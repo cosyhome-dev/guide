@@ -1,19 +1,23 @@
 {
-  "$schema": "https://raw.githubusercontent.com/strapi/strapi/main/packages/core/content-type-builder/content-type-schema.json",
   "info": {
     "singularName": "guide",
     "pluralName": "guides",
     "displayName": "Guide",
-    "description": "Guide de séjour — une entrée par propriété (données dynamiques)"
+    "description": "Guide de séjour — une entrée par propriété"
   },
   "options": {
     "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
   },
   "attributes": {
     "name": {
       "type": "string",
       "required": true,
-      "description": "Nom de la propriété (ex: Le Saint Georges)"
+      "pluginOptions": { "i18n": { "localized": false } }
     },
     "slug": {
       "type": "uid",
@@ -22,61 +26,70 @@
     },
     "address": {
       "type": "string",
-      "required": true
+      "required": true,
+      "pluginOptions": { "i18n": { "localized": true } }
     },
     "mapsUrl": {
       "type": "string",
-      "required": true
+      "required": true,
+      "pluginOptions": { "i18n": { "localized": false } }
     },
     "accessCode": {
       "type": "string",
       "required": true,
       "private": true,
-      "description": "Code d'accès au guide (saisi par le voyageur sur la page login)"
+      "pluginOptions": { "i18n": { "localized": false } }
     },
     "heroImage": {
       "type": "media",
       "multiple": false,
       "required": true,
-      "allowedTypes": ["images"]
+      "allowedTypes": ["images"],
+      "pluginOptions": { "i18n": { "localized": false } }
     },
     "checkIn": {
       "type": "string",
       "required": true,
-      "default": "Dès 17h00"
+      "pluginOptions": { "i18n": { "localized": true } }
     },
     "checkOut": {
       "type": "string",
       "required": true,
-      "default": "Avant 11h00"
+      "pluginOptions": { "i18n": { "localized": true } }
     },
     "codeBuilding": {
       "type": "string",
-      "required": true
+      "required": true,
+      "pluginOptions": { "i18n": { "localized": false } }
     },
     "codeKeyBox": {
       "type": "string",
-      "required": true
+      "required": true,
+      "pluginOptions": { "i18n": { "localized": false } }
     },
     "wifiSsid": {
-      "type": "string"
+      "type": "string",
+      "pluginOptions": { "i18n": { "localized": false } }
     },
     "wifiPassword": {
-      "type": "string"
-    },
-    "whatsapp": {
       "type": "string",
-      "required": true,
-      "description": "Numéro WhatsApp du concierge (format international)"
+      "pluginOptions": { "i18n": { "localized": false } }
     },
     "keyNote": {
       "type": "text",
-      "description": "Note courte sous les infos rapides (ex: La clé ouvre aussi le local à ski)"
+      "pluginOptions": { "i18n": { "localized": true } }
+    },
+
+    "gestionnaire": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::gestionnaire.gestionnaire",
+      "inversedBy": "guides"
     },
 
     "arriveeTip": {
       "type": "text",
-      "description": "Astuce affichée en haut de la section Arrivée"
+      "pluginOptions": { "i18n": { "localized": true } }
     },
     "arriveeSteps": {
       "type": "component",
@@ -85,21 +98,26 @@
     },
 
     "departCheckoutMessage": {
-      "type": "text"
+      "type": "text",
+      "pluginOptions": { "i18n": { "localized": true } }
     },
     "departChecklist": {
-      "type": "json",
-      "description": "Array de strings — items de la checklist de départ"
+      "type": "component",
+      "repeatable": true,
+      "component": "guide.checklist-item"
     },
 
     "parkingWinterNote": {
-      "type": "text"
+      "type": "text",
+      "pluginOptions": { "i18n": { "localized": true } }
     },
     "parkingPrivateTitle": {
-      "type": "string"
+      "type": "string",
+      "pluginOptions": { "i18n": { "localized": true } }
     },
     "parkingPrivateDescription": {
-      "type": "text"
+      "type": "text",
+      "pluginOptions": { "i18n": { "localized": true } }
     },
     "parkingPrivateImage": {
       "type": "media",
@@ -107,14 +125,17 @@
       "allowedTypes": ["images"]
     },
     "parkingPublicTitle": {
-      "type": "string"
+      "type": "string",
+      "pluginOptions": { "i18n": { "localized": true } }
     },
     "parkingPublicDescription": {
-      "type": "text"
+      "type": "text",
+      "pluginOptions": { "i18n": { "localized": true } }
     },
 
     "logementIntro": {
-      "type": "text"
+      "type": "text",
+      "pluginOptions": { "i18n": { "localized": true } }
     },
     "logementItems": {
       "type": "component",
@@ -122,7 +143,7 @@
       "component": "guide.logement-item"
     },
 
-    "dechets": {
+    "dechetsBlocks": {
       "type": "component",
       "repeatable": true,
       "component": "guide.dechets-block"
@@ -142,70 +163,33 @@
 
     "emergencyUrgences": {
       "type": "string",
-      "default": "Urgences 144"
+      "default": "Urgences 144",
+      "pluginOptions": { "i18n": { "localized": true } }
     },
     "emergencyUrgencesTel": {
       "type": "string",
-      "default": "+41144"
+      "default": "+41144",
+      "pluginOptions": { "i18n": { "localized": false } }
     },
     "emergencyPolice": {
       "type": "string",
-      "default": "Police 117"
+      "default": "Police 117",
+      "pluginOptions": { "i18n": { "localized": true } }
     },
     "emergencyPoliceTel": {
       "type": "string",
-      "default": "+41117"
+      "default": "+41117",
+      "pluginOptions": { "i18n": { "localized": false } }
     },
     "emergencyPompiers": {
       "type": "string",
-      "default": "Pompiers 118"
+      "default": "Pompiers 118",
+      "pluginOptions": { "i18n": { "localized": true } }
     },
     "emergencyPompiersTel": {
       "type": "string",
-      "default": "+41118"
-    }
-  },
-
-  "__components": {
-    "guide.step": {
-      "info": { "displayName": "Step", "description": "Étape numérotée (arrivée)" },
-      "attributes": {
-        "title": { "type": "string", "required": true },
-        "description": { "type": "text" },
-        "images": { "type": "media", "multiple": true, "allowedTypes": ["images"] }
-      }
-    },
-    "guide.logement-item": {
-      "info": { "displayName": "Logement Item", "description": "Élément accordion logement" },
-      "attributes": {
-        "title": { "type": "string", "required": true },
-        "description": { "type": "text", "required": true },
-        "images": { "type": "media", "multiple": true, "allowedTypes": ["images"] }
-      }
-    },
-    "guide.dechets-block": {
-      "info": { "displayName": "Déchets Block", "description": "Bloc section déchets" },
-      "attributes": {
-        "title": { "type": "string", "required": true },
-        "paragraphs": { "type": "json", "description": "Array de strings (HTML autorisé)" },
-        "image": { "type": "media", "multiple": false, "allowedTypes": ["images"] }
-      }
-    },
-    "guide.region-block": {
-      "info": { "displayName": "Region Block", "description": "Bloc section région" },
-      "attributes": {
-        "title": { "type": "string", "required": true },
-        "description": { "type": "text", "required": true },
-        "image": { "type": "media", "multiple": false, "allowedTypes": ["images"] },
-        "ctas": { "type": "json", "description": "Array of { label: string, url: string }" }
-      }
-    },
-    "guide.rule": {
-      "info": { "displayName": "Rule", "description": "Règle du règlement" },
-      "attributes": {
-        "title": { "type": "string", "required": true },
-        "content": { "type": "text", "required": true }
-      }
+      "default": "+41118",
+      "pluginOptions": { "i18n": { "localized": false } }
     }
   }
 }
