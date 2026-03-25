@@ -1,0 +1,30 @@
+import { Check } from "lucide-react"
+import { staticContent, property } from "@/content"
+
+const t = staticContent.depart
+
+export default function SectionDepart() {
+  return (
+    <div className="space-y-6">
+      {/* Check-out box */}
+      <div className="bg-accent/10 border border-accent/20 p-4 text-center space-y-2">
+        <p className="label-upper">{t.checkoutLabel}</p>
+        <p className="text-foreground font-medium">{property.checkOut}</p>
+        <p className="text-sm text-muted-foreground">{t.checkoutMessage}</p>
+      </div>
+
+      {/* Checklist */}
+      <div>
+        <h2 className="text-foreground mb-4">{t.checklistTitle}</h2>
+        {t.items.map((text, i) => (
+          <div key={i} className="flex items-start gap-3 py-3 border-b last:border-b-0">
+            <div className="w-5 h-5 bg-accent/15 shrink-0 mt-0.5 flex items-center justify-center">
+              <Check size={12} className="text-accent" />
+            </div>
+            <p className="text-sm text-foreground leading-relaxed">{text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}

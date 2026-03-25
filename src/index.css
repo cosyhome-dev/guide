@@ -1,19 +1,97 @@
-:root {
-  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
-  line-height: 1.5;
-  color-scheme: light dark;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@import url("https://fonts.googleapis.com/css2?family=DM+Serif+Text&family=DM+Sans:wght@300;400;500;600&display=swap");
+@import "tailwindcss";
+
+/* ── Design tokens ── */
+
+@theme {
+  --font-display: "DM Serif Text", serif;
+  --font-body: "DM Sans", sans-serif;
+
+  --color-background: hsl(30 17% 91%);
+  --color-foreground: hsl(0 0% 10%);
+  --color-primary: hsl(27 10% 22%);
+  --color-primary-foreground: hsl(30 17% 91%);
+  --color-secondary: hsl(30 12% 86%);
+  --color-secondary-foreground: hsl(0 0% 10%);
+  --color-accent: hsl(20 14% 59%);
+  --color-accent-foreground: hsl(30 17% 95%);
+  --color-muted: hsl(30 10% 88%);
+  --color-muted-foreground: hsl(28 8% 44%);
+  --color-card: hsl(30 14% 95%);
+  --color-card-foreground: hsl(0 0% 10%);
+  --color-border: hsl(30 10% 82%);
+  --color-destructive: hsl(0 65% 50%);
+  --color-destructive-foreground: hsl(30 17% 95%);
+
+  --radius-sm: 0;
+  --radius: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
+  --radius-4xl: 0;
 }
 
-body {
-  margin: 0;
+/* ── Base styles ── */
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-body);
+    font-weight: 300;
+    font-size: 13px;
+    letter-spacing: 0.4px;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 30px;
+    letter-spacing: 0.2px;
+  }
+
+  h2 {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+
+  h3 {
+    font-family: var(--font-body);
+    font-weight: 300;
+    font-size: 13px;
+    letter-spacing: 1px;
+  }
+
+  h4, h5, h6 {
+    font-family: var(--font-body);
+    font-weight: 600;
+  }
 }
 
-#root {
-  max-width: 100%;
-  margin: 0 auto;
-  min-height: 100svh;
+/* ── Utilities ── */
+
+@utility text-small {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 12px;
+  letter-spacing: 0.4px;
+}
+
+@utility label-upper {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-muted-foreground);
 }
