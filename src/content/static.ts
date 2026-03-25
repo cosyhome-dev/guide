@@ -32,7 +32,9 @@ export const staticContentSchema = z.object({
     codeLabel: z.string(),
     codePlaceholder: z.string(),
     submit: z.string(),
-    noCode: z.string(),
+    noCodePrefix: z.string(),
+    noCodeLink: z.string(),
+    noCodeWhatsapp: z.string(),
     error: z.string(),
   }),
 
@@ -66,6 +68,23 @@ export const staticContentSchema = z.object({
     back: z.string(),
     notFound: z.string(),
     openMaps: z.string(),
+    stepLabel: z.string(),
+  }),
+
+  notFound: z.object({
+    title: z.string(),
+    message: z.string(),
+    link: z.string(),
+  }),
+
+  alt: z.object({
+    brand: z.string(),
+  }),
+
+  format: z.object({
+    building: z.string(),
+    keyBox: z.string(),
+    password: z.string(),
   }),
 
   arrivee: z.object({
@@ -84,6 +103,18 @@ export const staticContentSchema = z.object({
     winterNote: z.string(),
     private: sectionBlockSchema,
     public: sectionBlockSchema,
+  }),
+
+  placeholders: z.object({
+    parkingGarage: z.string(),
+    sacsTaxes: z.string(),
+    containers: z.string(),
+    collecte: z.string(),
+    commerces: z.string(),
+    skiDomain: z.string(),
+    hiking: z.string(),
+    restaurant: z.string(),
+    busStation: z.string(),
   }),
 
   logement: z.object({
@@ -124,7 +155,9 @@ export const staticContent: StaticContent = {
     codeLabel: "Code d'accès",
     codePlaceholder: "Entrez votre code",
     submit: "Accéder au guide",
-    noCode: "Vous n'avez pas reçu de code ? Contactez votre concierge.",
+    noCodePrefix: "Vous n'avez pas reçu de code ?",
+    noCodeLink: "Contactez votre concierge",
+    noCodeWhatsapp: "+41791234567",
     error: "Veuillez entrer votre code d'accès",
   },
 
@@ -158,6 +191,23 @@ export const staticContent: StaticContent = {
     back: "Retour au guide",
     notFound: "Section introuvable",
     openMaps: "Ouvrir dans Google Maps ↗",
+    stepLabel: "Étape",
+  },
+
+  notFound: {
+    title: "404",
+    message: "Page introuvable",
+    link: "Retour à l'accueil",
+  },
+
+  alt: {
+    brand: "CosyHome Conciergerie",
+  },
+
+  format: {
+    building: "Bâtiment : {value}",
+    keyBox: "Boîte à clé : {value}",
+    password: "MDP : {value}",
   },
 
   arrivee: {
@@ -366,5 +416,17 @@ export const staticContent: StaticContent = {
           "Merci d'éteindre les lumières et de fermer les fenêtres lorsque vous quittez l'appartement, même temporairement.",
       },
     ],
+  },
+
+  placeholders: {
+    parkingGarage: "Photo parking / garage",
+    sacsTaxes: "Photo sac taxé officiel",
+    containers: "Photo emplacement containers arrière",
+    collecte: "Photo point de collecte verre/PET",
+    commerces: "Photo commerces du village",
+    skiDomain: "Photo domaine skiable / pistes",
+    hiking: "Photo randonnée / paysage été",
+    restaurant: "Photo restaurant local",
+    busStation: "Photo arrêt de bus / gare",
   },
 }

@@ -1,9 +1,11 @@
-import { staticContent } from "@/content"
+import { useGuideContext } from "@/hooks"
 import { PlaceholderImg } from "@/components/guide"
 
-const t = staticContent.dechets
-
 export default function SectionDechets() {
+  const { content } = useGuideContext()
+  const t = content.dechets
+  const ph = content.placeholders
+
   return (
     <div className="space-y-6">
       {/* Sacs taxés */}
@@ -16,21 +18,21 @@ export default function SectionDechets() {
             dangerouslySetInnerHTML={{ __html: p }}
           />
         ))}
-        <PlaceholderImg label="Photo sac taxé officiel" />
+        <PlaceholderImg label={ph.sacsTaxes} />
       </div>
 
       {/* Containers */}
       <div className="space-y-3">
         <h2 className="text-foreground">{t.containers.title}</h2>
         <p className="text-sm text-muted-foreground leading-relaxed">{t.containers.description}</p>
-        <PlaceholderImg label="Photo emplacement containers arrière" />
+        <PlaceholderImg label={ph.containers} />
       </div>
 
       {/* Collecte */}
       <div className="space-y-3">
         <h2 className="text-foreground">{t.collecte.title}</h2>
         <p className="text-sm text-muted-foreground leading-relaxed">{t.collecte.description}</p>
-        <PlaceholderImg label="Photo point de collecte verre/PET" />
+        <PlaceholderImg label={ph.collecte} />
       </div>
     </div>
   )

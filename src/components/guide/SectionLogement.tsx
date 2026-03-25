@@ -1,9 +1,10 @@
-import { staticContent } from "@/content"
+import { useGuideContext } from "@/hooks"
 import { Accordion, ImageGrid } from "@/components/guide"
 
-const t = staticContent.logement
-
 export default function SectionLogement() {
+  const { content } = useGuideContext()
+  const t = content.logement
+
   return (
     <div className="space-y-6">
       <p className="text-sm text-muted-foreground leading-relaxed">{t.intro}</p>

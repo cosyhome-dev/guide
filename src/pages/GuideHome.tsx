@@ -1,22 +1,25 @@
 import { LogIn, LogOut, Car, Home, Trash2, MapPin } from "lucide-react"
 import { Link } from "react-router-dom"
 import GuideLayout from "@/components/GuideLayout"
-import { staticContent, property } from "@/content"
+import { useGuideContext } from "@/hooks"
+import { fmt } from "@/lib"
 import heroImage from "@/assets/hero-guide.jpg"
 
-const t = staticContent.home
-const s = staticContent.sections
-
 const sections = [
-  { icon: LogIn, label: s.arrivee, path: "/guide/arrivee" },
-  { icon: LogOut, label: s.depart, path: "/guide/depart" },
-  { icon: Car, label: s.parking, path: "/guide/parking" },
-  { icon: Home, label: s.logement, path: "/guide/logement" },
-  { icon: Trash2, label: s.dechets, path: "/guide/dechets" },
-  { icon: MapPin, label: s.region, path: "/guide/region" },
-] as const
+  { icon: LogIn, key: "arrivee" as const, path: "/guide/arrivee" },
+  { icon: LogOut, key: "depart" as const, path: "/guide/depart" },
+  { icon: Car, key: "parking" as const, path: "/guide/parking" },
+  { icon: Home, key: "logement" as const, path: "/guide/logement" },
+  { icon: Trash2, key: "dechets" as const, path: "/guide/dechets" },
+  { icon: MapPin, key: "region" as const, path: "/guide/region" },
+]
 
 export default function GuideHome() {
+  const { content, property } = useGuideContext()
+  const t = content.home
+  const f = content.format
+  const s = content.sections
+
   return (
     <GuideLayout hideEmergency>
       {/* Hero */}
@@ -41,13 +44,13 @@ export default function GuideHome() {
               <QuickInfoCell label={t.checkOut} value={property.checkOut} />
               <QuickInfoCell
                 label={t.accessCodes}
-                value={`Bâtiment : ${property.codes.building}`}
-                extra={`Boîte à clé : ${property.codes.keyBox}`}
+                value={fmt(f.building, property.codes.building)}
+                extra={fmt(f.keyBox, property.codes.keyBox)}
               />
               <QuickInfoCell
                 label={t.wifi}
                 value={property.wifi.ssid}
-                extra={`MDP : ${property.wifi.password}`}
+                extra={fmt(f.password, property.wifi.password)}
               />
             </div>
           </div>
@@ -64,14 +67,14 @@ export default function GuideHome() {
               <div className="flex justify-center gap-8">
                 <QuickInfoCell
                   label={t.accessCodes}
-                  value={`Bâtiment : ${property.codes.building}`}
-                  extra={`Boîte à clé : ${property.codes.keyBox}`}
+                  value={fmt(f.building, property.codes.building)}
+                  extra={fmt(f.keyBox, property.codes.keyBox)}
                 />
                 <div className="w-px bg-border" />
                 <QuickInfoCell
                   label={t.wifi}
                   value={property.wifi.ssid}
-                  extra={`MDP : ${property.wifi.password}`}
+                  extra={fmt(f.password, property.wifi.password)}
                 />
               </div>
             </div>
@@ -94,7 +97,7 @@ export default function GuideHome() {
                 className="text-muted-foreground group-hover:text-accent transition-colors"
               />
               <span className="label-upper text-center group-hover:text-foreground transition-colors">
-                {section.label}
+                {s[section.key]}
               </span>
             </Link>
           ))}

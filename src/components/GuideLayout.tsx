@@ -2,23 +2,8 @@ import React from "react"
 import { Link, useLocation } from "react-router-dom"
 import { Home, Phone, MapPin, Shield, Globe } from "lucide-react"
 import { cn } from "@/lib"
-import { staticContent, property } from "@/content"
+import { useGuideContext } from "@/hooks"
 import logoRectDark from "@/assets/logo-cosyhome-rect-dark.png"
-
-type NavItem =
-  | { icon: typeof Home; label: string; to: string }
-  | { icon: typeof Home; label: string; href: string }
-
-const navItems: NavItem[] = [
-  { icon: Home, label: staticContent.nav.home, to: "/guide" },
-  { icon: Shield, label: staticContent.nav.rules, to: "/guide/regles" },
-  {
-    icon: Phone,
-    label: staticContent.nav.contact,
-    href: `https://wa.me/${property.whatsapp.replace(/\+/g, "")}`,
-  },
-  { icon: MapPin, label: staticContent.nav.route, href: property.mapsUrl },
-]
 
 interface GuideLayoutProps {
   children: React.ReactNode
@@ -26,10 +11,25 @@ interface GuideLayoutProps {
 }
 
 export default function GuideLayout({ children, hideEmergency = false }: GuideLayoutProps) {
+  // Hooks
+  const { content, property } = useGuideContext()
+
   // States
   const location = useLocation()
   const [currentLang, setCurrentLang] = React.useState("FR")
   const [langOpen, setLangOpen] = React.useState(false)
+
+  // Derived
+  const navItems = [
+    { icon: Home, label: content.nav.home, to: "/guide" },
+    { icon: Shield, label: content.nav.rules, to: "/guide/regles" },
+    {
+      icon: Phone,
+      label: content.nav.contact,
+      href: `https://wa.me/${property.whatsapp.replace(/\+/g, "")}`,
+    },
+    { icon: MapPin, label: content.nav.route, href: property.mapsUrl },
+  ] as const
 
   // Handlers
   function handleLangSelect(lang: string) {
@@ -46,7 +46,7 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
           <Link to="/guide">
             <img
               src={logoRectDark}
-              alt="CosyHome Conciergerie"
+              alt={content.alt.brand}
               className="h-10 w-auto object-contain"
             />
           </Link>

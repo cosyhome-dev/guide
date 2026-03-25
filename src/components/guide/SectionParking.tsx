@@ -1,10 +1,12 @@
 import { MapPin } from "lucide-react"
-import { staticContent, property } from "@/content"
+import { useGuideContext } from "@/hooks"
 import { PlaceholderImg } from "@/components/guide"
 
-const t = staticContent.parking
-
 export default function SectionParking() {
+  const { content, property } = useGuideContext()
+  const t = content.parking
+  const ph = content.placeholders
+
   return (
     <div className="space-y-6">
       {/* Address card */}
@@ -16,7 +18,7 @@ export default function SectionParking() {
       >
         <MapPin size={16} className="text-accent" strokeWidth={1.5} />
         <p className="text-sm text-foreground font-medium">{property.address}</p>
-        <p className="text-[11px] text-accent">{staticContent.section.openMaps}</p>
+        <p className="text-[11px] text-accent">{content.section.openMaps}</p>
       </a>
 
       {/* Winter note */}
@@ -28,7 +30,7 @@ export default function SectionParking() {
       <div className="space-y-3">
         <h2 className="text-foreground">{t.private.title}</h2>
         <p className="text-sm text-muted-foreground leading-relaxed">{t.private.description}</p>
-        <PlaceholderImg label="Photo parking / garage" />
+        <PlaceholderImg label={ph.parkingGarage} />
       </div>
 
       {/* Public parking */}

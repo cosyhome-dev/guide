@@ -1,9 +1,10 @@
 import { Check } from "lucide-react"
-import { staticContent, property } from "@/content"
-
-const t = staticContent.depart
+import { useGuideContext } from "@/hooks"
 
 export default function SectionDepart() {
+  const { content, property } = useGuideContext()
+  const t = content.depart
+
   return (
     <div className="space-y-6">
       {/* Check-out box */}

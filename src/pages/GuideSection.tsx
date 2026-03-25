@@ -2,7 +2,7 @@ import React from "react"
 import { useParams, Link } from "react-router-dom"
 import { ArrowLeft } from "lucide-react"
 import GuideLayout from "@/components/GuideLayout"
-import { staticContent } from "@/content"
+import { useGuideContext } from "@/hooks"
 import {
   SectionArrivee,
   SectionDepart,
@@ -13,24 +13,29 @@ import {
   SectionRegles,
 } from "@/components/guide"
 
-const t = staticContent.section
-const s = staticContent.sections
-
-const sectionMap: Record<string, { title: string; component: React.FC }> = {
-  arrivee: { title: s.arrivee, component: SectionArrivee },
-  depart: { title: s.depart, component: SectionDepart },
-  parking: { title: s.parking, component: SectionParking },
-  logement: { title: s.logement, component: SectionLogement },
-  dechets: { title: s.dechets, component: SectionDechets },
-  region: { title: s.region, component: SectionRegion },
-  regles: { title: s.regles, component: SectionRegles },
+const sectionComponents: Record<string, React.FC> = {
+  arrivee: SectionArrivee,
+  depart: SectionDepart,
+  parking: SectionParking,
+  logement: SectionLogement,
+  dechets: SectionDechets,
+  region: SectionRegion,
+  regles: SectionRegles,
 }
+
+type SectionKey = keyof typeof sectionComponents
 
 export default function GuideSection() {
   const { section } = useParams<{ section: string }>()
-  const data = sectionMap[section ?? ""]
+  const { content } = useGuideContext()
+  const t = content.section
+  const s = content.sections
 
-  if (!data) {
+  const key = section as SectionKey
+  const SectionComponent = sectionComponents[key]
+  const title = s[key as keyof typeof s]
+
+  if (!SectionComponent || !title) {
     return (
       <GuideLayout>
         <div className="mx-auto max-w-3xl px-4 py-16 text-center">
@@ -43,8 +48,6 @@ export default function GuideSection() {
     )
   }
 
-  const SectionComponent = data.component
-
   return (
     <GuideLayout>
       <div className="mx-auto max-w-3xl px-4 pt-6 pb-6">
@@ -56,7 +59,7 @@ export default function GuideSection() {
           <span>{t.back}</span>
         </Link>
 
-        <h1 className="text-2xl mt-8 mb-3 text-center">{data.title}</h1>
+        <h1 className="text-2xl mt-8 mb-3 text-center">{title}</h1>
         <div className="w-14 h-px bg-accent mx-auto" />
       </div>
 

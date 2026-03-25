@@ -1,9 +1,10 @@
-import { staticContent } from "@/content"
+import { useGuideContext } from "@/hooks"
 import { Accordion } from "@/components/guide"
 
-const t = staticContent.regles
-
 export default function SectionRegles() {
+  const { content } = useGuideContext()
+  const t = content.regles
+
   return (
     <Accordion
       items={t.items.map((rule) => ({

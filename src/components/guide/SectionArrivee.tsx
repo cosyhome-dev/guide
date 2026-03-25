@@ -1,10 +1,12 @@
 import { MapPin } from "lucide-react"
-import { staticContent, property } from "@/content"
+import { useGuideContext } from "@/hooks"
 import { ImageGrid } from "@/components/guide"
 
-const t = staticContent.arrivee
-
 export default function SectionArrivee() {
+  const { content, property } = useGuideContext()
+  const t = content.arrivee
+  const sec = content.section
+
   return (
     <div className="space-y-6">
       {/* Address card */}
@@ -16,7 +18,7 @@ export default function SectionArrivee() {
       >
         <MapPin size={16} className="text-accent" strokeWidth={1.5} />
         <p className="text-sm text-foreground font-medium">{property.address}</p>
-        <p className="text-[11px] text-accent">{staticContent.section.openMaps}</p>
+        <p className="text-[11px] text-accent">{sec.openMaps}</p>
       </a>
 
       {/* Tip */}
@@ -28,7 +30,9 @@ export default function SectionArrivee() {
       {t.steps.map((step, i) => (
         <div key={i} className="space-y-3">
           <div className="space-y-1">
-            <p className="label-upper">Étape {i + 1}</p>
+            <p className="label-upper">
+              {sec.stepLabel} {i + 1}
+            </p>
             <h2 className="text-left">{step.title}</h2>
           </div>
           {step.description && (

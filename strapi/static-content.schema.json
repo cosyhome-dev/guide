@@ -1,0 +1,159 @@
+{
+  "$schema": "https://raw.githubusercontent.com/strapi/strapi/main/packages/core/content-type-builder/content-type-schema.json",
+  "info": {
+    "singularName": "static-content",
+    "pluralName": "static-contents",
+    "displayName": "Static Content",
+    "kind": "singleType",
+    "description": "Texte UI statique — labels, boutons, titres partagés entre tous les guides"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "loginTitle": {
+      "type": "string",
+      "required": true,
+      "default": "Guide de séjour"
+    },
+    "loginDescription": {
+      "type": "text",
+      "required": true,
+      "default": "Entrez le code d'accès fourni dans votre confirmation de réservation pour accéder au guide de votre logement."
+    },
+    "loginCodeLabel": {
+      "type": "string",
+      "default": "Code d'accès"
+    },
+    "loginCodePlaceholder": {
+      "type": "string",
+      "default": "Entrez votre code"
+    },
+    "loginSubmit": {
+      "type": "string",
+      "default": "Accéder au guide"
+    },
+    "loginNoCode": {
+      "type": "string",
+      "default": "Vous n'avez pas reçu de code ? Contactez votre concierge."
+    },
+    "loginError": {
+      "type": "string",
+      "default": "Veuillez entrer votre code d'accès"
+    },
+
+    "navHome": {
+      "type": "string",
+      "default": "Accueil"
+    },
+    "navRules": {
+      "type": "string",
+      "default": "Règlement"
+    },
+    "navContact": {
+      "type": "string",
+      "default": "Contact"
+    },
+    "navRoute": {
+      "type": "string",
+      "default": "Itinéraire"
+    },
+
+    "homeWelcome": {
+      "type": "string",
+      "default": "Bienvenue"
+    },
+    "homeCheckIn": {
+      "type": "string",
+      "default": "Check-in"
+    },
+    "homeCheckOut": {
+      "type": "string",
+      "default": "Check-out"
+    },
+    "homeAccessCodes": {
+      "type": "string",
+      "default": "Codes d'accès"
+    },
+    "homeWifi": {
+      "type": "string",
+      "default": "WiFi"
+    },
+
+    "sectionBack": {
+      "type": "string",
+      "default": "Retour au guide"
+    },
+    "sectionNotFound": {
+      "type": "string",
+      "default": "Section introuvable"
+    },
+    "sectionOpenMaps": {
+      "type": "string",
+      "default": "Ouvrir dans Google Maps ↗"
+    },
+
+    "sectionArrivee": {
+      "type": "string",
+      "default": "Arrivée"
+    },
+    "sectionDepart": {
+      "type": "string",
+      "default": "Départ"
+    },
+    "sectionParking": {
+      "type": "string",
+      "default": "Parking"
+    },
+    "sectionLogement": {
+      "type": "string",
+      "default": "Le Logement"
+    },
+    "sectionDechets": {
+      "type": "string",
+      "default": "Déchets"
+    },
+    "sectionRegion": {
+      "type": "string",
+      "default": "Région"
+    },
+    "sectionRegles": {
+      "type": "string",
+      "default": "Règles"
+    },
+
+    "departCheckoutLabel": {
+      "type": "string",
+      "default": "Check-out"
+    },
+    "departChecklistTitle": {
+      "type": "string",
+      "default": "Checklist de départ"
+    },
+
+    "logoLight": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"],
+      "description": "Logo CosyHome rectangulaire (clair)"
+    },
+    "logoDark": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"],
+      "description": "Logo CosyHome rectangulaire (foncé, pour le header)"
+    },
+    "logoCircle": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"],
+      "description": "Logo CosyHome rond (watermark login)"
+    },
+    "logoCopyright": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"],
+      "description": "Logo copyright blanc (overlay login)"
+    }
+  }
+}
