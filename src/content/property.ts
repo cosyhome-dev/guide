@@ -45,189 +45,194 @@ const ruleSchema = z.object({
   content: z.string(),
 })
 
-const emergencyContactSchema = z.object({
-  label: z.string(),
-  tel: z.string(),
-})
-
 export const propertySchema = z.object({
-  name: z.string(),
+  nom: z.string(),
   slug: z.string(),
   address: z.string(),
   mapsUrl: z.string().url(),
-  heroImage: z.string().optional(),
+  imagePrincipale: z.string().optional(),
 
-  checkIn: z.string(),
-  checkOut: z.string(),
+  arrivee: z.object({
+    heureArrivee: z.string(),
+    codeImmeuble: z.string(),
+    codeBoiteACles: z.string(),
+    noteCle: z.string().optional(),
+    conseilArrivee: z.string().optional(),
+    etapesArrivee: z.array(stepSchema),
+  }),
 
-  codes: z.object({
-    building: z.string(),
-    keyBox: z.string(),
+  depart: z.object({
+    heureDepart: z.string(),
+    messageDepart: z.string(),
+    checklist: z.array(checklistItemSchema),
   }),
 
   wifi: z.object({
-    ssid: z.string(),
-    password: z.string(),
+    nomReseau: z.string(),
+    motDePasse: z.string(),
   }),
 
-  keyNote: z.string().optional(),
+  parking: z.object({
+    noteHiver: z.string().optional(),
+    blocs: z.array(parkingBlockSchema),
+  }),
+
+  logement: z.object({
+    introduction: z.string().optional(),
+    elements: z.array(logementItemSchema),
+  }),
+
+  urgences: z.object({
+    urgencesLabel: z.string(),
+    urgencesTel: z.string(),
+    policeLabel: z.string(),
+    policeTel: z.string(),
+    pompiersLabel: z.string(),
+    pompiersTel: z.string(),
+  }),
 
   whatsapp: z.string(),
 
-  emergency: z.object({
-    urgences: emergencyContactSchema,
-    police: emergencyContactSchema,
-    pompiers: emergencyContactSchema,
-  }),
-
-  arriveeTip: z.string().optional(),
-  arriveeSteps: z.array(stepSchema),
-
-  departCheckoutMessage: z.string(),
-  departChecklist: z.array(checklistItemSchema),
-
-  parkingWinterNote: z.string().optional(),
-  parkingBlocks: z.array(parkingBlockSchema),
-
-  logementIntro: z.string().optional(),
-  logementItems: z.array(logementItemSchema),
-
-  dechetsBlocks: z.array(dechetsBlockSchema),
-
-  regionBlocks: z.array(regionBlockSchema),
-
+  blocsDechets: z.array(dechetsBlockSchema),
+  blocsRegion: z.array(regionBlockSchema),
   regles: z.array(ruleSchema),
 })
 
 export type Property = z.infer<typeof propertySchema>
 
 export const property: Property = {
-  name: "Le Saint Georges",
+  nom: "Le Saint Georges",
   slug: "le-saint-georges",
   address: "Le Saint Georges — [Adresse complète], Valais",
   mapsUrl: "https://maps.google.com/?q=Le+Saint+Georges,+Valais,+Suisse",
 
-  checkIn: "Dès 17h00",
-  checkOut: "Avant 11h00",
+  arrivee: {
+    heureArrivee: "Dès 17h00",
+    codeImmeuble: "4521",
+    codeBoiteACles: "137617",
+    noteCle: "La clé ouvre la porte de l'immeuble, l'appartement et le local à ski.",
+    conseilArrivee: "💡 La clé ouvre également le local à ski au sous-sol.",
+    etapesArrivee: [
+      {
+        title: "Récupérez la clé",
+        description: "La boîte à clé se trouve à l'entrée du bâtiment. Code : 137617.",
+        images: ["Photo boîte à clé"],
+      },
+      {
+        title: "Entrez dans l'immeuble",
+        description: "Composez le code du bâtiment sur le digicode : 4521.",
+        images: ["Photo entrée immeuble", "Photo digicode", "Photo hall d'entrée"],
+      },
+      {
+        title: "Montez au 2ème étage",
+        description: "Par les escaliers ou l'ascenseur.",
+        images: ["Photo couloir / ascenseur"],
+      },
+      {
+        title: "Ouvrez l'appartement",
+        description: "La même clé ouvre votre porte d'entrée.",
+        images: ["Photo porte appartement"],
+      },
+    ],
+  },
 
-  codes: {
-    building: "4521",
-    keyBox: "137617",
+  depart: {
+    heureDepart: "Avant 11h00",
+    messageDepart:
+      "Merci de laisser l'appartement dans un état correct. Un supplément pourra être facturé en cas de ménage excessif.",
+    checklist: [
+      { text: "Lancez un cycle de lave-vaisselle si nécessaire." },
+      { text: "Videz les poubelles dans les containers à l'arrière du bâtiment." },
+      { text: "Fermez toutes les fenêtres et éteignez les lumières." },
+      { text: "Laissez le thermostat sur 18°C." },
+      { text: "Vérifiez que rien n'a été oublié (placards, réfrigérateur, salle de bain)." },
+      { text: "Replacez la clé dans la boîte à clé à l'entrée du bâtiment." },
+    ],
   },
 
   wifi: {
-    ssid: "Netplus-d17347",
-    password: "9mXmxffe",
+    nomReseau: "Netplus-d17347",
+    motDePasse: "9mXmxffe",
   },
 
-  keyNote: "La clé ouvre la porte de l'immeuble, l'appartement et le local à ski.",
+  parking: {
+    noteHiver: "❄️ En hiver, merci de ne pas bloquer l'accès au déneigement.",
+    blocs: [
+      {
+        title: "Parking privé",
+        description:
+          "Une place de parking est disponible devant le bâtiment. La télécommande du garage se trouve dans le tiroir de l'entrée.",
+      },
+      {
+        title: "Parking public",
+        description:
+          "Pour les véhicules de grande taille, un parking public gratuit se trouve à 200m en direction du centre.",
+      },
+    ],
+  },
+
+  logement: {
+    introduction:
+      "Voici les informations pratiques pour profiter de votre logement. N'hésitez pas à nous contacter si vous avez la moindre question.",
+    elements: [
+      {
+        title: "Cuisine",
+        description:
+          "Machine Nespresso (capsules fournies), lave-vaisselle, four, micro-ondes. Ustensiles et vaisselle dans les placards.",
+        images: ["Photo cuisine vue 1", "Photo cuisine vue 2"],
+      },
+      {
+        title: "Salle de bain",
+        description:
+          "Serviettes fournies. Des serviettes supplémentaires sont disponibles dans l'armoire du couloir. Sèche-cheveux sous le lavabo.",
+        images: ["Photo salle de bain"],
+      },
+      {
+        title: "Chauffage & Thermostat",
+        description:
+          "Le thermostat se trouve dans le couloir. Merci de le laisser sur 18°C à votre départ.",
+        images: ["Photo thermostat"],
+      },
+      {
+        title: "TV & WiFi",
+        description:
+          "Chaînes internationales disponibles. Le WiFi couvre l'ensemble de l'appartement. Identifiants affichés sur la page d'accueil du guide.",
+        images: ["Photo salon / TV"],
+      },
+      {
+        title: "Buanderie",
+        description:
+          "Machine à laver et sèche-linge au sous-sol. Lessive disponible sur place. Étendoir dans le placard de l'entrée.",
+        images: ["Photo buanderie vue 1", "Photo buanderie vue 2"],
+      },
+      {
+        title: "Local à ski",
+        description:
+          "Situé au sous-sol, accessible avec la même clé que l'appartement. Suivez le couloir jusqu'au fond.",
+        images: [
+          "Photo porte local à ski",
+          "Photo couloir sous-sol",
+          "Photo intérieur local",
+          "Photo racks à ski",
+          "Photo casiers",
+          "Photo accès depuis entrée",
+        ],
+      },
+    ],
+  },
+
+  urgences: {
+    urgencesLabel: "Urgences 144",
+    urgencesTel: "+41144",
+    policeLabel: "Police 117",
+    policeTel: "+41117",
+    pompiersLabel: "Pompiers 118",
+    pompiersTel: "+41118",
+  },
 
   whatsapp: "+41791234567",
 
-  emergency: {
-    urgences: { label: "Urgences 144", tel: "+41144" },
-    police: { label: "Police 117", tel: "+41117" },
-    pompiers: { label: "Pompiers 118", tel: "+41118" },
-  },
-
-  arriveeTip: "💡 La clé ouvre également le local à ski au sous-sol.",
-  arriveeSteps: [
-    {
-      title: "Récupérez la clé",
-      description: "La boîte à clé se trouve à l'entrée du bâtiment. Code : 137617.",
-      images: ["Photo boîte à clé"],
-    },
-    {
-      title: "Entrez dans l'immeuble",
-      description: "Composez le code du bâtiment sur le digicode : 4521.",
-      images: ["Photo entrée immeuble", "Photo digicode", "Photo hall d'entrée"],
-    },
-    {
-      title: "Montez au 2ème étage",
-      description: "Par les escaliers ou l'ascenseur.",
-      images: ["Photo couloir / ascenseur"],
-    },
-    {
-      title: "Ouvrez l'appartement",
-      description: "La même clé ouvre votre porte d'entrée.",
-      images: ["Photo porte appartement"],
-    },
-  ],
-
-  departCheckoutMessage:
-    "Merci de laisser l'appartement dans un état correct. Un supplément pourra être facturé en cas de ménage excessif.",
-  departChecklist: [
-    { text: "Lancez un cycle de lave-vaisselle si nécessaire." },
-    { text: "Videz les poubelles dans les containers à l'arrière du bâtiment." },
-    { text: "Fermez toutes les fenêtres et éteignez les lumières." },
-    { text: "Laissez le thermostat sur 18°C." },
-    { text: "Vérifiez que rien n'a été oublié (placards, réfrigérateur, salle de bain)." },
-    { text: "Replacez la clé dans la boîte à clé à l'entrée du bâtiment." },
-  ],
-
-  parkingWinterNote: "❄️ En hiver, merci de ne pas bloquer l'accès au déneigement.",
-  parkingBlocks: [
-    {
-      title: "Parking privé",
-      description:
-        "Une place de parking est disponible devant le bâtiment. La télécommande du garage se trouve dans le tiroir de l'entrée.",
-    },
-    {
-      title: "Parking public",
-      description:
-        "Pour les véhicules de grande taille, un parking public gratuit se trouve à 200m en direction du centre.",
-    },
-  ],
-
-  logementIntro:
-    "Voici les informations pratiques pour profiter de votre logement. N'hésitez pas à nous contacter si vous avez la moindre question.",
-  logementItems: [
-    {
-      title: "Cuisine",
-      description:
-        "Machine Nespresso (capsules fournies), lave-vaisselle, four, micro-ondes. Ustensiles et vaisselle dans les placards.",
-      images: ["Photo cuisine vue 1", "Photo cuisine vue 2"],
-    },
-    {
-      title: "Salle de bain",
-      description:
-        "Serviettes fournies. Des serviettes supplémentaires sont disponibles dans l'armoire du couloir. Sèche-cheveux sous le lavabo.",
-      images: ["Photo salle de bain"],
-    },
-    {
-      title: "Chauffage & Thermostat",
-      description:
-        "Le thermostat se trouve dans le couloir. Merci de le laisser sur 18°C à votre départ.",
-      images: ["Photo thermostat"],
-    },
-    {
-      title: "TV & WiFi",
-      description:
-        "Chaînes internationales disponibles. Le WiFi couvre l'ensemble de l'appartement. Identifiants affichés sur la page d'accueil du guide.",
-      images: ["Photo salon / TV"],
-    },
-    {
-      title: "Buanderie",
-      description:
-        "Machine à laver et sèche-linge au sous-sol. Lessive disponible sur place. Étendoir dans le placard de l'entrée.",
-      images: ["Photo buanderie vue 1", "Photo buanderie vue 2"],
-    },
-    {
-      title: "Local à ski",
-      description:
-        "Situé au sous-sol, accessible avec la même clé que l'appartement. Suivez le couloir jusqu'au fond.",
-      images: [
-        "Photo porte local à ski",
-        "Photo couloir sous-sol",
-        "Photo intérieur local",
-        "Photo racks à ski",
-        "Photo casiers",
-        "Photo accès depuis entrée",
-      ],
-    },
-  ],
-
-  dechetsBlocks: [
+  blocsDechets: [
     {
       title: "Sacs poubelle taxés",
       description:
@@ -245,7 +250,7 @@ export const property: Property = {
     },
   ],
 
-  regionBlocks: [
+  blocsRegion: [
     {
       title: "Commerces",
       description:

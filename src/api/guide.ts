@@ -16,19 +16,84 @@ import {
 // Strapi response schemas
 // ---------------------------------------------------------------------------
 
+const strapiArriveeSchema = z.object({
+  heureArrivee: z.string(),
+  codeImmeuble: z.string(),
+  codeBoiteACles: z.string(),
+  noteCle: z.string().nullable(),
+  conseilArrivee: z.string().nullable(),
+  etapesArrivee: z.array(
+    z.object({
+      id: z.number(),
+      title: z.string(),
+      description: z.string().nullable(),
+      images: strapiImagesSchema,
+    }),
+  ),
+})
+
+const strapiDepartSchema = z.object({
+  heureDepart: z.string(),
+  messageDepart: z.string().nullable(),
+  checklist: z.array(
+    z.object({
+      id: z.number(),
+      text: z.string(),
+    }),
+  ),
+})
+
+const strapiWifiSchema = z.object({
+  nomReseau: z.string().nullable(),
+  motDePasse: z.string().nullable(),
+})
+
+const strapiParkingSchema = z.object({
+  noteHiver: z.string().nullable(),
+  blocs: z.array(
+    z.object({
+      id: z.number(),
+      title: z.string(),
+      description: z.string().nullable(),
+      image: strapiImageSchema,
+    }),
+  ),
+})
+
+const strapiLogementSchema = z.object({
+  introduction: z.string().nullable(),
+  elements: z.array(
+    z.object({
+      id: z.number(),
+      title: z.string(),
+      description: z.string(),
+      images: strapiImagesSchema,
+    }),
+  ),
+})
+
+const strapiUrgencesSchema = z.object({
+  urgencesLabel: z.string(),
+  urgencesTel: z.string(),
+  policeLabel: z.string(),
+  policeTel: z.string(),
+  pompiersLabel: z.string(),
+  pompiersTel: z.string(),
+})
+
 const strapiGuideAttributesSchema = z.object({
-  name: z.string(),
+  nom: z.string(),
   slug: z.string(),
   address: z.string(),
   mapsUrl: z.string(),
-  heroImage: strapiImageSchema,
-  checkIn: z.string(),
-  checkOut: z.string(),
-  codeBuilding: z.string(),
-  codeKeyBox: z.string(),
-  wifiSsid: z.string().nullable(),
-  wifiPassword: z.string().nullable(),
-  keyNote: z.string().nullable(),
+  imagePrincipale: strapiImageSchema,
+
+  arrivee: strapiArriveeSchema,
+  depart: strapiDepartSchema,
+  wifi: strapiWifiSchema,
+  parking: strapiParkingSchema,
+  logement: strapiLogementSchema,
+  urgences: strapiUrgencesSchema,
 
   gestionnaire: z.object({
     data: z
@@ -43,26 +108,7 @@ const strapiGuideAttributesSchema = z.object({
       .nullable(),
   }),
 
-  arriveeTip: z.string().nullable(),
-  arriveeSteps: z.array(
-    z.object({
-      id: z.number(),
-      title: z.string(),
-      description: z.string().nullable(),
-      images: strapiImagesSchema,
-    }),
-  ),
-
-  departCheckoutMessage: z.string().nullable(),
-  departChecklist: z.array(
-    z.object({
-      id: z.number(),
-      text: z.string(),
-    }),
-  ),
-
-  parkingWinterNote: z.string().nullable(),
-  parkingBlocks: z.array(
+  blocsDechets: z.array(
     z.object({
       id: z.number(),
       title: z.string(),
@@ -71,26 +117,7 @@ const strapiGuideAttributesSchema = z.object({
     }),
   ),
 
-  logementIntro: z.string().nullable(),
-  logementItems: z.array(
-    z.object({
-      id: z.number(),
-      title: z.string(),
-      description: z.string(),
-      images: strapiImagesSchema,
-    }),
-  ),
-
-  dechetsBlocks: z.array(
-    z.object({
-      id: z.number(),
-      title: z.string(),
-      description: z.string().nullable(),
-      image: strapiImageSchema,
-    }),
-  ),
-
-  regionBlocks: z.array(
+  blocsRegion: z.array(
     z.object({
       id: z.number(),
       title: z.string(),
@@ -114,13 +141,6 @@ const strapiGuideAttributesSchema = z.object({
       content: z.string(),
     }),
   ),
-
-  emergencyUrgences: z.string(),
-  emergencyUrgencesTel: z.string(),
-  emergencyPolice: z.string(),
-  emergencyPoliceTel: z.string(),
-  emergencyPompiers: z.string(),
-  emergencyPompiersTel: z.string(),
 
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -150,54 +170,63 @@ type StrapiGuideAttributes = z.infer<typeof strapiGuideAttributesSchema>
 
 function transformGuide(attrs: StrapiGuideAttributes): Property {
   return propertySchema.parse({
-    name: attrs.name,
+    nom: attrs.nom,
     slug: attrs.slug,
     address: attrs.address,
     mapsUrl: attrs.mapsUrl,
-    heroImage: extractImageUrl(attrs.heroImage),
-    checkIn: attrs.checkIn,
-    checkOut: attrs.checkOut,
-    codes: {
-      building: attrs.codeBuilding,
-      keyBox: attrs.codeKeyBox,
+    imagePrincipale: extractImageUrl(attrs.imagePrincipale),
+    arrivee: {
+      heureArrivee: attrs.arrivee.heureArrivee,
+      codeImmeuble: attrs.arrivee.codeImmeuble,
+      codeBoiteACles: attrs.arrivee.codeBoiteACles,
+      noteCle: attrs.arrivee.noteCle ?? undefined,
+      conseilArrivee: attrs.arrivee.conseilArrivee ?? undefined,
+      etapesArrivee: attrs.arrivee.etapesArrivee.map((s) => ({
+        title: s.title,
+        description: s.description ?? "",
+        images: extractImageUrls(s.images),
+      })),
+    },
+    depart: {
+      heureDepart: attrs.depart.heureDepart,
+      messageDepart: attrs.depart.messageDepart ?? "",
+      checklist: attrs.depart.checklist.map((item) => ({ text: item.text })),
     },
     wifi: {
-      ssid: attrs.wifiSsid ?? "",
-      password: attrs.wifiPassword ?? "",
+      nomReseau: attrs.wifi.nomReseau ?? "",
+      motDePasse: attrs.wifi.motDePasse ?? "",
     },
-    keyNote: attrs.keyNote ?? undefined,
+    parking: {
+      noteHiver: attrs.parking.noteHiver ?? undefined,
+      blocs: attrs.parking.blocs.map((block) => ({
+        title: block.title,
+        description: block.description ?? "",
+        image: extractImageUrl(block.image),
+      })),
+    },
+    logement: {
+      introduction: attrs.logement.introduction ?? undefined,
+      elements: attrs.logement.elements.map((item) => ({
+        title: item.title,
+        description: item.description,
+        images: extractImageUrls(item.images),
+      })),
+    },
+    urgences: {
+      urgencesLabel: attrs.urgences.urgencesLabel,
+      urgencesTel: attrs.urgences.urgencesTel,
+      policeLabel: attrs.urgences.policeLabel,
+      policeTel: attrs.urgences.policeTel,
+      pompiersLabel: attrs.urgences.pompiersLabel,
+      pompiersTel: attrs.urgences.pompiersTel,
+    },
     whatsapp: attrs.gestionnaire.data?.attributes.phone ?? "",
-    emergency: {
-      urgences: { label: attrs.emergencyUrgences, tel: attrs.emergencyUrgencesTel },
-      police: { label: attrs.emergencyPolice, tel: attrs.emergencyPoliceTel },
-      pompiers: { label: attrs.emergencyPompiers, tel: attrs.emergencyPompiersTel },
-    },
-    arriveeTip: attrs.arriveeTip ?? undefined,
-    arriveeSteps: attrs.arriveeSteps.map((s) => ({
-      title: s.title,
-      description: s.description ?? "",
-      images: extractImageUrls(s.images),
-    })),
-    departCheckoutMessage: attrs.departCheckoutMessage ?? "",
-    departChecklist: attrs.departChecklist.map((item) => ({ text: item.text })),
-    parkingWinterNote: attrs.parkingWinterNote ?? undefined,
-    parkingBlocks: attrs.parkingBlocks.map((block) => ({
+    blocsDechets: attrs.blocsDechets.map((block) => ({
       title: block.title,
       description: block.description ?? "",
       image: extractImageUrl(block.image),
     })),
-    logementIntro: attrs.logementIntro ?? undefined,
-    logementItems: attrs.logementItems.map((item) => ({
-      title: item.title,
-      description: item.description,
-      images: extractImageUrls(item.images),
-    })),
-    dechetsBlocks: attrs.dechetsBlocks.map((block) => ({
-      title: block.title,
-      description: block.description ?? "",
-      image: extractImageUrl(block.image),
-    })),
-    regionBlocks: attrs.regionBlocks.map((block) => ({
+    blocsRegion: attrs.blocsRegion.map((block) => ({
       title: block.title,
       description: block.description,
       image: extractImageUrl(block.image),
@@ -215,16 +244,18 @@ function transformGuide(attrs: StrapiGuideAttributes): Property {
 // ---------------------------------------------------------------------------
 
 const GUIDE_POPULATE = [
-  "populate[heroImage]=*",
+  "populate[imagePrincipale]=*",
   "populate[gestionnaire][fields][0]=firstName",
   "populate[gestionnaire][fields][1]=lastName",
   "populate[gestionnaire][fields][2]=phone",
-  "populate[arriveeSteps][populate]=*",
-  "populate[departChecklist]=*",
-  "populate[parkingBlocks][populate]=*",
-  "populate[logementItems][populate]=*",
-  "populate[dechetsBlocks][populate]=*",
-  "populate[regionBlocks]=*",
+  "populate[arrivee][populate]=*",
+  "populate[depart][populate]=*",
+  "populate[wifi]=*",
+  "populate[parking][populate]=*",
+  "populate[logement][populate]=*",
+  "populate[urgences]=*",
+  "populate[blocsDechets][populate]=*",
+  "populate[blocsRegion]=*",
   "populate[regles]=*",
 ].join("&")
 

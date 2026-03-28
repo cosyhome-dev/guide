@@ -6,7 +6,7 @@ export default function SectionDechets() {
 
   return (
     <div className="space-y-6">
-      {property.dechetsBlocks.map((block, i) => (
+      {property.blocsDechets.map((block, i) => (
         <div key={i} className={i === 0 ? "bg-card border p-4 space-y-3" : "space-y-3"}>
           <h2 className="text-foreground">{block.title}</h2>
           <div

@@ -55,7 +55,7 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
 
           <div className="flex items-center gap-4">
             <span className="text-muted-foreground hidden sm:block font-display text-[15px]">
-              {property.name}
+              {property.nom}
             </span>
 
             {/* Language selector */}
@@ -101,7 +101,11 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
       {!hideEmergency && (
         <div className="border-t bg-card/50 py-3">
           <div className="mx-auto max-w-5xl px-4 flex justify-center gap-6 label-upper">
-            {Object.values(property.emergency).map((item) => (
+            {[
+              { label: property.urgences.urgencesLabel, tel: property.urgences.urgencesTel },
+              { label: property.urgences.policeLabel, tel: property.urgences.policeTel },
+              { label: property.urgences.pompiersLabel, tel: property.urgences.pompiersTel },
+            ].map((item) => (
               <a
                 key={item.tel}
                 href={`tel:${item.tel}`}

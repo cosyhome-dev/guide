@@ -6,7 +6,7 @@ export default function SectionRegion() {
 
   return (
     <div className="space-y-10">
-      {property.regionBlocks.map((block, i) => (
+      {property.blocsRegion.map((block, i) => (
         <div key={i} className="space-y-3">
           <h2 className="text-foreground">{block.title}</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">{block.description}</p>

@@ -21,14 +21,14 @@ export default function SectionArrivee() {
       </a>
 
       {/* Tip */}
-      {property.arriveeTip && (
+      {property.arrivee.conseilArrivee && (
         <div className="bg-accent/10 border border-accent/20 p-4">
-          <p className="text-sm text-foreground">{property.arriveeTip}</p>
+          <p className="text-sm text-foreground">{property.arrivee.conseilArrivee}</p>
         </div>
       )}
 
       {/* Steps */}
-      {property.arriveeSteps.map((step, i) => (
+      {property.arrivee.etapesArrivee.map((step, i) => (
         <div key={i} className="space-y-3">
           <div className="space-y-1">
             <p className="label-upper">

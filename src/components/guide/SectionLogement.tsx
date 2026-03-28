@@ -6,12 +6,14 @@ export default function SectionLogement() {
 
   return (
     <div className="space-y-6">
-      {property.logementIntro && (
-        <p className="text-sm text-muted-foreground leading-relaxed">{property.logementIntro}</p>
+      {property.logement.introduction && (
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {property.logement.introduction}
+        </p>
       )}
 
       <Accordion
-        items={property.logementItems.map((item) => ({
+        items={property.logement.elements.map((item) => ({
           title: item.title,
           content: (
             <div className="space-y-4">

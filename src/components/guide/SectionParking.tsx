@@ -20,14 +20,14 @@ export default function SectionParking() {
       </a>
 
       {/* Winter note */}
-      {property.parkingWinterNote && (
+      {property.parking.noteHiver && (
         <div className="bg-accent/10 border border-accent/20 p-4">
-          <p className="text-sm text-foreground">{property.parkingWinterNote}</p>
+          <p className="text-sm text-foreground">{property.parking.noteHiver}</p>
         </div>
       )}
 
       {/* Parking blocks */}
-      {property.parkingBlocks.map((block, i) => (
+      {property.parking.blocs.map((block, i) => (
         <div key={i} className="space-y-3">
           <h2 className="text-foreground">{block.title}</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">{block.description}</p>

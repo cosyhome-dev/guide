@@ -26,12 +26,12 @@ export default function GuideHome() {
     <GuideLayout hideEmergency>
       {/* Hero */}
       <div className="relative h-[280px] md:h-[340px] overflow-hidden">
-        <img src={heroImage} alt={property.name} className="w-full h-full object-cover" />
+        <img src={heroImage} alt={property.nom} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-linear-to-t from-primary/85 via-primary/40 to-primary/15" />
         <div className="absolute bottom-0 left-0 right-0 px-6 pb-[calc(1.5rem+10px)] md:px-8 md:pb-[calc(2rem+10px)] text-center">
           <h1 className="text-primary-foreground text-3xl md:text-4xl mb-1">{t.welcome}</h1>
           <p className="text-primary-foreground/80 tracking-[2px] uppercase text-[11px]">
-            {property.name}
+            {property.nom}
           </p>
         </div>
       </div>
@@ -42,17 +42,17 @@ export default function GuideHome() {
           {/* Desktop */}
           <div className="hidden md:block">
             <div className="flex items-stretch divide-x divide-border border overflow-hidden bg-card">
-              <QuickInfoCell label={t.checkIn} value={property.checkIn} />
-              <QuickInfoCell label={t.checkOut} value={property.checkOut} />
+              <QuickInfoCell label={t.checkIn} value={property.arrivee.heureArrivee} />
+              <QuickInfoCell label={t.checkOut} value={property.depart.heureDepart} />
               <QuickInfoCell
                 label={t.accessCodes}
-                value={fmt(f.building, property.codes.building)}
-                extra={fmt(f.keyBox, property.codes.keyBox)}
+                value={fmt(f.building, property.arrivee.codeImmeuble)}
+                extra={fmt(f.keyBox, property.arrivee.codeBoiteACles)}
               />
               <QuickInfoCell
                 label={t.wifi}
-                value={property.wifi.ssid}
-                extra={fmt(f.password, property.wifi.password)}
+                value={property.wifi.nomReseau}
+                extra={fmt(f.password, property.wifi.motDePasse)}
               />
             </div>
           </div>
@@ -61,30 +61,32 @@ export default function GuideHome() {
           <div className="md:hidden">
             <div className="bg-card border p-5 space-y-4">
               <div className="flex justify-center gap-8">
-                <QuickInfoCell label={t.checkIn} value={property.checkIn} />
+                <QuickInfoCell label={t.checkIn} value={property.arrivee.heureArrivee} />
                 <div className="w-px bg-border" />
-                <QuickInfoCell label={t.checkOut} value={property.checkOut} />
+                <QuickInfoCell label={t.checkOut} value={property.depart.heureDepart} />
               </div>
               <div className="h-px bg-border" />
               <div className="flex justify-center gap-8">
                 <QuickInfoCell
                   label={t.accessCodes}
-                  value={fmt(f.building, property.codes.building)}
-                  extra={fmt(f.keyBox, property.codes.keyBox)}
+                  value={fmt(f.building, property.arrivee.codeImmeuble)}
+                  extra={fmt(f.keyBox, property.arrivee.codeBoiteACles)}
                 />
                 <div className="w-px bg-border" />
                 <QuickInfoCell
                   label={t.wifi}
-                  value={property.wifi.ssid}
-                  extra={fmt(f.password, property.wifi.password)}
+                  value={property.wifi.nomReseau}
+                  extra={fmt(f.password, property.wifi.motDePasse)}
                 />
               </div>
             </div>
           </div>
         </div>
 
-        {property.keyNote && (
-          <p className="text-small text-muted-foreground text-center mb-8">{property.keyNote}</p>
+        {property.arrivee.noteCle && (
+          <p className="text-small text-muted-foreground text-center mb-8">
+            {property.arrivee.noteCle}
+          </p>
         )}
 
         {/* Section grid */}
