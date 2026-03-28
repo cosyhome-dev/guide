@@ -1,15 +1,20 @@
-import { Navigate } from "react-router-dom"
+import { Navigate, useParams } from "react-router-dom"
 import { useStaticContent } from "./useStaticContent"
 import { useGuide } from "./useGuide"
-import { getAccessCode } from "./useAccessCode"
+import { getSlug } from "./useAccessCode"
 import { GuideContext } from "./guideContext"
 
 export default function GuideProvider({ children }: { children: React.ReactNode }) {
-  const code = getAccessCode()
-  const { data: content, isLoading: contentLoading } = useStaticContent()
-  const { data: property, isLoading: guideLoading } = useGuide(code)
+  const { slug } = useParams<{ slug: string }>()
+  const storedSlug = getSlug()
 
-  if (!code) return <Navigate to="/" replace />
+  // Redirect to login if no stored slug or URL slug mismatch
+  if (!slug || !storedSlug || slug !== storedSlug) {
+    return <Navigate to="/" replace />
+  }
+
+  const { data: content, isLoading: contentLoading } = useStaticContent()
+  const { data: property, isLoading: guideLoading } = useGuide(slug)
 
   if (contentLoading || guideLoading) {
     return (

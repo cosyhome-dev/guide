@@ -26,8 +26,8 @@ const sectionComponents: Record<string, React.FC> = {
 type SectionKey = keyof typeof sectionComponents
 
 export default function GuideSection() {
-  const { section } = useParams<{ section: string }>()
-  const { content } = useGuideContext()
+  const { section } = useParams<{ slug: string; section: string }>()
+  const { content, property } = useGuideContext()
   const t = content.section
   const s = content.sections
 
@@ -40,7 +40,7 @@ export default function GuideSection() {
       <GuideLayout>
         <div className="mx-auto max-w-3xl px-4 py-16 text-center">
           <h1 className="text-2xl mb-4">{t.notFound}</h1>
-          <Link to="/guide" className="text-accent hover:underline text-sm">
+          <Link to={`/guide/${property.slug}`} className="text-accent hover:underline text-sm">
             {t.back}
           </Link>
         </div>
@@ -52,7 +52,7 @@ export default function GuideSection() {
     <GuideLayout>
       <div className="mx-auto max-w-3xl px-4 pt-6 pb-6">
         <Link
-          to="/guide"
+          to={`/guide/${property.slug}`}
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-small transition-colors"
         >
           <ArrowLeft size={14} />

@@ -2,15 +2,16 @@ import { useGuideContext } from "@/hooks"
 import { Accordion, ImageGrid } from "@/components/guide"
 
 export default function SectionLogement() {
-  const { content } = useGuideContext()
-  const t = content.logement
+  const { property } = useGuideContext()
 
   return (
     <div className="space-y-6">
-      <p className="text-sm text-muted-foreground leading-relaxed">{t.intro}</p>
+      {property.logementIntro && (
+        <p className="text-sm text-muted-foreground leading-relaxed">{property.logementIntro}</p>
+      )}
 
       <Accordion
-        items={t.items.map((item) => ({
+        items={property.logementItems.map((item) => ({
           title: item.title,
           content: (
             <div className="space-y-4">

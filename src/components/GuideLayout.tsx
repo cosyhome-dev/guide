@@ -2,7 +2,8 @@ import React from "react"
 import { Link, useLocation } from "react-router-dom"
 import { Home, Phone, MapPin, Shield, Globe } from "lucide-react"
 import { cn } from "@/lib"
-import { useGuideContext } from "@/hooks"
+import { useGuideContext, useLocale, LOCALES, LOCALE_LABELS } from "@/hooks"
+import type { Locale } from "@/hooks"
 import logoRectDark from "@/assets/logo-cosyhome-rect-dark.png"
 
 interface GuideLayoutProps {
@@ -13,16 +14,17 @@ interface GuideLayoutProps {
 export default function GuideLayout({ children, hideEmergency = false }: GuideLayoutProps) {
   // Hooks
   const { content, property } = useGuideContext()
+  const { locale, setLocale } = useLocale()
 
   // States
   const location = useLocation()
-  const [currentLang, setCurrentLang] = React.useState("FR")
   const [langOpen, setLangOpen] = React.useState(false)
 
   // Derived
+  const basePath = `/guide/${property.slug}`
   const navItems = [
-    { icon: Home, label: content.nav.home, to: "/guide" },
-    { icon: Shield, label: content.nav.rules, to: "/guide/regles" },
+    { icon: Home, label: content.nav.home, to: basePath },
+    { icon: Shield, label: content.nav.rules, to: `${basePath}/regles` },
     {
       icon: Phone,
       label: content.nav.contact,
@@ -32,8 +34,8 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
   ] as const
 
   // Handlers
-  function handleLangSelect(lang: string) {
-    setCurrentLang(lang)
+  function handleLangSelect(lang: Locale) {
+    setLocale(lang)
     setLangOpen(false)
   }
 
@@ -43,7 +45,7 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
       {/* Header */}
       <header className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="mx-auto max-w-5xl px-4 py-3 flex items-center justify-between">
-          <Link to="/guide">
+          <Link to={basePath}>
             <img
               src={logoRectDark}
               alt={content.alt.brand}
@@ -63,25 +65,25 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
                 className="flex items-center gap-1.5 label-upper hover:text-foreground transition-colors px-2 py-1 border border-transparent hover:border-border"
               >
                 <Globe size={14} strokeWidth={1.5} />
-                <span>{currentLang}</span>
+                <span>{LOCALE_LABELS[locale]}</span>
               </button>
 
               {langOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setLangOpen(false)} />
                   <div className="absolute right-0 top-full mt-1 bg-card border shadow-sm z-50 overflow-hidden">
-                    {property.languages.map((lang) => (
+                    {LOCALES.map((lang) => (
                       <button
                         key={lang}
                         onClick={() => handleLangSelect(lang)}
                         className={cn(
                           "block w-full text-left px-4 py-2 label-upper transition-colors",
-                          lang === currentLang
+                          lang === locale
                             ? "text-accent bg-accent/10"
                             : "text-muted-foreground hover:text-foreground hover:bg-muted",
                         )}
                       >
-                        {lang}
+                        {LOCALE_LABELS[lang]}
                       </button>
                     ))}
                   </div>

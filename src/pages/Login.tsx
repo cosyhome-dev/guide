@@ -1,6 +1,6 @@
 import React from "react"
 import { useNavigate } from "react-router-dom"
-import { useStaticContent, useValidateCode, setAccessCode } from "@/hooks"
+import { useStaticContent, useValidateCode, setSlug } from "@/hooks"
 import heroImage from "@/assets/hero-guide.jpg"
 import cosyhomeLogo from "@/assets/logo-cosyhome.png"
 import logoCopyright from "@/assets/logo-copyright-blanc.png"
@@ -28,12 +28,11 @@ export default function Login() {
 
     validateCode.mutate(code, {
       onSuccess: (result) => {
-        if (result.valid) {
-          setAccessCode(code)
-          navigate("/guide")
-        } else {
-          setError(t?.error ?? "")
-        }
+        setSlug(result.slug)
+        navigate(`/guide/${result.slug}`)
+      },
+      onError: () => {
+        setError(t?.error ?? "")
       },
     })
   }

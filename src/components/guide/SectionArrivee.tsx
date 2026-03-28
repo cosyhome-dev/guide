@@ -4,7 +4,6 @@ import { ImageGrid } from "@/components/guide"
 
 export default function SectionArrivee() {
   const { content, property } = useGuideContext()
-  const t = content.arrivee
   const sec = content.section
 
   return (
@@ -22,12 +21,14 @@ export default function SectionArrivee() {
       </a>
 
       {/* Tip */}
-      <div className="bg-accent/10 border border-accent/20 p-4">
-        <p className="text-sm text-foreground">{t.tip}</p>
-      </div>
+      {property.arriveeTip && (
+        <div className="bg-accent/10 border border-accent/20 p-4">
+          <p className="text-sm text-foreground">{property.arriveeTip}</p>
+        </div>
+      )}
 
       {/* Steps */}
-      {t.steps.map((step, i) => (
+      {property.arriveeSteps.map((step, i) => (
         <div key={i} className="space-y-3">
           <div className="space-y-1">
             <p className="label-upper">

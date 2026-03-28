@@ -1,7 +1,7 @@
 import React from "react"
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { GuideProvider } from "@/hooks"
+import { GuideProvider, LocaleProvider } from "@/hooks"
 import Login from "@/pages/Login"
 import GuideHome from "@/pages/GuideHome"
 import GuideSection from "@/pages/GuideSection"
@@ -21,7 +21,7 @@ function AnimatedRoutes() {
       <Routes location={location}>
         <Route path="/" element={<Login />} />
         <Route
-          path="/guide"
+          path="/guide/:slug"
           element={
             <GuideProvider>
               <GuideHome />
@@ -29,7 +29,7 @@ function AnimatedRoutes() {
           }
         />
         <Route
-          path="/guide/:section"
+          path="/guide/:slug/:section"
           element={
             <GuideProvider>
               <GuideSection />
@@ -45,9 +45,11 @@ function AnimatedRoutes() {
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AnimatedRoutes />
-      </BrowserRouter>
+      <LocaleProvider>
+        <BrowserRouter>
+          <AnimatedRoutes />
+        </BrowserRouter>
+      </LocaleProvider>
     </QueryClientProvider>
   )
 }

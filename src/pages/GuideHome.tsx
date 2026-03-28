@@ -5,14 +5,16 @@ import { useGuideContext } from "@/hooks"
 import { fmt } from "@/lib"
 import heroImage from "@/assets/hero-guide.jpg"
 
-const sections = [
-  { icon: LogIn, key: "arrivee" as const, path: "/guide/arrivee" },
-  { icon: LogOut, key: "depart" as const, path: "/guide/depart" },
-  { icon: Car, key: "parking" as const, path: "/guide/parking" },
-  { icon: Home, key: "logement" as const, path: "/guide/logement" },
-  { icon: Trash2, key: "dechets" as const, path: "/guide/dechets" },
-  { icon: MapPin, key: "region" as const, path: "/guide/region" },
-]
+const sectionKeys = ["arrivee", "depart", "parking", "logement", "dechets", "region"] as const
+
+const sectionIcons: Record<(typeof sectionKeys)[number], typeof LogIn> = {
+  arrivee: LogIn,
+  depart: LogOut,
+  parking: Car,
+  logement: Home,
+  dechets: Trash2,
+  region: MapPin,
+}
 
 export default function GuideHome() {
   const { content, property } = useGuideContext()
@@ -81,26 +83,31 @@ export default function GuideHome() {
           </div>
         </div>
 
-        <p className="text-small text-muted-foreground text-center mb-8">{t.keyNote}</p>
+        {property.keyNote && (
+          <p className="text-small text-muted-foreground text-center mb-8">{property.keyNote}</p>
+        )}
 
         {/* Section grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-5 pb-12">
-          {sections.map((section) => (
-            <Link
-              key={section.path}
-              to={section.path}
-              className="bg-card border p-6 flex flex-col items-center gap-3 hover:border-accent/50 hover:shadow-xs transition-all group"
-            >
-              <section.icon
-                size={26}
-                strokeWidth={1.2}
-                className="text-muted-foreground group-hover:text-accent transition-colors"
-              />
-              <span className="label-upper text-center group-hover:text-foreground transition-colors">
-                {s[section.key]}
-              </span>
-            </Link>
-          ))}
+          {sectionKeys.map((key) => {
+            const Icon = sectionIcons[key]
+            return (
+              <Link
+                key={key}
+                to={`/guide/${property.slug}/${key}`}
+                className="bg-card border p-6 flex flex-col items-center gap-3 hover:border-accent/50 hover:shadow-xs transition-all group"
+              >
+                <Icon
+                  size={26}
+                  strokeWidth={1.2}
+                  className="text-muted-foreground group-hover:text-accent transition-colors"
+                />
+                <span className="label-upper text-center group-hover:text-foreground transition-colors">
+                  {s[key]}
+                </span>
+              </Link>
+            )
+          })}
         </div>
       </div>
     </GuideLayout>

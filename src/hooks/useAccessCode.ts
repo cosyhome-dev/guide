@@ -1,13 +1,13 @@
-const STORAGE_KEY = "cosyhome-access-code"
+const STORAGE_KEY = "cosyhome-slug"
 
-export function getAccessCode(): string {
+export function getSlug(): string {
   return sessionStorage.getItem(STORAGE_KEY) ?? ""
 }
 
-export function setAccessCode(code: string) {
-  sessionStorage.setItem(STORAGE_KEY, code)
+export function setSlug(slug: string) {
+  sessionStorage.setItem(STORAGE_KEY, slug)
 }
 
-export function clearAccessCode() {
+export function clearSlug() {
   sessionStorage.removeItem(STORAGE_KEY)
 }
