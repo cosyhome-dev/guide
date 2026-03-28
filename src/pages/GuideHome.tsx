@@ -42,12 +42,12 @@ export default function GuideHome() {
           {/* Desktop */}
           <div className="hidden md:block">
             <div className="flex items-stretch divide-x divide-border border overflow-hidden bg-card">
-              <QuickInfoCell label={t.checkIn} value={property.arrivee.heureArrivee} />
-              <QuickInfoCell label={t.checkOut} value={property.depart.heureDepart} />
+              <QuickInfoCell label={t.checkIn} value={property.infos.heureArrivee} />
+              <QuickInfoCell label={t.checkOut} value={property.infos.heureDepart} />
               <QuickInfoCell
                 label={t.accessCodes}
-                value={fmt(f.building, property.arrivee.codeImmeuble)}
-                extra={fmt(f.keyBox, property.arrivee.codeBoiteACles)}
+                value={fmt(f.building, property.infos.codeImmeuble)}
+                extra={fmt(f.keyBox, property.infos.codeBoiteACles)}
               />
               <QuickInfoCell
                 label={t.wifi}
@@ -61,16 +61,16 @@ export default function GuideHome() {
           <div className="md:hidden">
             <div className="bg-card border p-5 space-y-4">
               <div className="flex justify-center gap-8">
-                <QuickInfoCell label={t.checkIn} value={property.arrivee.heureArrivee} />
+                <QuickInfoCell label={t.checkIn} value={property.infos.heureArrivee} />
                 <div className="w-px bg-border" />
-                <QuickInfoCell label={t.checkOut} value={property.depart.heureDepart} />
+                <QuickInfoCell label={t.checkOut} value={property.infos.heureDepart} />
               </div>
               <div className="h-px bg-border" />
               <div className="flex justify-center gap-8">
                 <QuickInfoCell
                   label={t.accessCodes}
-                  value={fmt(f.building, property.arrivee.codeImmeuble)}
-                  extra={fmt(f.keyBox, property.arrivee.codeBoiteACles)}
+                  value={fmt(f.building, property.infos.codeImmeuble)}
+                  extra={fmt(f.keyBox, property.infos.codeBoiteACles)}
                 />
                 <div className="w-px bg-border" />
                 <QuickInfoCell
@@ -82,12 +82,6 @@ export default function GuideHome() {
             </div>
           </div>
         </div>
-
-        {property.arrivee.noteCle && (
-          <p className="text-small text-muted-foreground text-center mb-8">
-            {property.arrivee.noteCle}
-          </p>
-        )}
 
         {/* Section grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-5 pb-12">

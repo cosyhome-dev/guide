@@ -1,1 +1,1 @@
-export { cn, fmt } from "./utils"
+export { cn, fmt, RICHTEXT_CLASS } from "./utils"

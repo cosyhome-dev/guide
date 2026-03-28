@@ -1,5 +1,11 @@
+import qs from "qs"
 import { z } from "zod"
-import { propertySchema, type Property } from "@/content/property"
+import {
+  propertySchema,
+  dynamicZoneBlockSchema,
+  type Property,
+  type DynamicZoneBlock,
+} from "@/content/property"
 import { property as mockData } from "@/content/property"
 import { delay } from "./mock"
 import {
@@ -13,134 +19,130 @@ import {
 } from "./strapi"
 
 // ---------------------------------------------------------------------------
-// Strapi response schemas
+// Strapi v5 dynamic zone schemas
 // ---------------------------------------------------------------------------
 
-const strapiArriveeSchema = z.object({
-  heureArrivee: z.string(),
-  codeImmeuble: z.string(),
-  codeBoiteACles: z.string(),
-  noteCle: z.string().nullable(),
-  conseilArrivee: z.string().nullable(),
-  etapesArrivee: z.array(
-    z.object({
-      id: z.number(),
-      title: z.string(),
-      description: z.string().nullable(),
-      images: strapiImagesSchema,
+const strapiLienExterneSchema = z.object({
+  id: z.number(),
+  label: z.string(),
+  url: z.string(),
+})
+
+const strapiElementChecklistSchema = z.object({
+  id: z.number(),
+  texte: z.string(),
+})
+
+const strapiElementDropdownSchema = z.object({
+  id: z.number(),
+  titre: z.string(),
+  description: z.string(),
+})
+
+const strapiBlocSchema = z.object({
+  __component: z.literal("guide.bloc"),
+  id: z.number(),
+  titre: z.string(),
+  sousTitre: z.string().nullable(),
+  contenu: z.string().nullable(),
+  images: strapiImagesSchema.default([]),
+  liens: z.array(strapiLienExterneSchema).default([]),
+  misEnAvant: z.boolean(),
+})
+
+const strapiNoteSchema = z.object({
+  __component: z.literal("guide.note"),
+  id: z.number(),
+  contenu: z.string(),
+})
+
+const strapiChecklistSchema = z.object({
+  __component: z.literal("guide.checklist"),
+  id: z.number(),
+  titre: z.string(),
+  elements: z.array(strapiElementChecklistSchema),
+})
+
+const strapiDropdownSchema = z.object({
+  __component: z.literal("guide.dropdown"),
+  id: z.number(),
+  elements: z.array(strapiElementDropdownSchema),
+})
+
+const strapiAffichageRegionSchema = z.object({
+  __component: z.literal("guide.affichage-region"),
+  id: z.number(),
+  afficher: z.boolean(),
+})
+
+const strapiDynamicZoneSchema = z.discriminatedUnion("__component", [
+  strapiBlocSchema,
+  strapiNoteSchema,
+  strapiChecklistSchema,
+  strapiDropdownSchema,
+  strapiAffichageRegionSchema,
+])
+
+type StrapiDynamicZoneBlock = z.infer<typeof strapiDynamicZoneSchema>
+
+// ---------------------------------------------------------------------------
+// Strapi v5 guide response schema (fields directly on data, no attributes)
+// ---------------------------------------------------------------------------
+
+const strapiLocalisationSchema = z.object({
+  id: z.number().optional(),
+  value: z.object({
+    address: z.string().optional(),
+    geohash: z.string().optional(),
+    coordinates: z.object({
+      lat: z.number(),
+      lng: z.number(),
     }),
-  ),
+  }),
 })
 
-const strapiDepartSchema = z.object({
-  heureDepart: z.string(),
-  messageDepart: z.string().nullable(),
-  checklist: z.array(
-    z.object({
-      id: z.number(),
-      text: z.string(),
-    }),
-  ),
-})
+const strapiGestionnaireSchema = z
+  .object({
+    id: z.number(),
+    documentId: z.string().optional(),
+    firstName: z.string(),
+    lastName: z.string(),
+    phone: z.string(),
+  })
+  .nullable()
 
-const strapiWifiSchema = z.object({
-  nomReseau: z.string().nullable(),
-  motDePasse: z.string().nullable(),
-})
+const strapiGuideDataSchema = z.object({
+  id: z.number(),
+  documentId: z.string(),
 
-const strapiParkingSchema = z.object({
-  noteHiver: z.string().nullable(),
-  blocs: z.array(
-    z.object({
-      id: z.number(),
-      title: z.string(),
-      description: z.string().nullable(),
-      image: strapiImageSchema,
-    }),
-  ),
-})
-
-const strapiLogementSchema = z.object({
-  introduction: z.string().nullable(),
-  elements: z.array(
-    z.object({
-      id: z.number(),
-      title: z.string(),
-      description: z.string(),
-      images: strapiImagesSchema,
-    }),
-  ),
-})
-
-const strapiUrgencesSchema = z.object({
-  urgencesLabel: z.string(),
-  urgencesTel: z.string(),
-  policeLabel: z.string(),
-  policeTel: z.string(),
-  pompiersLabel: z.string(),
-  pompiersTel: z.string(),
-})
-
-const strapiGuideAttributesSchema = z.object({
   nom: z.string(),
   slug: z.string(),
-  address: z.string(),
-  mapsUrl: z.string(),
   imagePrincipale: strapiImageSchema,
+  localisation: strapiLocalisationSchema,
 
-  arrivee: strapiArriveeSchema,
-  depart: strapiDepartSchema,
-  wifi: strapiWifiSchema,
-  parking: strapiParkingSchema,
-  logement: strapiLogementSchema,
-  urgences: strapiUrgencesSchema,
-
-  gestionnaire: z.object({
-    data: z
-      .object({
-        id: z.number(),
-        attributes: z.object({
-          firstName: z.string(),
-          lastName: z.string(),
-          phone: z.string(),
-        }),
-      })
-      .nullable(),
+  infos: z.object({
+    id: z.number().optional(),
+    heureArrivee: z.string(),
+    codeImmeuble: z.string(),
+    codeBoiteACles: z.string(),
+    heureDepart: z.string(),
   }),
 
-  blocsDechets: z.array(
-    z.object({
-      id: z.number(),
-      title: z.string(),
-      description: z.string().nullable(),
-      image: strapiImageSchema,
-    }),
-  ),
+  wifi: z.object({
+    id: z.number().optional(),
+    nomReseau: z.string().nullable(),
+    motDePasse: z.string().nullable(),
+  }),
 
-  blocsRegion: z.array(
-    z.object({
-      id: z.number(),
-      title: z.string(),
-      description: z.string(),
-      image: strapiImageSchema,
-      ctas: z
-        .array(
-          z.object({
-            label: z.string(),
-            url: z.string(),
-          }),
-        )
-        .nullable(),
-    }),
-  ),
+  gestionnaire: strapiGestionnaireSchema,
 
-  regles: z.array(
-    z.object({
-      id: z.number(),
-      title: z.string(),
-      content: z.string(),
-    }),
-  ),
+  arriveeContenu: z.array(strapiDynamicZoneSchema).default([]),
+  departContenu: z.array(strapiDynamicZoneSchema).default([]),
+  parkingContenu: z.array(strapiDynamicZoneSchema).default([]),
+  logementContenu: z.array(strapiDynamicZoneSchema).default([]),
+  dechetsContenu: z.array(strapiDynamicZoneSchema).default([]),
+  regionContenu: z.array(strapiDynamicZoneSchema).default([]),
+  reglesContenu: z.array(strapiDynamicZoneSchema).default([]),
 
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -149,12 +151,7 @@ const strapiGuideAttributesSchema = z.object({
 })
 
 const strapiGuideResponseSchema = z.object({
-  data: z.array(
-    z.object({
-      id: z.number(),
-      attributes: strapiGuideAttributesSchema,
-    }),
-  ),
+  data: z.array(strapiGuideDataSchema),
   meta: z.object({}).passthrough(),
 })
 
@@ -163,101 +160,123 @@ const accessResponseSchema = z.object({
 })
 
 // ---------------------------------------------------------------------------
-// Transformer: Strapi → Property
+// Transformer: Strapi v5 → Property
 // ---------------------------------------------------------------------------
 
-type StrapiGuideAttributes = z.infer<typeof strapiGuideAttributesSchema>
+type StrapiGuideData = z.infer<typeof strapiGuideDataSchema>
 
-function transformGuide(attrs: StrapiGuideAttributes): Property {
+function transformDynamicZoneBlock(block: StrapiDynamicZoneBlock): DynamicZoneBlock {
+  switch (block.__component) {
+    case "guide.bloc":
+      return dynamicZoneBlockSchema.parse({
+        __component: "guide.bloc",
+        id: block.id,
+        titre: block.titre,
+        sousTitre: block.sousTitre ?? undefined,
+        contenu: block.contenu ?? undefined,
+        images: extractImageUrls(block.images),
+        liens: block.liens?.map((l) => ({ label: l.label, url: l.url })),
+        misEnAvant: block.misEnAvant,
+      })
+    case "guide.note":
+      return { __component: "guide.note", id: block.id, contenu: block.contenu }
+    case "guide.checklist":
+      return {
+        __component: "guide.checklist",
+        id: block.id,
+        titre: block.titre,
+        elements: block.elements.map((e) => ({ texte: e.texte })),
+      }
+    case "guide.dropdown":
+      return {
+        __component: "guide.dropdown",
+        id: block.id,
+        elements: block.elements.map((e) => ({ titre: e.titre, description: e.description })),
+      }
+    case "guide.affichage-region":
+      return { __component: "guide.affichage-region", id: block.id, afficher: block.afficher }
+  }
+}
+
+function transformLocalisation(loc: z.infer<typeof strapiLocalisationSchema>) {
+  const { lat, lng } = loc.value.coordinates
+  return {
+    address: loc.value.address ?? "",
+    mapsUrl: `https://www.google.com/maps?q=${lat},${lng}`,
+  }
+}
+
+function transformGuide(d: StrapiGuideData): Property {
+  const transformZone = (blocks: StrapiDynamicZoneBlock[]) => blocks.map(transformDynamicZoneBlock)
+
   return propertySchema.parse({
-    nom: attrs.nom,
-    slug: attrs.slug,
-    address: attrs.address,
-    mapsUrl: attrs.mapsUrl,
-    imagePrincipale: extractImageUrl(attrs.imagePrincipale),
-    arrivee: {
-      heureArrivee: attrs.arrivee.heureArrivee,
-      codeImmeuble: attrs.arrivee.codeImmeuble,
-      codeBoiteACles: attrs.arrivee.codeBoiteACles,
-      noteCle: attrs.arrivee.noteCle ?? undefined,
-      conseilArrivee: attrs.arrivee.conseilArrivee ?? undefined,
-      etapesArrivee: attrs.arrivee.etapesArrivee.map((s) => ({
-        title: s.title,
-        description: s.description ?? "",
-        images: extractImageUrls(s.images),
-      })),
-    },
-    depart: {
-      heureDepart: attrs.depart.heureDepart,
-      messageDepart: attrs.depart.messageDepart ?? "",
-      checklist: attrs.depart.checklist.map((item) => ({ text: item.text })),
+    nom: d.nom,
+    slug: d.slug,
+    imagePrincipale: extractImageUrl(d.imagePrincipale),
+    localisation: transformLocalisation(d.localisation),
+    whatsapp: d.gestionnaire?.phone ?? "",
+    infos: {
+      heureArrivee: d.infos.heureArrivee,
+      codeImmeuble: d.infos.codeImmeuble,
+      codeBoiteACles: d.infos.codeBoiteACles,
+      heureDepart: d.infos.heureDepart,
     },
     wifi: {
-      nomReseau: attrs.wifi.nomReseau ?? "",
-      motDePasse: attrs.wifi.motDePasse ?? "",
+      nomReseau: d.wifi.nomReseau ?? "",
+      motDePasse: d.wifi.motDePasse ?? "",
     },
-    parking: {
-      noteHiver: attrs.parking.noteHiver ?? undefined,
-      blocs: attrs.parking.blocs.map((block) => ({
-        title: block.title,
-        description: block.description ?? "",
-        image: extractImageUrl(block.image),
-      })),
-    },
-    logement: {
-      introduction: attrs.logement.introduction ?? undefined,
-      elements: attrs.logement.elements.map((item) => ({
-        title: item.title,
-        description: item.description,
-        images: extractImageUrls(item.images),
-      })),
-    },
-    urgences: {
-      urgencesLabel: attrs.urgences.urgencesLabel,
-      urgencesTel: attrs.urgences.urgencesTel,
-      policeLabel: attrs.urgences.policeLabel,
-      policeTel: attrs.urgences.policeTel,
-      pompiersLabel: attrs.urgences.pompiersLabel,
-      pompiersTel: attrs.urgences.pompiersTel,
-    },
-    whatsapp: attrs.gestionnaire.data?.attributes.phone ?? "",
-    blocsDechets: attrs.blocsDechets.map((block) => ({
-      title: block.title,
-      description: block.description ?? "",
-      image: extractImageUrl(block.image),
-    })),
-    blocsRegion: attrs.blocsRegion.map((block) => ({
-      title: block.title,
-      description: block.description,
-      image: extractImageUrl(block.image),
-      ctas: block.ctas?.map((cta) => ({ label: cta.label, url: cta.url })),
-    })),
-    regles: attrs.regles.map((rule) => ({
-      title: rule.title,
-      content: rule.content,
-    })),
+    arriveeContenu: transformZone(d.arriveeContenu),
+    departContenu: transformZone(d.departContenu),
+    parkingContenu: transformZone(d.parkingContenu),
+    logementContenu: transformZone(d.logementContenu),
+    dechetsContenu: transformZone(d.dechetsContenu),
+    regionContenu: transformZone(d.regionContenu),
+    reglesContenu: transformZone(d.reglesContenu),
   })
 }
 
 // ---------------------------------------------------------------------------
-// Populate query for nested components
+// Populate query — Strapi v5 syntax with [on] for dynamic zones
 // ---------------------------------------------------------------------------
 
-const GUIDE_POPULATE = [
-  "populate[imagePrincipale]=*",
-  "populate[gestionnaire][fields][0]=firstName",
-  "populate[gestionnaire][fields][1]=lastName",
-  "populate[gestionnaire][fields][2]=phone",
-  "populate[arrivee][populate]=*",
-  "populate[depart][populate]=*",
-  "populate[wifi]=*",
-  "populate[parking][populate]=*",
-  "populate[logement][populate]=*",
-  "populate[urgences]=*",
-  "populate[blocsDechets][populate]=*",
-  "populate[blocsRegion]=*",
-  "populate[regles]=*",
-].join("&")
+const dynamicZonePopulate = {
+  on: {
+    "guide.bloc": {
+      populate: {
+        images: { fields: ["url", "alternativeText"] },
+        liens: { populate: "*" },
+      },
+    },
+    "guide.note": { populate: "*" },
+    "guide.checklist": { populate: { elements: { populate: "*" } } },
+    "guide.dropdown": { populate: { elements: { populate: "*" } } },
+    "guide.affichage-region": { populate: "*" },
+  },
+}
+
+function buildGuideQuery(slug: string, locale: string): string {
+  return qs.stringify(
+    {
+      filters: { slug: { $eq: slug } },
+      locale,
+      populate: {
+        imagePrincipale: { fields: ["url", "alternativeText"] },
+        localisation: { populate: "*" },
+        gestionnaire: { fields: ["firstName", "lastName", "phone"] },
+        wifi: { populate: "*" },
+        infos: { populate: "*" },
+        arriveeContenu: dynamicZonePopulate,
+        departContenu: dynamicZonePopulate,
+        parkingContenu: dynamicZonePopulate,
+        logementContenu: dynamicZonePopulate,
+        dechetsContenu: dynamicZonePopulate,
+        regionContenu: dynamicZonePopulate,
+        reglesContenu: dynamicZonePopulate,
+      },
+    },
+    { encodeValuesOnly: true },
+  )
+}
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -270,7 +289,7 @@ export async function validateCode(code: string): Promise<{ slug: string }> {
     return { slug: "le-saint-georges" }
   }
 
-  const raw = await strapiPost("/guide-sejours/access", { code })
+  const raw = await strapiPost("/guides/access", { code })
   return accessResponseSchema.parse(raw)
 }
 
@@ -280,11 +299,9 @@ export async function fetchGuide(slug: string, locale: string): Promise<Property
     return propertySchema.parse(mockData)
   }
 
-  const raw = await strapiFetch(
-    `/guide-sejours?filters[slug][$eq]=${encodeURIComponent(slug)}&locale=${locale}&${GUIDE_POPULATE}`,
-  )
+  const raw = await strapiFetch(`/guides?${buildGuideQuery(slug, locale)}`)
   const response = strapiGuideResponseSchema.parse(raw)
   const guide = response.data[0]
   if (!guide) throw new Error("GUIDE_NOT_FOUND")
-  return transformGuide(guide.attributes)
+  return transformGuide(guide)
 }

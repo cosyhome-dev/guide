@@ -65,6 +65,15 @@ export const staticContentSchema = z.object({
     keyBox: z.string(),
     password: z.string(),
   }),
+
+  urgences: z.object({
+    urgencesLabel: z.string(),
+    urgencesTel: z.string(),
+    policeLabel: z.string(),
+    policeTel: z.string(),
+    pompiersLabel: z.string(),
+    pompiersTel: z.string(),
+  }),
 })
 
 export type StaticContent = z.infer<typeof staticContentSchema>
@@ -134,5 +143,14 @@ export const staticContent: StaticContent = {
     building: "Bâtiment : {value}",
     keyBox: "Boîte à clé : {value}",
     password: "MDP : {value}",
+  },
+
+  urgences: {
+    urgencesLabel: "Urgences 144",
+    urgencesTel: "+41144",
+    policeLabel: "Police 117",
+    policeTel: "+41117",
+    pompiersLabel: "Pompiers 118",
+    pompiersTel: "+41118",
   },
 }

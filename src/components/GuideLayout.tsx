@@ -1,8 +1,9 @@
 import React from "react"
-import { Link, useLocation } from "react-router-dom"
-import { Home, Phone, MapPin, Shield, Globe } from "lucide-react"
+import { Link, useLocation, useNavigate } from "react-router-dom"
+import { Home, Phone, MapPin, Shield, Globe, LogOut } from "lucide-react"
 import { cn } from "@/lib"
 import { useGuideContext, useLocale, LOCALES, LOCALE_LABELS } from "@/hooks"
+import { clearSlug } from "@/hooks/useAccessCode"
 import type { Locale } from "@/hooks"
 import logoRectDark from "@/assets/logo-cosyhome-rect-dark.png"
 
@@ -15,6 +16,7 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
   // Hooks
   const { content, property } = useGuideContext()
   const { locale, setLocale } = useLocale()
+  const navigate = useNavigate()
 
   // States
   const location = useLocation()
@@ -30,13 +32,20 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
       label: content.nav.contact,
       href: `https://wa.me/${property.whatsapp.replace(/\+/g, "")}`,
     },
-    { icon: MapPin, label: content.nav.route, href: property.mapsUrl },
+    { icon: MapPin, label: content.nav.route, href: property.localisation.mapsUrl },
   ] as const
+
+  const urgences = content.urgences
 
   // Handlers
   function handleLangSelect(lang: Locale) {
     setLocale(lang)
     setLangOpen(false)
+  }
+
+  function handleLogout() {
+    clearSlug()
+    navigate("/")
   }
 
   // Render
@@ -57,6 +66,14 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
             <span className="text-muted-foreground hidden sm:block font-display text-[15px]">
               {property.nom}
             </span>
+
+            {/* Logout */}
+            <button
+              onClick={handleLogout}
+              className="text-muted-foreground hover:text-foreground transition-colors p-1"
+            >
+              <LogOut size={16} strokeWidth={1.5} />
+            </button>
 
             {/* Language selector */}
             <div className="relative">
@@ -102,9 +119,9 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
         <div className="border-t bg-card/50 py-3">
           <div className="mx-auto max-w-5xl px-4 flex justify-center gap-6 label-upper">
             {[
-              { label: property.urgences.urgencesLabel, tel: property.urgences.urgencesTel },
-              { label: property.urgences.policeLabel, tel: property.urgences.policeTel },
-              { label: property.urgences.pompiersLabel, tel: property.urgences.pompiersTel },
+              { label: urgences.urgencesLabel, tel: urgences.urgencesTel },
+              { label: urgences.policeLabel, tel: urgences.policeTel },
+              { label: urgences.pompiersLabel, tel: urgences.pompiersTel },
             ].map((item) => (
               <a
                 key={item.tel}

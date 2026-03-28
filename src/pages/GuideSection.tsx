@@ -1,29 +1,9 @@
-import React from "react"
 import { useParams, Link } from "react-router-dom"
 import { ArrowLeft } from "lucide-react"
 import GuideLayout from "@/components/GuideLayout"
+import { DynamicZone } from "@/components/guide"
 import { useGuideContext } from "@/hooks"
-import {
-  SectionArrivee,
-  SectionDepart,
-  SectionParking,
-  SectionLogement,
-  SectionDechets,
-  SectionRegion,
-  SectionRegles,
-} from "@/components/guide"
-
-const sectionComponents: Record<string, React.FC> = {
-  arrivee: SectionArrivee,
-  depart: SectionDepart,
-  parking: SectionParking,
-  logement: SectionLogement,
-  dechets: SectionDechets,
-  region: SectionRegion,
-  regles: SectionRegles,
-}
-
-type SectionKey = keyof typeof sectionComponents
+import { SECTION_CONTENU_KEYS, type SectionKey } from "@/content/property"
 
 export default function GuideSection() {
   const { section } = useParams<{ slug: string; section: string }>()
@@ -32,10 +12,10 @@ export default function GuideSection() {
   const s = content.sections
 
   const key = section as SectionKey
-  const SectionComponent = sectionComponents[key]
+  const contenuKey = SECTION_CONTENU_KEYS[key]
   const title = s[key as keyof typeof s]
 
-  if (!SectionComponent || !title) {
+  if (!contenuKey || !title) {
     return (
       <GuideLayout>
         <div className="mx-auto max-w-3xl px-4 py-16 text-center">
@@ -47,6 +27,8 @@ export default function GuideSection() {
       </GuideLayout>
     )
   }
+
+  const blocks = property[contenuKey]
 
   return (
     <GuideLayout>
@@ -64,7 +46,7 @@ export default function GuideSection() {
       </div>
 
       <div className="mx-auto max-w-3xl px-4 pb-8">
-        <SectionComponent />
+        <DynamicZone blocks={blocks} />
       </div>
     </GuideLayout>
   )

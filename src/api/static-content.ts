@@ -5,10 +5,13 @@ import { delay } from "./mock"
 import { USE_MOCK, strapiFetch, strapiImageSchema } from "./strapi"
 
 // ---------------------------------------------------------------------------
-// Strapi response schema
+// Strapi v5 response schema (fields directly on data, no attributes wrapper)
 // ---------------------------------------------------------------------------
 
-const strapiStaticAttributesSchema = z.object({
+const strapiStaticDataSchema = z.object({
+  id: z.number(),
+  documentId: z.string(),
+
   loginTitle: z.string(),
   loginDescription: z.string(),
   loginCodeLabel: z.string(),
@@ -55,6 +58,13 @@ const strapiStaticAttributesSchema = z.object({
   formatKeyBox: z.string(),
   formatPassword: z.string(),
 
+  urgencesLabel: z.string(),
+  urgencesTel: z.string(),
+  policeLabel: z.string(),
+  policeTel: z.string(),
+  pompiersLabel: z.string(),
+  pompiersTel: z.string(),
+
   logoLight: strapiImageSchema,
   logoDark: strapiImageSchema,
   logoCircle: strapiImageSchema,
@@ -67,10 +77,7 @@ const strapiStaticAttributesSchema = z.object({
 })
 
 const strapiStaticResponseSchema = z.object({
-  data: z.object({
-    id: z.number(),
-    attributes: strapiStaticAttributesSchema,
-  }),
+  data: strapiStaticDataSchema,
   meta: z.object({}).passthrough(),
 })
 
@@ -78,65 +85,73 @@ const strapiStaticResponseSchema = z.object({
 // Transformer: Strapi flat → StaticContent nested
 // ---------------------------------------------------------------------------
 
-type StrapiStaticAttributes = z.infer<typeof strapiStaticAttributesSchema>
+type StrapiStaticData = z.infer<typeof strapiStaticDataSchema>
 
-function transformStaticContent(attrs: StrapiStaticAttributes): StaticContent {
+function transformStaticContent(d: StrapiStaticData): StaticContent {
   return staticContentSchema.parse({
     login: {
-      title: attrs.loginTitle,
-      description: attrs.loginDescription,
-      codeLabel: attrs.loginCodeLabel,
-      codePlaceholder: attrs.loginCodePlaceholder,
-      submit: attrs.loginSubmit,
-      noCodePrefix: attrs.loginNoCodePrefix,
-      noCodeLink: attrs.loginNoCodeLink,
-      noCodeWhatsapp: attrs.loginNoCodeWhatsapp,
-      error: attrs.loginError,
+      title: d.loginTitle,
+      description: d.loginDescription,
+      codeLabel: d.loginCodeLabel,
+      codePlaceholder: d.loginCodePlaceholder,
+      submit: d.loginSubmit,
+      noCodePrefix: d.loginNoCodePrefix,
+      noCodeLink: d.loginNoCodeLink,
+      noCodeWhatsapp: d.loginNoCodeWhatsapp,
+      error: d.loginError,
     },
     nav: {
-      home: attrs.navHome,
-      rules: attrs.navRules,
-      contact: attrs.navContact,
-      route: attrs.navRoute,
+      home: d.navHome,
+      rules: d.navRules,
+      contact: d.navContact,
+      route: d.navRoute,
     },
     home: {
-      welcome: attrs.homeWelcome,
-      checkIn: attrs.homeCheckIn,
-      checkOut: attrs.homeCheckOut,
-      accessCodes: attrs.homeAccessCodes,
-      wifi: attrs.homeWifi,
+      welcome: d.homeWelcome,
+      checkIn: d.homeCheckIn,
+      checkOut: d.homeCheckOut,
+      accessCodes: d.homeAccessCodes,
+      wifi: d.homeWifi,
     },
     sections: {
-      arrivee: attrs.sectionArrivee,
-      depart: attrs.sectionDepart,
-      parking: attrs.sectionParking,
-      logement: attrs.sectionLogement,
-      dechets: attrs.sectionDechets,
-      region: attrs.sectionRegion,
-      regles: attrs.sectionRegles,
+      arrivee: d.sectionArrivee,
+      depart: d.sectionDepart,
+      parking: d.sectionParking,
+      logement: d.sectionLogement,
+      dechets: d.sectionDechets,
+      region: d.sectionRegion,
+      regles: d.sectionRegles,
     },
     section: {
-      back: attrs.sectionBack,
-      notFound: attrs.sectionNotFound,
-      openMaps: attrs.sectionOpenMaps,
-      stepLabel: attrs.sectionStepLabel,
+      back: d.sectionBack,
+      notFound: d.sectionNotFound,
+      openMaps: d.sectionOpenMaps,
+      stepLabel: d.sectionStepLabel,
     },
     depart: {
-      checkoutLabel: attrs.departCheckoutLabel,
-      checklistTitle: attrs.departChecklistTitle,
+      checkoutLabel: d.departCheckoutLabel,
+      checklistTitle: d.departChecklistTitle,
     },
     notFound: {
-      title: attrs.notFoundTitle,
-      message: attrs.notFoundMessage,
-      link: attrs.notFoundLink,
+      title: d.notFoundTitle,
+      message: d.notFoundMessage,
+      link: d.notFoundLink,
     },
     alt: {
-      brand: attrs.altBrand,
+      brand: d.altBrand,
     },
     format: {
-      building: attrs.formatBuilding,
-      keyBox: attrs.formatKeyBox,
-      password: attrs.formatPassword,
+      building: d.formatBuilding,
+      keyBox: d.formatKeyBox,
+      password: d.formatPassword,
+    },
+    urgences: {
+      urgencesLabel: d.urgencesLabel,
+      urgencesTel: d.urgencesTel,
+      policeLabel: d.policeLabel,
+      policeTel: d.policeTel,
+      pompiersLabel: d.pompiersLabel,
+      pompiersTel: d.pompiersTel,
     },
   })
 }
@@ -145,8 +160,12 @@ function transformStaticContent(attrs: StrapiStaticAttributes): StaticContent {
 // Public API
 // ---------------------------------------------------------------------------
 
-const STATIC_POPULATE =
-  "populate[logoLight]=*&populate[logoDark]=*&populate[logoCircle]=*&populate[logoCopyright]=*"
+const STATIC_POPULATE = [
+  "populate[logoLight][fields][0]=url",
+  "populate[logoDark][fields][0]=url",
+  "populate[logoCircle][fields][0]=url",
+  "populate[logoCopyright][fields][0]=url",
+].join("&")
 
 export async function fetchStaticContent(locale: string): Promise<StaticContent> {
   if (USE_MOCK) {
@@ -156,5 +175,5 @@ export async function fetchStaticContent(locale: string): Promise<StaticContent>
 
   const raw = await strapiFetch(`/guide-static-content?locale=${locale}&${STATIC_POPULATE}`)
   const response = strapiStaticResponseSchema.parse(raw)
-  return transformStaticContent(response.data.attributes)
+  return transformStaticContent(response.data)
 }

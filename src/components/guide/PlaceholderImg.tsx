@@ -2,13 +2,16 @@ import React from "react"
 import { X } from "lucide-react"
 
 interface PlaceholderImgProps {
-  label: string
-  src?: string
+  src: string
+  alt?: string
 }
 
-export default function PlaceholderImg({ label, src }: PlaceholderImgProps) {
+export default function PlaceholderImg({ src, alt = "" }: PlaceholderImgProps) {
   // States
   const [open, setOpen] = React.useState(false)
+
+  // Derived
+  const isUrl = src.startsWith("http") || src.startsWith("/")
 
   // Effects
   React.useEffect(() => {
@@ -20,38 +23,29 @@ export default function PlaceholderImg({ label, src }: PlaceholderImgProps) {
     return () => document.removeEventListener("keydown", onKeyDown)
   }, [open])
 
-  // Handlers
-  function handleOpen() {
-    setOpen(true)
-  }
-
-  function handleClose() {
-    setOpen(false)
-  }
-
   // Render
   return (
     <>
       <button
         type="button"
-        onClick={handleOpen}
-        className="w-full bg-muted border border-dashed aspect-video flex items-center justify-center cursor-pointer hover:border-accent/50 transition-colors"
+        onClick={() => setOpen(true)}
+        className="w-full bg-muted border border-dashed aspect-video flex items-center justify-center cursor-pointer hover:border-accent/50 transition-colors overflow-hidden"
       >
-        {src ? (
-          <img src={src} alt={label} className="w-full h-full object-cover" />
+        {isUrl ? (
+          <img src={src} alt={alt} className="w-full h-full object-cover" />
         ) : (
-          <span className="text-small text-muted-foreground">{label}</span>
+          <span className="text-small text-muted-foreground">{src}</span>
         )}
       </button>
 
       {open && (
         <div
           className="fixed inset-0 z-100 bg-foreground/80 flex items-center justify-center p-4"
-          onClick={handleClose}
+          onClick={() => setOpen(false)}
         >
           <button
             className="absolute top-4 right-4 text-background hover:text-background/70 transition-colors"
-            onClick={handleClose}
+            onClick={() => setOpen(false)}
           >
             <X size={28} />
           </button>
@@ -59,11 +53,11 @@ export default function PlaceholderImg({ label, src }: PlaceholderImgProps) {
             className="max-w-[90vw] max-h-[85vh] flex items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
-            {src ? (
-              <img src={src} alt={label} className="max-w-full max-h-[85vh] object-contain" />
+            {isUrl ? (
+              <img src={src} alt={alt} className="max-w-full max-h-[85vh] object-contain" />
             ) : (
               <div className="bg-muted border border-dashed w-[80vw] aspect-video flex items-center justify-center">
-                <span className="text-muted-foreground">{label}</span>
+                <span className="text-muted-foreground">{src}</span>
               </div>
             )}
           </div>

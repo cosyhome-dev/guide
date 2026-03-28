@@ -9,3 +9,7 @@ export function cn(...inputs: ClassValue[]) {
 export function fmt(template: string, value: string) {
   return template.replace("{value}", value)
 }
+
+/** Shared className for rendering richtext/HTML content from Strapi */
+export const RICHTEXT_CLASS =
+  "text-sm text-muted-foreground leading-relaxed [&>p]:mb-2 last:[&>p]:mb-0"

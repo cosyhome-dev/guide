@@ -4,43 +4,28 @@ export const API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? "
 export const USE_MOCK = !API_URL
 
 // ---------------------------------------------------------------------------
-// Strapi media schemas
+// Strapi v5 media schemas (flat objects, no data.attributes wrapper)
 // ---------------------------------------------------------------------------
 
-const strapiImageAttributesSchema = z.object({
-  url: z.string(),
-  alternativeText: z.string().nullable(),
-  width: z.number(),
-  height: z.number(),
-  formats: z
-    .object({
-      thumbnail: z.object({ url: z.string(), width: z.number(), height: z.number() }).optional(),
-      small: z.object({ url: z.string(), width: z.number(), height: z.number() }).optional(),
-      medium: z.object({ url: z.string(), width: z.number(), height: z.number() }).optional(),
-      large: z.object({ url: z.string(), width: z.number(), height: z.number() }).optional(),
-    })
-    .nullable(),
-})
+export const strapiImageSchema = z
+  .object({
+    id: z.number(),
+    documentId: z.string().optional(),
+    url: z.string(),
+    alternativeText: z.string().nullable().optional(),
+  })
+  .nullable()
 
-export const strapiImageSchema = z.object({
-  data: z
-    .object({
+export const strapiImagesSchema = z
+  .array(
+    z.object({
       id: z.number(),
-      attributes: strapiImageAttributesSchema,
-    })
-    .nullable(),
-})
-
-export const strapiImagesSchema = z.object({
-  data: z
-    .array(
-      z.object({
-        id: z.number(),
-        attributes: strapiImageAttributesSchema,
-      }),
-    )
-    .nullable(),
-})
+      documentId: z.string().optional(),
+      url: z.string(),
+      alternativeText: z.string().nullable().optional(),
+    }),
+  )
+  .nullable()
 
 export type StrapiImage = z.infer<typeof strapiImageSchema>
 export type StrapiImages = z.infer<typeof strapiImagesSchema>
@@ -49,15 +34,19 @@ export type StrapiImages = z.infer<typeof strapiImagesSchema>
 // Image extraction helpers
 // ---------------------------------------------------------------------------
 
+function resolveUrl(url: string): string {
+  if (url.startsWith("http")) return url
+  return `${API_URL.replace(/\/api$/, "")}${url}`
+}
+
 export function extractImageUrl(media: StrapiImage | undefined): string | undefined {
-  const attrs = media?.data?.attributes
-  if (!attrs) return undefined
-  return attrs.formats?.medium?.url ?? attrs.url
+  if (!media) return undefined
+  return resolveUrl(media.url)
 }
 
 export function extractImageUrls(media: StrapiImages | undefined): string[] {
-  if (!media?.data) return []
-  return media.data.map((item) => item.attributes.formats?.medium?.url ?? item.attributes.url)
+  if (!media) return []
+  return media.map((item) => resolveUrl(item.url))
 }
 
 // ---------------------------------------------------------------------------
