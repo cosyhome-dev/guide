@@ -23,7 +23,7 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
   const [langOpen, setLangOpen] = React.useState(false)
 
   // Derived
-  const basePath = `/guide/${property.slug}`
+  const basePath = `/${locale}/guide/${property.slug}`
   const navItems = [
     { icon: Home, label: content.nav.home, to: basePath },
     { icon: Shield, label: content.nav.rules, to: `${basePath}/regles` },
@@ -45,7 +45,7 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
 
   function handleLogout() {
     clearSlug()
-    navigate("/")
+    navigate(`/${locale}`)
   }
 
   // Render

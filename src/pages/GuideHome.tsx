@@ -1,7 +1,7 @@
 import { LogIn, LogOut, Car, Home, Trash2, MapPin } from "lucide-react"
 import { Link } from "react-router-dom"
 import GuideLayout from "@/components/GuideLayout"
-import { useGuideContext } from "@/hooks"
+import { useGuideContext, useLocale } from "@/hooks"
 import { fmt } from "@/lib"
 import heroImage from "@/assets/hero-guide.jpg"
 
@@ -18,6 +18,7 @@ const sectionIcons: Record<(typeof sectionKeys)[number], typeof LogIn> = {
 
 export default function GuideHome() {
   const { content, property } = useGuideContext()
+  const { locale } = useLocale()
   const t = content.home
   const f = content.format
   const s = content.sections
@@ -26,7 +27,7 @@ export default function GuideHome() {
     <GuideLayout hideEmergency>
       {/* Hero */}
       <div className="relative h-[280px] md:h-[340px] overflow-hidden">
-        <img src={heroImage} alt={property.nom} className="w-full h-full object-cover" />
+        <img src={property.imagePrincipale ?? heroImage} alt={property.nom} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-linear-to-t from-primary/85 via-primary/40 to-primary/15" />
         <div className="absolute bottom-0 left-0 right-0 px-6 pb-[calc(1.5rem+10px)] md:px-8 md:pb-[calc(2rem+10px)] text-center">
           <h1 className="text-primary-foreground text-3xl md:text-4xl mb-1">{t.welcome}</h1>
@@ -90,7 +91,7 @@ export default function GuideHome() {
             return (
               <Link
                 key={key}
-                to={`/guide/${property.slug}/${key}`}
+                to={`/${locale}/guide/${property.slug}/${key}`}
                 className="bg-card border p-6 flex flex-col items-center gap-3 hover:border-accent/50 hover:shadow-xs transition-all group"
               >
                 <Icon

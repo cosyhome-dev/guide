@@ -1,6 +1,6 @@
 import React from "react"
 import { useNavigate } from "react-router-dom"
-import { useStaticContent, useValidateCode, setSlug } from "@/hooks"
+import { useStaticContent, useValidateCode, useLocale, setSlug } from "@/hooks"
 import heroImage from "@/assets/hero-guide.jpg"
 import cosyhomeLogo from "@/assets/logo-cosyhome.png"
 import logoCopyright from "@/assets/logo-copyright-blanc.png"
@@ -12,6 +12,7 @@ export default function Login() {
   const navigate = useNavigate()
 
   // Hooks
+  const { locale } = useLocale()
   const { data: content } = useStaticContent()
   const validateCode = useValidateCode()
 
@@ -29,7 +30,7 @@ export default function Login() {
     validateCode.mutate(code, {
       onSuccess: (result) => {
         setSlug(result.slug)
-        navigate(`/guide/${result.slug}`)
+        navigate(`/${locale}/guide/${result.slug}`)
       },
       onError: () => {
         setError(t?.error ?? "")
