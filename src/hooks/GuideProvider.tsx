@@ -4,6 +4,7 @@ import { useGuide } from "./useGuide"
 import { useLocale } from "./useLocale"
 import { getSlug } from "./useAccessCode"
 import { GuideContext } from "./guideContext"
+import GuideSkeleton from "@/components/GuideSkeleton"
 
 export default function GuideProvider({ children }: { children: React.ReactNode }) {
   const { slug } = useParams<{ slug: string }>()
@@ -19,11 +20,7 @@ export default function GuideProvider({ children }: { children: React.ReactNode 
   const { data: property, isLoading: guideLoading } = useGuide(slug)
 
   if (contentLoading || guideLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-muted-foreground text-sm">...</div>
-      </div>
-    )
+    return <GuideSkeleton />
   }
 
   if (!content || !property) return <Navigate to={`/${locale}`} replace />
