@@ -1,4 +1,18 @@
 {
+  "trailingSlash": true,
+  "redirects": [
+    {
+      "source": "/:path(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "cosy-home-conciergerie-guide.vercel.app"
+        }
+      ],
+      "destination": "https://stay.cosyhomeconciergerie.ch/:path",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/" }
   ]

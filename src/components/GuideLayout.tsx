@@ -26,7 +26,7 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
   const basePath = `/${locale}/guide/${property.slug}`
   const navItems = [
     { icon: Home, label: content.nav.home, to: basePath },
-    { icon: Shield, label: content.nav.rules, to: `${basePath}/regles` },
+    { icon: Shield, label: content.nav.rules, to: `${basePath}/rules` },
     {
       icon: Phone,
       label: content.nav.contact,

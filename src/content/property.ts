@@ -115,13 +115,13 @@ export type Property = z.infer<typeof propertySchema>
 // ---------------------------------------------------------------------------
 
 export const SECTION_CONTENU_KEYS = {
-  arrivee: "arriveeContenu",
-  depart: "departContenu",
+  "check-in": "arriveeContenu",
+  "check-out": "departContenu",
   parking: "parkingContenu",
-  logement: "logementContenu",
-  dechets: "dechetsContenu",
-  region: "regionContenu",
-  regles: "reglesContenu",
+  property: "logementContenu",
+  "waste-recycling": "dechetsContenu",
+  area: "regionContenu",
+  rules: "reglesContenu",
 } as const satisfies Record<string, keyof Property>
 
 export type SectionKey = keyof typeof SECTION_CONTENU_KEYS

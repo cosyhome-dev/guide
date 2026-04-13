@@ -29,12 +29,12 @@ export default function PlaceholderImg({ src, alt = "" }: PlaceholderImgProps) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="w-full bg-muted border border-dashed aspect-video flex items-center justify-center cursor-pointer hover:border-accent/50 transition-colors overflow-hidden"
+        className="w-full flex items-center justify-center cursor-pointer overflow-hidden"
       >
         {isUrl ? (
-          <img src={src} alt={alt} className="w-full h-full object-cover" />
+          <img src={src} alt={alt} className="w-full h-auto block" />
         ) : (
-          <span className="text-small text-muted-foreground">{src}</span>
+          <span className="text-small text-muted-foreground aspect-video flex items-center justify-center">{src}</span>
         )}
       </button>
 

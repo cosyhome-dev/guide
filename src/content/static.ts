@@ -29,13 +29,13 @@ export const staticContentSchema = z.object({
   }),
 
   sections: z.object({
-    arrivee: z.string(),
-    depart: z.string(),
+    "check-in": z.string(),
+    "check-out": z.string(),
     parking: z.string(),
-    logement: z.string(),
-    dechets: z.string(),
-    region: z.string(),
-    regles: z.string(),
+    property: z.string(),
+    "waste-recycling": z.string(),
+    area: z.string(),
+    rules: z.string(),
   }),
 
   section: z.object({
@@ -108,13 +108,13 @@ export const staticContent: StaticContent = {
   },
 
   sections: {
-    arrivee: "Arrivée",
-    depart: "Départ",
+    "check-in": "Arrivée",
+    "check-out": "Départ",
     parking: "Parking",
-    logement: "Le Logement",
-    dechets: "Déchets",
-    region: "Région",
-    regles: "Règles",
+    property: "Le Logement",
+    "waste-recycling": "Déchets",
+    area: "Région",
+    rules: "Règles",
   },
 
   section: {

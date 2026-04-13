@@ -5,15 +5,15 @@ import { useGuideContext, useLocale } from "@/hooks"
 import { fmt } from "@/lib"
 import heroImage from "@/assets/hero-guide.jpg"
 
-const sectionKeys = ["arrivee", "depart", "parking", "logement", "dechets", "region"] as const
+const sectionKeys = ["check-in", "check-out", "parking", "property", "waste-recycling", "area"] as const
 
 const sectionIcons: Record<(typeof sectionKeys)[number], typeof LogIn> = {
-  arrivee: LogIn,
-  depart: LogOut,
+  "check-in": LogIn,
+  "check-out": LogOut,
   parking: Car,
-  logement: Home,
-  dechets: Trash2,
-  region: MapPin,
+  property: Home,
+  "waste-recycling": Trash2,
+  area: MapPin,
 }
 
 export default function GuideHome() {
