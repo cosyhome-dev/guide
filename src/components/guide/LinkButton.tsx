@@ -1,8 +1,8 @@
-import { MoveRight } from "lucide-react"
+import { MoveRight } from "lucide-react";
 
 interface LinkButtonProps {
-  title: string
-  url: string
+  title: string;
+  url: string;
 }
 
 export default function LinkButton({ title, url }: LinkButtonProps) {
@@ -19,5 +19,5 @@ export default function LinkButton({ title, url }: LinkButtonProps) {
         className="text-accent-foreground/70 group-hover:translate-x-1.5 group-hover:text-accent-foreground transition-all duration-300"
       />
     </a>
-  )
+  );
 }

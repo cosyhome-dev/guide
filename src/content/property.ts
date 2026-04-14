@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "zod";
 
 // ---------------------------------------------------------------------------
 // Dynamic zone sub-schemas
@@ -7,16 +7,16 @@ import { z } from "zod"
 const lienExterneSchema = z.object({
   label: z.string(),
   url: z.string(),
-})
+});
 
 const elementChecklistSchema = z.object({
   texte: z.string(),
-})
+});
 
 const elementDropdownSchema = z.object({
   titre: z.string(),
   description: z.string(),
-})
+});
 
 // ---------------------------------------------------------------------------
 // Dynamic zone component schemas (discriminated union on __component)
@@ -32,7 +32,7 @@ const blocSchema = z.object({
   liens: z.array(lienExterneSchema).optional(),
   misEnAvant: z.boolean(),
   centrerBouton: z.boolean().optional(),
-})
+});
 
 const noteSchema = z.object({
   __component: z.literal("guide.note"),
@@ -41,26 +41,26 @@ const noteSchema = z.object({
   titre: z.string().optional(),
   contenu: z.string(),
   centre: z.boolean().optional(),
-})
+});
 
 const checklistSchema = z.object({
   __component: z.literal("guide.checklist"),
   id: z.number(),
   titre: z.string(),
   elements: z.array(elementChecklistSchema),
-})
+});
 
 const dropdownSchema = z.object({
   __component: z.literal("guide.dropdown"),
   id: z.number(),
   elements: z.array(elementDropdownSchema),
-})
+});
 
 const affichageRegionSchema = z.object({
   __component: z.literal("guide.affichage-region"),
   id: z.number(),
   afficher: z.boolean(),
-})
+});
 
 export const dynamicZoneBlockSchema = z.discriminatedUnion("__component", [
   blocSchema,
@@ -68,14 +68,14 @@ export const dynamicZoneBlockSchema = z.discriminatedUnion("__component", [
   checklistSchema,
   dropdownSchema,
   affichageRegionSchema,
-])
+]);
 
-export type DynamicZoneBlock = z.infer<typeof dynamicZoneBlockSchema>
-export type BlocBlock = z.infer<typeof blocSchema>
-export type NoteBlock = z.infer<typeof noteSchema>
-export type ChecklistBlock = z.infer<typeof checklistSchema>
-export type DropdownBlock = z.infer<typeof dropdownSchema>
-export type AffichageRegionBlock = z.infer<typeof affichageRegionSchema>
+export type DynamicZoneBlock = z.infer<typeof dynamicZoneBlockSchema>;
+export type BlocBlock = z.infer<typeof blocSchema>;
+export type NoteBlock = z.infer<typeof noteSchema>;
+export type ChecklistBlock = z.infer<typeof checklistSchema>;
+export type DropdownBlock = z.infer<typeof dropdownSchema>;
+export type AffichageRegionBlock = z.infer<typeof affichageRegionSchema>;
 
 // ---------------------------------------------------------------------------
 // Property schema
@@ -87,9 +87,9 @@ export const customPageSchema = z.object({
   ordre: z.number(),
   icone: z.string().optional(),
   contenu: z.array(dynamicZoneBlockSchema),
-})
+});
 
-export type CustomPage = z.infer<typeof customPageSchema>
+export type CustomPage = z.infer<typeof customPageSchema>;
 
 const contenusReutilisablesSchema = z.object({
   arrivee: z.array(z.array(dynamicZoneBlockSchema)).default([]),
@@ -99,10 +99,10 @@ const contenusReutilisablesSchema = z.object({
   dechets: z.array(z.array(dynamicZoneBlockSchema)).default([]),
   region: z.array(z.array(dynamicZoneBlockSchema)).default([]),
   reglement: z.array(z.array(dynamicZoneBlockSchema)).default([]),
-})
+});
 
-export type ContenusReutilisables = z.infer<typeof contenusReutilisablesSchema>
-export type ContenusReutilisablesKey = keyof ContenusReutilisables
+export type ContenusReutilisables = z.infer<typeof contenusReutilisablesSchema>;
+export type ContenusReutilisablesKey = keyof ContenusReutilisables;
 
 export const propertySchema = z.object({
   nom: z.string(),
@@ -147,9 +147,9 @@ export const propertySchema = z.object({
   }),
 
   customPages: z.array(customPageSchema).default([]),
-})
+});
 
-export type Property = z.infer<typeof propertySchema>
+export type Property = z.infer<typeof propertySchema>;
 
 // ---------------------------------------------------------------------------
 // Section key → contenu field mapping
@@ -163,9 +163,9 @@ export const SECTION_CONTENU_KEYS = {
   "waste-recycling": "dechetsContenu",
   area: "regionContenu",
   rules: "reglesContenu",
-} as const satisfies Record<string, keyof Property>
+} as const satisfies Record<string, keyof Property>;
 
-export type SectionKey = keyof typeof SECTION_CONTENU_KEYS
+export type SectionKey = keyof typeof SECTION_CONTENU_KEYS;
 
 export const SECTION_REUSABLE_KEYS: Record<SectionKey, ContenusReutilisablesKey> = {
   "check-in": "arrivee",
@@ -175,7 +175,7 @@ export const SECTION_REUSABLE_KEYS: Record<SectionKey, ContenusReutilisablesKey>
   "waste-recycling": "dechets",
   area: "region",
   rules: "reglement",
-}
+};
 
 // ---------------------------------------------------------------------------
 // Mock data
@@ -510,4 +510,4 @@ export const property: Property = {
     region: [],
     reglement: [],
   },
-}
+};

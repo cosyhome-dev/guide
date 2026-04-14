@@ -1,8 +1,8 @@
-import { z } from "zod"
-import { staticContentSchema, type StaticContent } from "@/content/static"
-import { staticContent as mockData } from "@/content/static"
-import { delay } from "./mock"
-import { USE_MOCK, strapiFetch, strapiImageSchema } from "./strapi"
+import { z } from "zod";
+import { staticContentSchema, type StaticContent } from "@/content/static";
+import { staticContent as mockData } from "@/content/static";
+import { delay } from "./mock";
+import { USE_MOCK, strapiFetch, strapiImageSchema } from "./strapi";
 
 // ---------------------------------------------------------------------------
 // Strapi v5 response schema (fields directly on data, no attributes wrapper)
@@ -74,18 +74,18 @@ const strapiStaticDataSchema = z.object({
   updatedAt: z.string(),
   publishedAt: z.string(),
   locale: z.string(),
-})
+});
 
 const strapiStaticResponseSchema = z.object({
   data: strapiStaticDataSchema,
   meta: z.object({}).passthrough(),
-})
+});
 
 // ---------------------------------------------------------------------------
 // Transformer: Strapi flat → StaticContent nested
 // ---------------------------------------------------------------------------
 
-type StrapiStaticData = z.infer<typeof strapiStaticDataSchema>
+type StrapiStaticData = z.infer<typeof strapiStaticDataSchema>;
 
 function transformStaticContent(d: StrapiStaticData): StaticContent {
   return staticContentSchema.parse({
@@ -153,7 +153,7 @@ function transformStaticContent(d: StrapiStaticData): StaticContent {
       pompiersLabel: d.pompiersLabel,
       pompiersTel: d.pompiersTel,
     },
-  })
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -165,15 +165,15 @@ const STATIC_POPULATE = [
   "populate[logoDark][fields][0]=url",
   "populate[logoCircle][fields][0]=url",
   "populate[logoCopyright][fields][0]=url",
-].join("&")
+].join("&");
 
 export async function fetchStaticContent(locale: string): Promise<StaticContent> {
   if (USE_MOCK) {
-    await delay()
-    return staticContentSchema.parse(mockData)
+    await delay();
+    return staticContentSchema.parse(mockData);
   }
 
-  const raw = await strapiFetch(`/guide-static-content?locale=${locale}&${STATIC_POPULATE}`)
-  const response = strapiStaticResponseSchema.parse(raw)
-  return transformStaticContent(response.data)
+  const raw = await strapiFetch(`/guide-static-content?locale=${locale}&${STATIC_POPULATE}`);
+  const response = strapiStaticResponseSchema.parse(raw);
+  return transformStaticContent(response.data);
 }

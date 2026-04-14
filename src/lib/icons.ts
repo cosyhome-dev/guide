@@ -74,7 +74,7 @@ import {
   Recycle,
   Trash,
   type LucideIcon,
-} from "lucide-react"
+} from "lucide-react";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   bath: Bath,
@@ -151,9 +151,9 @@ const ICON_MAP: Record<string, LucideIcon> = {
   store: Store,
   recycle: Recycle,
   trash: Trash,
-}
+};
 
 export function getIcon(name?: string): LucideIcon {
-  if (name && ICON_MAP[name]) return ICON_MAP[name]
-  return FileText
+  if (name && ICON_MAP[name]) return ICON_MAP[name];
+  return FileText;
 }

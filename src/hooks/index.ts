@@ -1,9 +1,9 @@
-export { useStaticContent } from "./useStaticContent"
-export { useGuide } from "./useGuide"
-export { useValidateCode } from "./useValidateCode"
-export { getSlug, setSlug, clearSlug } from "./useAccessCode"
-export { useGuideContext } from "./guideContext"
-export { default as GuideProvider } from "./GuideProvider"
+export { useStaticContent } from "./useStaticContent";
+export { useGuide } from "./useGuide";
+export { useValidateCode } from "./useValidateCode";
+export { getSlug, setSlug, clearSlug } from "./useAccessCode";
+export { useGuideContext } from "./guideContext";
+export { default as GuideProvider } from "./GuideProvider";
 export {
   useLocale,
   LocaleContext,
@@ -11,5 +11,5 @@ export {
   LOCALE_LABELS,
   DEFAULT_LOCALE,
   isLocale,
-} from "./useLocale"
-export type { Locale } from "./useLocale"
+} from "./useLocale";
+export type { Locale } from "./useLocale";

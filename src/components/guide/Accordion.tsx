@@ -1,35 +1,35 @@
-import React from "react"
-import { ChevronDown } from "lucide-react"
-import { cn } from "@/lib"
+import React from "react";
+import { ChevronDown } from "lucide-react";
+import { cn } from "@/lib";
 
 interface AccordionItem {
-  title: string
-  content: React.ReactNode
+  title: string;
+  content: React.ReactNode;
 }
 
 interface AccordionProps {
-  items: AccordionItem[]
+  items: AccordionItem[];
 }
 
 export default function Accordion({ items }: AccordionProps) {
   // States
-  const [openItems, setOpenItems] = React.useState<Set<number>>(new Set())
+  const [openItems, setOpenItems] = React.useState<Set<number>>(new Set());
 
   // Handlers
   function toggle(index: number) {
     setOpenItems((prev) => {
-      const next = new Set(prev)
-      if (next.has(index)) next.delete(index)
-      else next.add(index)
-      return next
-    })
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
   }
 
   // Render
   return (
     <div className="w-full divide-y divide-border border-y">
       {items.map((item, i) => {
-        const isOpen = openItems.has(i)
+        const isOpen = openItems.has(i);
         return (
           <div key={i}>
             <button
@@ -57,8 +57,8 @@ export default function Accordion({ items }: AccordionProps) {
               </div>
             </div>
           </div>
-        )
+        );
       })}
     </div>
-  )
+  );
 }

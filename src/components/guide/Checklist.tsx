@@ -1,43 +1,43 @@
-import React from "react"
-import { Check } from "lucide-react"
-import { cn } from "@/lib"
-import type { ChecklistBlock } from "@/content/property"
+import React from "react";
+import { Check } from "lucide-react";
+import { cn } from "@/lib";
+import type { ChecklistBlock } from "@/content/property";
 
 interface ChecklistProps {
-  data: ChecklistBlock
+  data: ChecklistBlock;
 }
 
 export default function Checklist({ data }: ChecklistProps) {
-  const storageKey = `checklist-${data.id}`
+  const storageKey = `checklist-${data.id}`;
 
   const [checked, setChecked] = React.useState<Set<number>>(() => {
     try {
-      const stored = localStorage.getItem(storageKey)
-      return stored ? new Set(JSON.parse(stored) as number[]) : new Set()
+      const stored = localStorage.getItem(storageKey);
+      return stored ? new Set(JSON.parse(stored) as number[]) : new Set();
     } catch {
-      return new Set()
+      return new Set();
     }
-  })
+  });
 
   function toggle(index: number) {
     setChecked((prev) => {
-      const next = new Set(prev)
-      if (next.has(index)) next.delete(index)
-      else next.add(index)
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
       try {
-        localStorage.setItem(storageKey, JSON.stringify([...next]))
+        localStorage.setItem(storageKey, JSON.stringify([...next]));
       } catch {
         /* localStorage full or disabled */
       }
-      return next
-    })
+      return next;
+    });
   }
 
   return (
     <div>
       <h2 className="text-foreground mb-4">{data.titre}</h2>
       {data.elements.map((item, i) => {
-        const isDone = checked.has(i)
+        const isDone = checked.has(i);
         return (
           <button
             key={i}
@@ -62,8 +62,8 @@ export default function Checklist({ data }: ChecklistProps) {
               {item.texte}
             </p>
           </button>
-        )
+        );
       })}
     </div>
-  )
+  );
 }

@@ -1,9 +1,9 @@
-import { Accordion } from "@/components/guide"
-import type { DropdownBlock } from "@/content/property"
-import { RICHTEXT_CLASS } from "@/lib"
+import { Accordion } from "@/components/guide";
+import type { DropdownBlock } from "@/content/property";
+import { RICHTEXT_CLASS } from "@/lib";
 
 interface DropdownProps {
-  data: DropdownBlock
+  data: DropdownBlock;
 }
 
 export default function Dropdown({ data }: DropdownProps) {
@@ -16,5 +16,5 @@ export default function Dropdown({ data }: DropdownProps) {
         ),
       }))}
     />
-  )
+  );
 }

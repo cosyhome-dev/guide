@@ -1,9 +1,9 @@
-import { LogIn, LogOut, Car, Home, Trash2, MapPin } from "lucide-react"
-import { Link } from "react-router-dom"
-import GuideLayout from "@/components/GuideLayout"
-import { useGuideContext, useLocale } from "@/hooks"
-import { fmt, getIcon, RICHTEXT_CLASS } from "@/lib"
-import heroImage from "@/assets/hero-guide.jpg"
+import { LogIn, LogOut, Car, Home, Trash2, MapPin } from "lucide-react";
+import { Link } from "react-router-dom";
+import GuideLayout from "@/components/GuideLayout";
+import { useGuideContext, useLocale } from "@/hooks";
+import { fmt, getIcon, RICHTEXT_CLASS } from "@/lib";
+import heroImage from "@/assets/hero-guide.jpg";
 
 const sectionKeys = [
   "check-in",
@@ -12,7 +12,7 @@ const sectionKeys = [
   "property",
   "waste-recycling",
   "area",
-] as const
+] as const;
 
 const sectionIcons: Record<(typeof sectionKeys)[number], typeof LogIn> = {
   "check-in": LogIn,
@@ -21,14 +21,14 @@ const sectionIcons: Record<(typeof sectionKeys)[number], typeof LogIn> = {
   property: Home,
   "waste-recycling": Trash2,
   area: MapPin,
-}
+};
 
 export default function GuideHome() {
-  const { content, property } = useGuideContext()
-  const { locale } = useLocale()
-  const t = content.home
-  const f = content.format
-  const s = content.sections
+  const { content, property } = useGuideContext();
+  const { locale } = useLocale();
+  const t = content.home;
+  const f = content.format;
+  const s = content.sections;
 
   return (
     <GuideLayout hideEmergency>
@@ -105,7 +105,7 @@ export default function GuideHome() {
         {/* Section grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-5 pb-12">
           {sectionKeys.map((key) => {
-            const Icon = sectionIcons[key]
+            const Icon = sectionIcons[key];
             return (
               <Link
                 key={key}
@@ -121,11 +121,11 @@ export default function GuideHome() {
                   {s[key]}
                 </span>
               </Link>
-            )
+            );
           })}
 
           {property.customPages.map((page) => {
-            const Icon = getIcon(page.icone)
+            const Icon = getIcon(page.icone);
             return (
               <Link
                 key={page.slug}
@@ -141,12 +141,12 @@ export default function GuideHome() {
                   {page.titre}
                 </span>
               </Link>
-            )
+            );
           })}
         </div>
       </div>
     </GuideLayout>
-  )
+  );
 }
 
 function QuickInfoCell({ label, value, extra }: { label: string; value: string; extra?: string }) {
@@ -156,5 +156,5 @@ function QuickInfoCell({ label, value, extra }: { label: string; value: string; 
       <p className="font-medium text-sm text-foreground mt-0.5">{value}</p>
       {extra && <p className="font-medium text-sm text-foreground">{extra}</p>}
     </div>
-  )
+  );
 }

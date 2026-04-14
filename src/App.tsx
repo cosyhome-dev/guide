@@ -1,4 +1,4 @@
-import React from "react"
+import React from "react";
 import {
   BrowserRouter,
   Navigate,
@@ -8,51 +8,51 @@ import {
   useLocation,
   useNavigate,
   useParams,
-} from "react-router-dom"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { GuideProvider, LocaleContext, DEFAULT_LOCALE, isLocale } from "@/hooks"
-import type { Locale } from "@/hooks"
-import Login from "@/pages/Login"
-import GuideHome from "@/pages/GuideHome"
-import GuideSection from "@/pages/GuideSection"
-import NotFound from "@/pages/NotFound"
+} from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { GuideProvider, LocaleContext, DEFAULT_LOCALE, isLocale } from "@/hooks";
+import type { Locale } from "@/hooks";
+import Login from "@/pages/Login";
+import GuideHome from "@/pages/GuideHome";
+import GuideSection from "@/pages/GuideSection";
+import NotFound from "@/pages/NotFound";
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient();
 
 function LocaleLayout() {
-  const { locale: localeParam } = useParams<{ locale: string }>()
-  const navigate = useNavigate()
-  const location = useLocation()
+  const { locale: localeParam } = useParams<{ locale: string }>();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   if (!localeParam || !isLocale(localeParam)) {
-    return <Navigate to={`/${DEFAULT_LOCALE}`} replace />
+    return <Navigate to={`/${DEFAULT_LOCALE}`} replace />;
   }
 
-  const locale = localeParam as Locale
+  const locale = localeParam as Locale;
 
   const setLocale = React.useCallback(
     (newLocale: Locale) => {
-      const newPath = location.pathname.replace(`/${locale}`, `/${newLocale}`)
-      navigate(newPath, { replace: true })
+      const newPath = location.pathname.replace(`/${locale}`, `/${newLocale}`);
+      navigate(newPath, { replace: true });
     },
     [locale, location.pathname, navigate],
-  )
+  );
 
-  const value = React.useMemo(() => ({ locale, setLocale }), [locale, setLocale])
+  const value = React.useMemo(() => ({ locale, setLocale }), [locale, setLocale]);
 
   return (
     <LocaleContext value={value}>
       <Outlet />
     </LocaleContext>
-  )
+  );
 }
 
 function AnimatedRoutes() {
-  const location = useLocation()
+  const location = useLocation();
 
   React.useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [location.pathname])
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   return (
     <div key={location.pathname} className="animate-fade-in">
@@ -81,7 +81,7 @@ function AnimatedRoutes() {
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
-  )
+  );
 }
 
 export default function App() {
@@ -91,5 +91,5 @@ export default function App() {
         <AnimatedRoutes />
       </BrowserRouter>
     </QueryClientProvider>
-  )
+  );
 }

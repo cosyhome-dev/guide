@@ -1,2 +1,2 @@
-export { fetchStaticContent } from "./static-content"
-export { fetchGuide, validateCode } from "./guide"
+export { fetchStaticContent } from "./static-content";
+export { fetchGuide, validateCode } from "./guide";

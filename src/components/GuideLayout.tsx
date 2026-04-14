@@ -1,29 +1,29 @@
-import React from "react"
-import { Link, useLocation, useNavigate } from "react-router-dom"
-import { Home, Phone, MapPin, Shield, Globe, LogOut } from "lucide-react"
-import { cn } from "@/lib"
-import { useGuideContext, useLocale, LOCALES, LOCALE_LABELS } from "@/hooks"
-import { clearSlug } from "@/hooks/useAccessCode"
-import type { Locale } from "@/hooks"
-import logoRectDark from "@/assets/logo-cosyhome-rect-dark.png"
+import React from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Home, Phone, MapPin, Shield, Globe, LogOut } from "lucide-react";
+import { cn } from "@/lib";
+import { useGuideContext, useLocale, LOCALES, LOCALE_LABELS } from "@/hooks";
+import { clearSlug } from "@/hooks/useAccessCode";
+import type { Locale } from "@/hooks";
+import logoRectDark from "@/assets/logo-cosyhome-rect-dark.png";
 
 interface GuideLayoutProps {
-  children: React.ReactNode
-  hideEmergency?: boolean
+  children: React.ReactNode;
+  hideEmergency?: boolean;
 }
 
 export default function GuideLayout({ children, hideEmergency = false }: GuideLayoutProps) {
   // Hooks
-  const { content, property } = useGuideContext()
-  const { locale, setLocale } = useLocale()
-  const navigate = useNavigate()
+  const { content, property } = useGuideContext();
+  const { locale, setLocale } = useLocale();
+  const navigate = useNavigate();
 
   // States
-  const location = useLocation()
-  const [langOpen, setLangOpen] = React.useState(false)
+  const location = useLocation();
+  const [langOpen, setLangOpen] = React.useState(false);
 
   // Derived
-  const basePath = `/${locale}/guide/${property.slug}`
+  const basePath = `/${locale}/guide/${property.slug}`;
   const navItems = [
     { icon: Home, label: content.nav.home, to: basePath },
     { icon: Shield, label: content.nav.rules, to: `${basePath}/rules` },
@@ -33,19 +33,19 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
       href: `https://wa.me/${property.whatsapp.replace(/\+/g, "")}`,
     },
     { icon: MapPin, label: content.nav.route, href: property.localisation.mapsUrl },
-  ] as const
+  ] as const;
 
-  const urgences = content.urgences
+  const urgences = content.urgences;
 
   // Handlers
   function handleLangSelect(lang: Locale) {
-    setLocale(lang)
-    setLangOpen(false)
+    setLocale(lang);
+    setLangOpen(false);
   }
 
   function handleLogout() {
-    clearSlug()
-    navigate(`/${locale}`)
+    clearSlug();
+    navigate(`/${locale}`);
   }
 
   // Render
@@ -145,7 +145,7 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
                 "to" in item && location.pathname === item.to
                   ? "text-accent"
                   : "text-muted-foreground hover:text-foreground",
-              )
+              );
 
               if ("href" in item) {
                 return (
@@ -159,7 +159,7 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
                     <item.icon size={20} strokeWidth={1.5} />
                     <span className="label-upper">{item.label}</span>
                   </a>
-                )
+                );
               }
 
               return (
@@ -167,11 +167,11 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
                   <item.icon size={20} strokeWidth={1.5} />
                   <span className="label-upper">{item.label}</span>
                 </Link>
-              )
+              );
             })}
           </div>
         </div>
       </nav>
     </div>
-  )
+  );
 }

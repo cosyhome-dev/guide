@@ -1,27 +1,27 @@
-import React from "react"
-import { X } from "lucide-react"
+import React from "react";
+import { X } from "lucide-react";
 
 interface PlaceholderImgProps {
-  src: string
-  alt?: string
+  src: string;
+  alt?: string;
 }
 
 export default function PlaceholderImg({ src, alt = "" }: PlaceholderImgProps) {
   // States
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState(false);
 
   // Derived
-  const isUrl = src.startsWith("http") || src.startsWith("/")
+  const isUrl = src.startsWith("http") || src.startsWith("/");
 
   // Effects
   React.useEffect(() => {
-    if (!open) return
+    if (!open) return;
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false)
+      if (e.key === "Escape") setOpen(false);
     }
-    document.addEventListener("keydown", onKeyDown)
-    return () => document.removeEventListener("keydown", onKeyDown)
-  }, [open])
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open]);
 
   // Render
   return (
@@ -66,5 +66,5 @@ export default function PlaceholderImg({ src, alt = "" }: PlaceholderImgProps) {
         </div>
       )}
     </>
-  )
+  );
 }

@@ -1,21 +1,21 @@
-import { useParams, Link } from "react-router-dom"
-import { ArrowLeft } from "lucide-react"
-import GuideLayout from "@/components/GuideLayout"
-import { DynamicZone } from "@/components/guide"
-import { useGuideContext, useLocale } from "@/hooks"
-import { SECTION_CONTENU_KEYS, SECTION_REUSABLE_KEYS, type SectionKey } from "@/content/property"
+import { useParams, Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
+import GuideLayout from "@/components/GuideLayout";
+import { DynamicZone } from "@/components/guide";
+import { useGuideContext, useLocale } from "@/hooks";
+import { SECTION_CONTENU_KEYS, SECTION_REUSABLE_KEYS, type SectionKey } from "@/content/property";
 
 export default function GuideSection() {
-  const { section } = useParams<{ slug: string; section: string }>()
-  const { content, property } = useGuideContext()
-  const { locale } = useLocale()
-  const t = content.section
-  const s = content.sections
+  const { section } = useParams<{ slug: string; section: string }>();
+  const { content, property } = useGuideContext();
+  const { locale } = useLocale();
+  const t = content.section;
+  const s = content.sections;
 
-  const key = section as SectionKey
-  const contenuKey = SECTION_CONTENU_KEYS[key]
-  const title = contenuKey ? s[key as keyof typeof s] : undefined
-  const customPage = !contenuKey ? property.customPages.find((p) => p.slug === section) : undefined
+  const key = section as SectionKey;
+  const contenuKey = SECTION_CONTENU_KEYS[key];
+  const title = contenuKey ? s[key as keyof typeof s] : undefined;
+  const customPage = !contenuKey ? property.customPages.find((p) => p.slug === section) : undefined;
 
   if (!contenuKey && !customPage) {
     return (
@@ -30,14 +30,14 @@ export default function GuideSection() {
           </Link>
         </div>
       </GuideLayout>
-    )
+    );
   }
 
-  const reusableKey = contenuKey ? SECTION_REUSABLE_KEYS[key] : undefined
-  const reusableBlocks = reusableKey ? property.contenusReutilisables[reusableKey].flat() : []
-  const specificBlocks = contenuKey ? property[contenuKey] : customPage!.contenu
-  const blocks = [...reusableBlocks, ...specificBlocks]
-  const pageTitle = contenuKey ? title! : customPage!.titre
+  const reusableKey = contenuKey ? SECTION_REUSABLE_KEYS[key] : undefined;
+  const reusableBlocks = reusableKey ? property.contenusReutilisables[reusableKey].flat() : [];
+  const specificBlocks = contenuKey ? property[contenuKey] : customPage!.contenu;
+  const blocks = [...reusableBlocks, ...specificBlocks];
+  const pageTitle = contenuKey ? title! : customPage!.titre;
 
   return (
     <GuideLayout>
@@ -58,5 +58,5 @@ export default function GuideSection() {
         <DynamicZone blocks={blocks} />
       </div>
     </GuideLayout>
-  )
+  );
 }

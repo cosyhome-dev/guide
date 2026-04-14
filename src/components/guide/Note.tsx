@@ -1,9 +1,9 @@
-import { Info } from "lucide-react"
-import type { NoteBlock } from "@/content/property"
-import { RICHTEXT_CLASS } from "@/lib"
+import { Info } from "lucide-react";
+import type { NoteBlock } from "@/content/property";
+import { RICHTEXT_CLASS } from "@/lib";
 
 interface NoteProps {
-  data: NoteBlock
+  data: NoteBlock;
 }
 
 export default function Note({ data }: NoteProps) {
@@ -20,5 +20,5 @@ export default function Note({ data }: NoteProps) {
         <div className={RICHTEXT_CLASS} dangerouslySetInnerHTML={{ __html: data.contenu }} />
       </div>
     </div>
-  )
+  );
 }

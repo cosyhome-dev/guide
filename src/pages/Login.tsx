@@ -1,50 +1,50 @@
-import React from "react"
-import { useNavigate } from "react-router-dom"
-import { useStaticContent, useValidateCode, useLocale, setSlug } from "@/hooks"
-import heroImage from "@/assets/hero-guide.jpg"
-import cosyhomeLogo from "@/assets/logo-cosyhome.png"
-import logoCopyright from "@/assets/logo-copyright-blanc.png"
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useStaticContent, useValidateCode, useLocale, setSlug } from "@/hooks";
+import heroImage from "@/assets/hero-guide.jpg";
+import cosyhomeLogo from "@/assets/logo-cosyhome.png";
+import logoCopyright from "@/assets/logo-copyright-blanc.png";
 
 export default function Login() {
   // States
-  const [code, setCode] = React.useState("")
-  const [error, setError] = React.useState("")
-  const navigate = useNavigate()
+  const [code, setCode] = React.useState("");
+  const [error, setError] = React.useState("");
+  const navigate = useNavigate();
 
   // Hooks
-  const { locale } = useLocale()
-  const { data: content } = useStaticContent()
-  const validateCode = useValidateCode()
+  const { locale } = useLocale();
+  const { data: content } = useStaticContent();
+  const validateCode = useValidateCode();
 
-  const t = content?.login
-  const alt = content?.alt
+  const t = content?.login;
+  const alt = content?.alt;
 
   // Handlers
   function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+    e.preventDefault();
     if (!code.trim()) {
-      setError(t?.error ?? "")
-      return
+      setError(t?.error ?? "");
+      return;
     }
 
     validateCode.mutate(code, {
       onSuccess: (result) => {
-        setSlug(result.slug)
-        navigate(`/${locale}/guide/${result.slug}`)
+        setSlug(result.slug);
+        navigate(`/${locale}/guide/${result.slug}`);
       },
       onError: () => {
-        setError(t?.error ?? "")
+        setError(t?.error ?? "");
       },
-    })
+    });
   }
 
   function handleCodeChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setCode(e.target.value)
-    setError("")
+    setCode(e.target.value);
+    setError("");
   }
 
   // Render
-  if (!content) return null
+  if (!content) return null;
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
@@ -104,5 +104,5 @@ export default function Login() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,13 +1,13 @@
-import type { BlocBlock } from "@/content/property"
-import { ImageGrid, LinkButton } from "@/components/guide"
-import { RICHTEXT_CLASS } from "@/lib"
+import type { BlocBlock } from "@/content/property";
+import { ImageGrid, LinkButton } from "@/components/guide";
+import { RICHTEXT_CLASS } from "@/lib";
 
 interface BlocProps {
-  data: BlocBlock
+  data: BlocBlock;
 }
 
 export default function Bloc({ data }: BlocProps) {
-  const wrapperClass = data.misEnAvant ? "bg-[#f4f2f0] border p-4 space-y-3" : "space-y-3"
+  const wrapperClass = data.misEnAvant ? "bg-[#f4f2f0] border p-4 space-y-3" : "space-y-3";
 
   return (
     <div className={wrapperClass}>
@@ -33,5 +33,5 @@ export default function Bloc({ data }: BlocProps) {
       )}
       <ImageGrid images={data.images} />
     </div>
-  )
+  );
 }

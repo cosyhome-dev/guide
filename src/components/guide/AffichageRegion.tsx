@@ -1,15 +1,15 @@
-import { MapPin } from "lucide-react"
-import type { AffichageRegionBlock } from "@/content/property"
-import { useGuideContext } from "@/hooks"
+import { MapPin } from "lucide-react";
+import type { AffichageRegionBlock } from "@/content/property";
+import { useGuideContext } from "@/hooks";
 
 interface AffichageRegionProps {
-  data: AffichageRegionBlock
+  data: AffichageRegionBlock;
 }
 
 export default function AffichageRegion({ data }: AffichageRegionProps) {
-  const { content, property } = useGuideContext()
+  const { content, property } = useGuideContext();
 
-  if (!data.afficher) return null
+  if (!data.afficher) return null;
 
   return (
     <a
@@ -22,5 +22,5 @@ export default function AffichageRegion({ data }: AffichageRegionProps) {
       <p className="text-sm text-foreground font-medium">{property.localisation.address}</p>
       <p className="text-[11px] text-accent">{content.section.openMaps}</p>
     </a>
-  )
+  );
 }

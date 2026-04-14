@@ -1,12 +1,12 @@
-import { PlaceholderImg } from "@/components/guide"
+import { PlaceholderImg } from "@/components/guide";
 
 interface ImageGridProps {
-  images: readonly string[]
+  images: readonly string[];
 }
 
 export default function ImageGrid({ images }: ImageGridProps) {
-  if (images.length === 0) return null
-  if (images.length === 1) return <PlaceholderImg src={images[0]} />
+  if (images.length === 0) return null;
+  if (images.length === 1) return <PlaceholderImg src={images[0]} />;
 
   return (
     <div className="columns-2 gap-2 space-y-2">
@@ -16,5 +16,5 @@ export default function ImageGrid({ images }: ImageGridProps) {
         </div>
       ))}
     </div>
-  )
+  );
 }

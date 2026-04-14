@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "zod";
 
 export const staticContentSchema = z.object({
   login: z.object({
@@ -74,9 +74,9 @@ export const staticContentSchema = z.object({
     pompiersLabel: z.string(),
     pompiersTel: z.string(),
   }),
-})
+});
 
-export type StaticContent = z.infer<typeof staticContentSchema>
+export type StaticContent = z.infer<typeof staticContentSchema>;
 
 export const staticContent: StaticContent = {
   login: {
@@ -153,4 +153,4 @@ export const staticContent: StaticContent = {
     pompiersLabel: "Pompiers 118",
     pompiersTel: "+41118",
   },
-}
+};

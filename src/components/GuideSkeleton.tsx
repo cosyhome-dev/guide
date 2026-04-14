@@ -1,7 +1,7 @@
-import logoRectDark from "@/assets/logo-cosyhome-rect-dark.png"
+import logoRectDark from "@/assets/logo-cosyhome-rect-dark.png";
 
 function Bone({ className }: { className?: string }) {
-  return <div className={`bg-border/60 animate-pulse ${className ?? ""}`} />
+  return <div className={`bg-border/60 animate-pulse ${className ?? ""}`} />;
 }
 
 export default function GuideSkeleton() {
@@ -98,5 +98,5 @@ export default function GuideSkeleton() {
         </div>
       </nav>
     </div>
-  )
+  );
 }
