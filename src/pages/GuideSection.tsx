@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react"
 import GuideLayout from "@/components/GuideLayout"
 import { DynamicZone } from "@/components/guide"
 import { useGuideContext, useLocale } from "@/hooks"
-import { SECTION_CONTENU_KEYS, type SectionKey } from "@/content/property"
+import { SECTION_CONTENU_KEYS, SECTION_REUSABLE_KEYS, type SectionKey } from "@/content/property"
 
 export default function GuideSection() {
   const { section } = useParams<{ slug: string; section: string }>()
@@ -33,7 +33,10 @@ export default function GuideSection() {
     )
   }
 
-  const blocks = contenuKey ? property[contenuKey] : customPage!.contenu
+  const reusableKey = contenuKey ? SECTION_REUSABLE_KEYS[key] : undefined
+  const reusableBlocks = reusableKey ? property.contenusReutilisables[reusableKey].flat() : []
+  const specificBlocks = contenuKey ? property[contenuKey] : customPage!.contenu
+  const blocks = [...reusableBlocks, ...specificBlocks]
   const pageTitle = contenuKey ? title! : customPage!.titre
 
   return (

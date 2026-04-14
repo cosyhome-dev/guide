@@ -5,6 +5,7 @@ import {
   dynamicZoneBlockSchema,
   type Property,
   type DynamicZoneBlock,
+  type ContenusReutilisablesKey,
 } from "@/content/property"
 import { property as mockData } from "@/content/property"
 import { delay } from "./mock"
@@ -133,6 +134,42 @@ const strapiCustomPageSchema = z.object({
   contenu: z.array(strapiDynamicZoneSchema).default([]),
 })
 
+const strapiDestinationSchema = z
+  .object({
+    id: z.number(),
+    title: z.string(),
+  })
+  .nullable()
+  .optional()
+
+const strapiContenuReutilisableSchema = z.object({
+  id: z.number(),
+  nom: z.string(),
+  pageDestinee: z.string(),
+  ordre: z.number().default(0),
+  contenu: z.array(strapiDynamicZoneSchema).default([]),
+})
+
+const strapiContenusReutilisablesSchema = z
+  .object({
+    arrivee: z.array(strapiContenuReutilisableSchema).default([]),
+    depart: z.array(strapiContenuReutilisableSchema).default([]),
+    parking: z.array(strapiContenuReutilisableSchema).default([]),
+    logement: z.array(strapiContenuReutilisableSchema).default([]),
+    dechets: z.array(strapiContenuReutilisableSchema).default([]),
+    region: z.array(strapiContenuReutilisableSchema).default([]),
+    reglement: z.array(strapiContenuReutilisableSchema).default([]),
+  })
+  .default({
+    arrivee: [],
+    depart: [],
+    parking: [],
+    logement: [],
+    dechets: [],
+    region: [],
+    reglement: [],
+  })
+
 const strapiGuideDataSchema = z.object({
   id: z.number(),
   documentId: z.string(),
@@ -141,6 +178,7 @@ const strapiGuideDataSchema = z.object({
   slug: z.string(),
   imagePrincipale: strapiImageSchema,
   localisation: strapiLocalisationSchema,
+  destination: strapiDestinationSchema,
 
   infos: z.object({
     id: z.number().optional(),
@@ -166,6 +204,8 @@ const strapiGuideDataSchema = z.object({
   dechetsContenu: z.array(strapiDynamicZoneSchema).default([]),
   regionContenu: z.array(strapiDynamicZoneSchema).default([]),
   reglesContenu: z.array(strapiDynamicZoneSchema).default([]),
+
+  contenusReutilisables: strapiContenusReutilisablesSchema,
 
   customPages: z
     .array(strapiCustomPageSchema)
@@ -243,6 +283,16 @@ function transformLocalisation(loc: z.infer<typeof strapiLocalisationSchema>) {
   }
 }
 
+function transformContenusReutilisables(cr: z.infer<typeof strapiContenusReutilisablesSchema>) {
+  const transformZone = (blocks: StrapiDynamicZoneBlock[]) => blocks.map(transformDynamicZoneBlock)
+
+  const result: Record<string, DynamicZoneBlock[][]> = {}
+  for (const key of Object.keys(cr) as ContenusReutilisablesKey[]) {
+    result[key] = cr[key].map((entry) => transformZone(entry.contenu))
+  }
+  return result
+}
+
 function transformGuide(d: StrapiGuideData): Property {
   const transformZone = (blocks: StrapiDynamicZoneBlock[]) => blocks.map(transformDynamicZoneBlock)
 
@@ -250,6 +300,7 @@ function transformGuide(d: StrapiGuideData): Property {
     nom: d.nom,
     slug: d.slug,
     imagePrincipale: extractImageUrl(d.imagePrincipale),
+    destination: d.destination?.title ?? undefined,
     localisation: transformLocalisation(d.localisation),
     whatsapp: d.gestionnaire?.phone ?? "",
     infos: {
@@ -270,6 +321,7 @@ function transformGuide(d: StrapiGuideData): Property {
     dechetsContenu: transformZone(d.dechetsContenu),
     regionContenu: transformZone(d.regionContenu),
     reglesContenu: transformZone(d.reglesContenu),
+    contenusReutilisables: transformContenusReutilisables(d.contenusReutilisables),
     customPages: d.customPages
       .sort((a, b) => a.ordre - b.ordre)
       .map((cp) => ({
@@ -310,6 +362,7 @@ function buildGuideQuery(slug: string, locale: string): string {
         imagePrincipale: { fields: ["url", "alternativeText"] },
         localisation: { populate: "*" },
         gestionnaire: { fields: ["firstName", "lastName", "phone"] },
+        destination: { fields: ["id", "title"] },
         wifi: { populate: "*" },
         infos: { populate: "*" },
         arriveeContenu: dynamicZonePopulate,
