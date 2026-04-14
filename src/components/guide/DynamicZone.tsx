@@ -13,17 +13,18 @@ export default function DynamicZone({ blocks }: DynamicZoneProps) {
   return (
     <div className="space-y-6">
       {blocks.map((block) => {
+        const key = `${block.__component}-${block.id}`
         switch (block.__component) {
           case "guide.bloc":
-            return <Bloc key={block.id} data={block} />
+            return <Bloc key={key} data={block} />
           case "guide.note":
-            return <Note key={block.id} data={block} />
+            return <Note key={key} data={block} />
           case "guide.checklist":
-            return <Checklist key={block.id} data={block} />
+            return <Checklist key={key} data={block} />
           case "guide.dropdown":
-            return <Dropdown key={block.id} data={block} />
+            return <Dropdown key={key} data={block} />
           case "guide.affichage-region":
-            return <AffichageRegion key={block.id} data={block} />
+            return <AffichageRegion key={key} data={block} />
         }
       })}
     </div>

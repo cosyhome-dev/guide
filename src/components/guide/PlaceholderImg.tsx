@@ -34,7 +34,9 @@ export default function PlaceholderImg({ src, alt = "" }: PlaceholderImgProps) {
         {isUrl ? (
           <img src={src} alt={alt} className="w-full h-auto block" />
         ) : (
-          <span className="text-small text-muted-foreground aspect-video flex items-center justify-center">{src}</span>
+          <span className="text-small text-muted-foreground aspect-video flex items-center justify-center">
+            {src}
+          </span>
         )}
       </button>
 

@@ -14,7 +14,9 @@ export default function Bloc({ data }: BlocProps) {
       {(data.surtitre || data.titre) && (
         <div className="space-y-0.5">
           {data.surtitre && (
-            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">{data.surtitre}</p>
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+              {data.surtitre}
+            </p>
           )}
           {data.titre && <h2 className="text-foreground">{data.titre}</h2>}
         </div>

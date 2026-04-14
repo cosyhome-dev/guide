@@ -1,5 +1,14 @@
 import React from "react"
-import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom"
+import {
+  BrowserRouter,
+  Navigate,
+  Outlet,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { GuideProvider, LocaleContext, DEFAULT_LOCALE, isLocale } from "@/hooks"
 import type { Locale } from "@/hooks"

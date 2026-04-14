@@ -48,7 +48,11 @@ const strapiBlocSchema = z.object({
   images: strapiImagesSchema.default([]),
   liens: z.array(strapiLienExterneSchema).default([]),
   misEnAvant: z.boolean(),
-  centrerBouton: z.boolean().optional().default(false),
+  centrerBouton: z
+    .boolean()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? false),
 })
 
 const strapiNoteSchema = z.object({
@@ -57,7 +61,11 @@ const strapiNoteSchema = z.object({
   surtitre: z.string().nullable().optional(),
   titre: z.string().nullable().optional(),
   contenu: z.string(),
-  centre: z.boolean().optional().default(false),
+  centre: z
+    .boolean()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? false),
 })
 
 const strapiChecklistSchema = z.object({
@@ -159,7 +167,11 @@ const strapiGuideDataSchema = z.object({
   regionContenu: z.array(strapiDynamicZoneSchema).default([]),
   reglesContenu: z.array(strapiDynamicZoneSchema).default([]),
 
-  customPages: z.array(strapiCustomPageSchema).default([]),
+  customPages: z
+    .array(strapiCustomPageSchema)
+    .nullable()
+    .optional()
+    .transform((v) => v ?? []),
 
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -340,8 +352,16 @@ export async function fetchGuide(slug: string, locale: string): Promise<Property
   }
 
   const raw = await strapiFetch(`/guides?${buildGuideQuery(slug, locale)}`)
-  const response = strapiGuideResponseSchema.parse(raw)
-  const guide = response.data[0]
-  if (!guide) throw new Error("GUIDE_NOT_FOUND")
-  return transformGuide(guide)
+  console.log("[fetchGuide] raw response:", JSON.stringify(raw, null, 2))
+  try {
+    const response = strapiGuideResponseSchema.parse(raw)
+    const guide = response.data[0]
+    if (!guide) throw new Error("GUIDE_NOT_FOUND")
+    const result = transformGuide(guide)
+    console.log("[fetchGuide] transform OK")
+    return result
+  } catch (err) {
+    console.error("[fetchGuide] parse/transform error:", err)
+    throw err
+  }
 }

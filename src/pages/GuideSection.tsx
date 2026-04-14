@@ -22,7 +22,10 @@ export default function GuideSection() {
       <GuideLayout>
         <div className="mx-auto max-w-3xl px-4 py-16 text-center">
           <h1 className="text-2xl mb-4">{t.notFound}</h1>
-          <Link to={`/${locale}/guide/${property.slug}`} className="text-accent hover:underline text-sm">
+          <Link
+            to={`/${locale}/guide/${property.slug}`}
+            className="text-accent hover:underline text-sm"
+          >
             {t.back}
           </Link>
         </div>
