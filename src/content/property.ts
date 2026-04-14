@@ -500,4 +500,14 @@ export const property: Property = {
       ],
     },
   ],
+
+  contenusReutilisables: {
+    arrivee: [],
+    depart: [],
+    parking: [],
+    logement: [],
+    dechets: [],
+    region: [],
+    reglement: [],
+  },
 }
