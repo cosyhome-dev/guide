@@ -102,6 +102,7 @@ export const propertySchema = z.object({
     codeImmeuble: z.string(),
     codeBoiteACles: z.string(),
     heureDepart: z.string(),
+    noteGenerale: z.string().optional(),
   }),
 
   wifi: z.object({

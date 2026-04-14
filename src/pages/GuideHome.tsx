@@ -2,7 +2,7 @@ import { LogIn, LogOut, Car, Home, Trash2, MapPin } from "lucide-react"
 import { Link } from "react-router-dom"
 import GuideLayout from "@/components/GuideLayout"
 import { useGuideContext, useLocale } from "@/hooks"
-import { fmt, getIcon } from "@/lib"
+import { fmt, getIcon, RICHTEXT_CLASS } from "@/lib"
 import heroImage from "@/assets/hero-guide.jpg"
 
 const sectionKeys = [
@@ -93,6 +93,13 @@ export default function GuideHome() {
               </div>
             </div>
           </div>
+
+          {property.infos.noteGenerale && (
+            <div
+              className={RICHTEXT_CLASS}
+              dangerouslySetInnerHTML={{ __html: property.infos.noteGenerale }}
+            />
+          )}
         </div>
 
         {/* Section grid */}

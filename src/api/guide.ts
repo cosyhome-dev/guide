@@ -136,6 +136,7 @@ const strapiGuideDataSchema = z.object({
     codeImmeuble: z.string(),
     codeBoiteACles: z.string(),
     heureDepart: z.string(),
+    noteGenerale: z.string().nullable().optional(),
   }),
 
   wifi: z.object({
@@ -232,6 +233,7 @@ function transformGuide(d: StrapiGuideData): Property {
       codeImmeuble: d.infos.codeImmeuble,
       codeBoiteACles: d.infos.codeBoiteACles,
       heureDepart: d.infos.heureDepart,
+      noteGenerale: d.infos.noteGenerale ?? undefined,
     },
     wifi: {
       nomReseau: d.wifi.nomReseau ?? "",
