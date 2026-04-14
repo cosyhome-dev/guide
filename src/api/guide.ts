@@ -111,6 +111,16 @@ const strapiGestionnaireSchema = z
   })
   .nullable()
 
+const strapiCustomPageSchema = z.object({
+  id: z.number(),
+  documentId: z.string(),
+  titre: z.string(),
+  slug: z.string(),
+  ordre: z.number().default(0),
+  icone: z.string().nullable().optional(),
+  contenu: z.array(strapiDynamicZoneSchema).default([]),
+})
+
 const strapiGuideDataSchema = z.object({
   id: z.number(),
   documentId: z.string(),
@@ -143,6 +153,8 @@ const strapiGuideDataSchema = z.object({
   dechetsContenu: z.array(strapiDynamicZoneSchema).default([]),
   regionContenu: z.array(strapiDynamicZoneSchema).default([]),
   reglesContenu: z.array(strapiDynamicZoneSchema).default([]),
+
+  customPages: z.array(strapiCustomPageSchema).default([]),
 
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -232,6 +244,15 @@ function transformGuide(d: StrapiGuideData): Property {
     dechetsContenu: transformZone(d.dechetsContenu),
     regionContenu: transformZone(d.regionContenu),
     reglesContenu: transformZone(d.reglesContenu),
+    customPages: d.customPages
+      .sort((a, b) => a.ordre - b.ordre)
+      .map((cp) => ({
+        titre: cp.titre,
+        slug: cp.slug,
+        ordre: cp.ordre,
+        icone: cp.icone ?? undefined,
+        contenu: transformZone(cp.contenu),
+      })),
   })
 }
 
@@ -272,6 +293,11 @@ function buildGuideQuery(slug: string, locale: string): string {
         dechetsContenu: dynamicZonePopulate,
         regionContenu: dynamicZonePopulate,
         reglesContenu: dynamicZonePopulate,
+        customPages: {
+          populate: {
+            contenu: dynamicZonePopulate,
+          },
+        },
       },
     },
     { encodeValuesOnly: true },

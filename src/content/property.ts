@@ -77,6 +77,16 @@ export type AffichageRegionBlock = z.infer<typeof affichageRegionSchema>
 // Property schema
 // ---------------------------------------------------------------------------
 
+export const customPageSchema = z.object({
+  titre: z.string(),
+  slug: z.string(),
+  ordre: z.number(),
+  icone: z.string().optional(),
+  contenu: z.array(dynamicZoneBlockSchema),
+})
+
+export type CustomPage = z.infer<typeof customPageSchema>
+
 export const propertySchema = z.object({
   nom: z.string(),
   slug: z.string(),
@@ -106,6 +116,8 @@ export const propertySchema = z.object({
   dechetsContenu: z.array(dynamicZoneBlockSchema),
   regionContenu: z.array(dynamicZoneBlockSchema),
   reglesContenu: z.array(dynamicZoneBlockSchema),
+
+  customPages: z.array(customPageSchema).default([]),
 })
 
 export type Property = z.infer<typeof propertySchema>
@@ -378,6 +390,26 @@ export const property: Property = {
         { label: "Valais Tourisme", url: "https://www.valais.ch" },
       ],
       misEnAvant: false,
+    },
+  ],
+
+  customPages: [
+    {
+      titre: "Jacuzzi",
+      slug: "jacuzzi",
+      ordre: 1,
+      icone: "bath",
+      contenu: [
+        {
+          __component: "guide.bloc",
+          id: 100,
+          titre: "Utilisation du jacuzzi",
+          contenu:
+            "Le jacuzzi est disponible de 9h à 22h. Merci de respecter les horaires pour le confort de tous les résidents.",
+          images: [],
+          misEnAvant: false,
+        },
+      ],
     },
   ],
 

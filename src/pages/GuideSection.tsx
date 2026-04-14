@@ -14,9 +14,10 @@ export default function GuideSection() {
 
   const key = section as SectionKey
   const contenuKey = SECTION_CONTENU_KEYS[key]
-  const title = s[key as keyof typeof s]
+  const title = contenuKey ? s[key as keyof typeof s] : undefined
+  const customPage = !contenuKey ? property.customPages.find((p) => p.slug === section) : undefined
 
-  if (!contenuKey || !title) {
+  if (!contenuKey && !customPage) {
     return (
       <GuideLayout>
         <div className="mx-auto max-w-3xl px-4 py-16 text-center">
@@ -29,7 +30,8 @@ export default function GuideSection() {
     )
   }
 
-  const blocks = property[contenuKey]
+  const blocks = contenuKey ? property[contenuKey] : customPage!.contenu
+  const pageTitle = contenuKey ? title! : customPage!.titre
 
   return (
     <GuideLayout>
@@ -42,7 +44,7 @@ export default function GuideSection() {
           <span>{t.back}</span>
         </Link>
 
-        <h1 className="text-2xl mt-8 mb-3 text-center">{title}</h1>
+        <h1 className="text-2xl mt-8 mb-3 text-center">{pageTitle}</h1>
         <div className="w-14 h-px bg-accent mx-auto" />
       </div>
 
