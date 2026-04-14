@@ -43,17 +43,21 @@ const strapiBlocSchema = z.object({
   __component: z.literal("guide.bloc"),
   id: z.number(),
   titre: z.string(),
-  sousTitre: z.string().nullable(),
+  surtitre: z.string().nullable().optional(),
   contenu: z.string().nullable(),
   images: strapiImagesSchema.default([]),
   liens: z.array(strapiLienExterneSchema).default([]),
   misEnAvant: z.boolean(),
+  centrerBouton: z.boolean().optional().default(false),
 })
 
 const strapiNoteSchema = z.object({
   __component: z.literal("guide.note"),
   id: z.number(),
+  surtitre: z.string().nullable().optional(),
+  titre: z.string().nullable().optional(),
   contenu: z.string(),
+  centre: z.boolean().optional().default(false),
 })
 
 const strapiChecklistSchema = z.object({
@@ -185,14 +189,22 @@ function transformDynamicZoneBlock(block: StrapiDynamicZoneBlock): DynamicZoneBl
         __component: "guide.bloc",
         id: block.id,
         titre: block.titre,
-        sousTitre: block.sousTitre ?? undefined,
+        surtitre: block.surtitre ?? undefined,
         contenu: block.contenu ?? undefined,
         images: extractImageUrls(block.images),
         liens: block.liens?.map((l) => ({ label: l.label, url: l.url })),
         misEnAvant: block.misEnAvant,
+        centrerBouton: block.centrerBouton,
       })
     case "guide.note":
-      return { __component: "guide.note", id: block.id, contenu: block.contenu }
+      return {
+        __component: "guide.note",
+        id: block.id,
+        surtitre: block.surtitre ?? undefined,
+        titre: block.titre ?? undefined,
+        contenu: block.contenu,
+        centre: block.centre,
+      }
     case "guide.checklist":
       return {
         __component: "guide.checklist",

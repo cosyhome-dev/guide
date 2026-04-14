@@ -7,25 +7,29 @@ interface BlocProps {
 }
 
 export default function Bloc({ data }: BlocProps) {
-  const wrapperClass = data.misEnAvant ? "bg-card border p-4 space-y-3" : "space-y-3"
+  const wrapperClass = data.misEnAvant ? "bg-[#f4f2f0] border p-4 space-y-3" : "space-y-3"
 
   return (
     <div className={wrapperClass}>
-      {data.sousTitre && (
-        <p className="text-sm font-medium text-muted-foreground">{data.sousTitre}</p>
+      {(data.surtitre || data.titre) && (
+        <div className="space-y-0.5">
+          {data.surtitre && (
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">{data.surtitre}</p>
+          )}
+          {data.titre && <h2 className="text-foreground">{data.titre}</h2>}
+        </div>
       )}
-      {data.titre && <h2 className="text-foreground">{data.titre}</h2>}
       {data.contenu && (
         <div className={RICHTEXT_CLASS} dangerouslySetInnerHTML={{ __html: data.contenu }} />
       )}
-      <ImageGrid images={data.images} />
       {data.liens && data.liens.length > 0 && (
-        <div className="flex flex-wrap gap-2">
+        <div className={`flex flex-wrap gap-2${data.centrerBouton ? " justify-center" : ""}`}>
           {data.liens.map((lien) => (
             <LinkButton key={lien.url} title={lien.label} url={lien.url} />
           ))}
         </div>
       )}
+      <ImageGrid images={data.images} />
     </div>
   )
 }

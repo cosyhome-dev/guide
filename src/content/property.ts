@@ -26,17 +26,21 @@ const blocSchema = z.object({
   __component: z.literal("guide.bloc"),
   id: z.number(),
   titre: z.string(),
-  sousTitre: z.string().optional(),
+  surtitre: z.string().optional(),
   contenu: z.string().optional(),
   images: z.array(z.string()),
   liens: z.array(lienExterneSchema).optional(),
   misEnAvant: z.boolean(),
+  centrerBouton: z.boolean().optional().default(false),
 })
 
 const noteSchema = z.object({
   __component: z.literal("guide.note"),
   id: z.number(),
+  surtitre: z.string().optional(),
+  titre: z.string().optional(),
   contenu: z.string(),
+  centre: z.boolean().optional().default(false),
 })
 
 const checklistSchema = z.object({
