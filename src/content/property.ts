@@ -31,7 +31,7 @@ const blocSchema = z.object({
   images: z.array(z.string()),
   liens: z.array(lienExterneSchema).optional(),
   misEnAvant: z.boolean(),
-  centrerBouton: z.boolean().optional().default(false),
+  centrerBouton: z.boolean().optional(),
 })
 
 const noteSchema = z.object({
@@ -40,7 +40,7 @@ const noteSchema = z.object({
   surtitre: z.string().optional(),
   titre: z.string().optional(),
   contenu: z.string(),
-  centre: z.boolean().optional().default(false),
+  centre: z.boolean().optional(),
 })
 
 const checklistSchema = z.object({
