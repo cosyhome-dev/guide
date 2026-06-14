@@ -405,15 +405,18 @@ export async function fetchGuide(slug: string, locale: string): Promise<Property
   }
 
   const raw = await strapiFetch(`/guides?${buildGuideQuery(slug, locale)}`);
-  console.log("[fetchGuide] raw response:", JSON.stringify(raw, null, 2));
+  const isDev = import.meta.env.DEV;
+  if (isDev) console.log("[fetchGuide] raw response:", JSON.stringify(raw, null, 2));
   try {
     const response = strapiGuideResponseSchema.parse(raw);
     const guide = response.data[0];
     if (!guide) throw new Error("GUIDE_NOT_FOUND");
     const result = transformGuide(guide);
-    console.log("[fetchGuide] transform OK");
+    if (isDev) console.log("[fetchGuide] transform OK");
     return result;
   } catch (err) {
+    // L'erreur de parse Strapi est utile en prod (visible dans la console
+    // du voyageur si la cliente sauvegarde un schema cassé) — on garde.
     console.error("[fetchGuide] parse/transform error:", err);
     throw err;
   }
