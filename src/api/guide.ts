@@ -102,16 +102,15 @@ type StrapiDynamicZoneBlock = z.infer<typeof strapiDynamicZoneSchema>;
 // Strapi v5 guide response schema (fields directly on data, no attributes)
 // ---------------------------------------------------------------------------
 
+// Schema aligné sur le composant Strapi guide.localisation (champs à plat).
+// L'ancien format (value.coordinates.lat/lng) venait du plugin Google Maps
+// custom — abandonné au profit d'un composant simple lat/lng pour faciliter
+// la saisie cliente sans dépendance de plugin admin.
 const strapiLocalisationSchema = z.object({
   id: z.number().optional(),
-  value: z.object({
-    address: z.string().optional(),
-    geohash: z.string().optional(),
-    coordinates: z.object({
-      lat: z.number(),
-      lng: z.number(),
-    }),
-  }),
+  address: z.string(),
+  lat: z.coerce.number(),
+  lng: z.coerce.number(),
 });
 
 const strapiGestionnaireSchema = z
@@ -134,10 +133,12 @@ const strapiCustomPageSchema = z.object({
   contenu: z.array(strapiDynamicZoneSchema).default([]),
 });
 
+// Aligné sur api::destination.destination du backend principal CosyHome :
+// champ `nom` (FR) et non `title`.
 const strapiDestinationSchema = z
   .object({
     id: z.number(),
-    title: z.string(),
+    nom: z.string(),
   })
   .nullable()
   .optional();
@@ -276,10 +277,9 @@ function transformDynamicZoneBlock(block: StrapiDynamicZoneBlock): DynamicZoneBl
 }
 
 function transformLocalisation(loc: z.infer<typeof strapiLocalisationSchema>) {
-  const { lat, lng } = loc.value.coordinates;
   return {
-    address: loc.value.address ?? "",
-    mapsUrl: `https://www.google.com/maps?q=${lat},${lng}`,
+    address: loc.address,
+    mapsUrl: `https://www.google.com/maps?q=${loc.lat},${loc.lng}`,
   };
 }
 
@@ -300,7 +300,7 @@ function transformGuide(d: StrapiGuideData): Property {
     nom: d.nom,
     slug: d.slug,
     imagePrincipale: extractImageUrl(d.imagePrincipale),
-    destination: d.destination?.title ?? undefined,
+    destination: d.destination?.nom ?? undefined,
     localisation: transformLocalisation(d.localisation),
     whatsapp: d.gestionnaire?.phone ?? "",
     infos: {
@@ -361,8 +361,8 @@ function buildGuideQuery(slug: string, locale: string): string {
       populate: {
         imagePrincipale: { fields: ["url", "alternativeText"] },
         localisation: { populate: "*" },
-        gestionnaire: { fields: ["firstName", "lastName", "phone"] },
-        destination: { fields: ["id", "title"] },
+        gestionnaire: { populate: "*" },
+        destination: { fields: ["id", "nom"] },
         wifi: { populate: "*" },
         infos: { populate: "*" },
         arriveeContenu: dynamicZonePopulate,
