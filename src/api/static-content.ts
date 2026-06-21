@@ -173,7 +173,17 @@ export async function fetchStaticContent(locale: string): Promise<StaticContent>
     return staticContentSchema.parse(mockData);
   }
 
-  const raw = await strapiFetch(`/guide-static-content?locale=${locale}&${STATIC_POPULATE}`);
-  const response = strapiStaticResponseSchema.parse(raw);
-  return transformStaticContent(response.data);
+  // Si la cliente n'a pas (encore) saisi le contenu Strapi du singleType
+  // ou n'a pas activé la permission `find` publique, Strapi retourne 404.
+  // On fallback sur le mock pour ne pas casser tout le guide — la cliente
+  // pourra customiser les textes UI plus tard.
+  try {
+    const raw = await strapiFetch(`/guide-static-content?locale=${locale}&${STATIC_POPULATE}`);
+    const response = strapiStaticResponseSchema.parse(raw);
+    return transformStaticContent(response.data);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn("[fetchStaticContent] fallback sur mock —", err instanceof Error ? err.message : err);
+    return staticContentSchema.parse(mockData);
+  }
 }

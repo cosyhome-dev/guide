@@ -82,18 +82,11 @@ const strapiDropdownSchema = z.object({
   elements: z.array(strapiElementDropdownSchema),
 });
 
-const strapiAffichageRegionSchema = z.object({
-  __component: z.literal("guide.affichage-region"),
-  id: z.number(),
-  afficher: z.boolean(),
-});
-
 const strapiDynamicZoneSchema = z.discriminatedUnion("__component", [
   strapiBlocSchema,
   strapiNoteSchema,
   strapiChecklistSchema,
   strapiDropdownSchema,
-  strapiAffichageRegionSchema,
 ]);
 
 type StrapiDynamicZoneBlock = z.infer<typeof strapiDynamicZoneSchema>;
@@ -273,8 +266,6 @@ function transformDynamicZoneBlock(block: StrapiDynamicZoneBlock): DynamicZoneBl
         id: block.id,
         elements: block.elements.map((e) => ({ titre: e.titre, description: e.description })),
       };
-    case "guide.affichage-region":
-      return { __component: "guide.affichage-region", id: block.id, afficher: block.afficher };
   }
 }
 
@@ -370,7 +361,6 @@ const dynamicZonePopulate = {
     "guide.note": { populate: "*" },
     "guide.checklist": { populate: { elements: { populate: "*" } } },
     "guide.dropdown": { populate: { elements: { populate: "*" } } },
-    "guide.affichage-region": { populate: "*" },
   },
 };
 
