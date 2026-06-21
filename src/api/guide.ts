@@ -387,11 +387,6 @@ function buildGuideQuery(slug: string, locale: string): string {
           fields: ["id", "nom", "pageDestinee", "ordre"],
           populate: { contenu: dynamicZonePopulate },
         },
-        customPages: {
-          populate: {
-            contenu: dynamicZonePopulate,
-          },
-        },
       },
     },
     { encodeValuesOnly: true },
