@@ -46,8 +46,8 @@ const strapiBlocSchema = z.object({
   titre: z.string(),
   surtitre: z.string().nullable().optional(),
   contenu: z.string().nullable(),
-  images: strapiImagesSchema.default([]),
-  liens: z.array(strapiLienExterneSchema).default([]),
+  images: strapiImagesSchema.nullable().optional().transform((v) => v ?? []),
+  liens: z.array(strapiLienExterneSchema).nullable().optional().transform((v) => v ?? []),
   misEnAvant: z.boolean(),
   centrerBouton: z
     .boolean()
@@ -122,7 +122,7 @@ const strapiCustomPageSchema = z.object({
   slug: z.string(),
   ordre: z.number().default(0),
   icone: z.string().nullable().optional(),
-  contenu: z.array(strapiDynamicZoneSchema).default([]),
+  contenu: z.array(strapiDynamicZoneSchema).nullable().optional().transform((v) => v ?? []),
 });
 
 // Aligné sur api::destination.destination du backend principal CosyHome :
@@ -151,7 +151,7 @@ const strapiContenuReutilisableSchema = z.object({
   nom: z.string(),
   pageDestinee: z.enum(REUSABLE_KEYS),
   ordre: z.number().default(100),
-  contenu: z.array(strapiDynamicZoneSchema).default([]),
+  contenu: z.array(strapiDynamicZoneSchema).nullable().optional().transform((v) => v ?? []),
 });
 
 // Strapi renvoie la relation manyToMany sous forme de tableau plat.
@@ -180,7 +180,9 @@ const strapiGuideDataSchema = z.object({
     codeBoiteACles: z.string().nullable().optional(),
     codesSupplementaires: z
       .array(z.object({ id: z.number().optional(), nom: z.string(), valeur: z.string() }))
-      .default([]),
+      .nullable()
+      .optional()
+      .transform((v) => v ?? []),
     heureDepart: z.string(),
     noteGenerale: z.string().nullable().optional(),
   }),
@@ -193,13 +195,13 @@ const strapiGuideDataSchema = z.object({
 
   gestionnaire: strapiGestionnaireSchema,
 
-  arriveeContenu: z.array(strapiDynamicZoneSchema).default([]),
-  departContenu: z.array(strapiDynamicZoneSchema).default([]),
-  parkingContenu: z.array(strapiDynamicZoneSchema).default([]),
-  logementContenu: z.array(strapiDynamicZoneSchema).default([]),
-  dechetsContenu: z.array(strapiDynamicZoneSchema).default([]),
-  regionContenu: z.array(strapiDynamicZoneSchema).default([]),
-  reglesContenu: z.array(strapiDynamicZoneSchema).default([]),
+  arriveeContenu: z.array(strapiDynamicZoneSchema).nullable().optional().transform((v) => v ?? []),
+  departContenu: z.array(strapiDynamicZoneSchema).nullable().optional().transform((v) => v ?? []),
+  parkingContenu: z.array(strapiDynamicZoneSchema).nullable().optional().transform((v) => v ?? []),
+  logementContenu: z.array(strapiDynamicZoneSchema).nullable().optional().transform((v) => v ?? []),
+  dechetsContenu: z.array(strapiDynamicZoneSchema).nullable().optional().transform((v) => v ?? []),
+  regionContenu: z.array(strapiDynamicZoneSchema).nullable().optional().transform((v) => v ?? []),
+  reglesContenu: z.array(strapiDynamicZoneSchema).nullable().optional().transform((v) => v ?? []),
 
   contenusReutilisables: strapiContenusReutilisablesSchema,
 
