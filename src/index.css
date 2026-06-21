@@ -1,38 +1,157 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Serif+Text&family=DM+Sans:wght@300;400;500;600&display=swap");
 @import "tailwindcss";
 
-/* ── Design tokens ── */
+/* ============================================
+   FONTS — self-hosted (alignés sur frontend principal)
+   IvyOra Display (titres serif premium) + DM Sans (corps).
+   Remplace l'ancien @import Google Fonts CDN (DM Serif Text + DM Sans)
+   pour cohérence brand avec cosyhomeconciergerie.ch + suppression
+   dépendance externe.
+   ============================================ */
+
+@font-face {
+  font-family: "ivyora-display";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/ivyora-display/IvyOraDisplay-Light.woff2") format("woff2");
+}
+@font-face {
+  font-family: "ivyora-display";
+  font-style: italic;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/ivyora-display/IvyOraDisplay-LightItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "ivyora-display";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/ivyora-display/IvyOraDisplay-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "ivyora-display";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/ivyora-display/IvyOraDisplay-RegularItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "ivyora-display";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/ivyora-display/IvyOraDisplay-Medium.woff2") format("woff2");
+}
+@font-face {
+  font-family: "ivyora-display";
+  font-style: italic;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/ivyora-display/IvyOraDisplay-MediumItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "ivyora-display";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/ivyora-display/IvyOraDisplay-Bold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "ivyora-display";
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/ivyora-display/IvyOraDisplay-BoldItalic.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "dm-sans";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/dm-sans/dm-sans-v17-latin-300.woff2") format("woff2");
+}
+@font-face {
+  font-family: "dm-sans";
+  font-style: italic;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/dm-sans/dm-sans-v17-latin-300italic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "dm-sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/dm-sans/dm-sans-v17-latin-regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "dm-sans";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/dm-sans/dm-sans-v17-latin-italic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "dm-sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/dm-sans/dm-sans-v17-latin-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "dm-sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/dm-sans/dm-sans-v17-latin-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "dm-sans";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/dm-sans/dm-sans-v17-latin-700.woff2") format("woff2");
+}
+
+/* ============================================
+   DESIGN TOKENS — alignés sur frontend (globals.css)
+   Source de vérité : frontend/app/globals.css (charte CosyHome).
+   ============================================ */
 
 @theme {
   --animate-fade-in: fade-in 0.3s ease-out;
 
-  --font-display: "DM Serif Text", serif;
-  --font-body: "DM Sans", sans-serif;
+  --font-display: "ivyora-display", serif;
+  --font-body: "dm-sans", sans-serif;
 
-  --color-background: hsl(30 17% 91%);
-  --color-foreground: hsl(0 0% 10%);
-  --color-primary: hsl(27 10% 22%);
-  --color-primary-foreground: hsl(30 17% 91%);
-  --color-secondary: hsl(30 12% 86%);
-  --color-secondary-foreground: hsl(0 0% 10%);
-  --color-accent: hsl(20 14% 59%);
-  --color-accent-foreground: hsl(30 17% 95%);
-  --color-muted: hsl(30 10% 88%);
-  --color-muted-foreground: hsl(28 8% 44%);
-  --color-card: hsl(30 14% 95%);
-  --color-card-foreground: hsl(0 0% 10%);
-  --color-border: hsl(30 10% 82%);
-  --color-destructive: hsl(0 65% 50%);
-  --color-destructive-foreground: hsl(30 17% 95%);
+  /* Couleurs alignées HSL frontend */
+  --color-background: hsl(37 10% 89%);          /* #E5E3E0 beige */
+  --color-foreground: hsl(0 0% 17%);            /* #2B2B2B */
+  --color-primary: hsl(20 4% 18%);              /* #312e2c marron foncé */
+  --color-primary-foreground: hsl(0 0% 100%);
+  --color-secondary: hsl(20 5% 25%);            /* #423f3c */
+  --color-secondary-foreground: hsl(0 0% 100%);
+  --color-accent: hsl(24 16% 59%);              /* #A59687 taupe signature */
+  --color-accent-foreground: hsl(0 0% 100%);
+  --color-muted: hsl(0 0% 98%);
+  --color-muted-foreground: hsl(0 0% 63%);
+  --color-card: hsl(0 0% 98%);
+  --color-card-foreground: hsl(0 0% 17%);
+  --color-border: hsl(27 18% 84%);              /* #DDD5CE */
+  --color-destructive: hsl(0 84.2% 60.2%);
+  --color-destructive-foreground: hsl(0 0% 98%);
 
-  --radius-sm: 0;
-  --radius: 0;
-  --radius-md: 0;
-  --radius-lg: 0;
-  --radius-xl: 0;
-  --radius-2xl: 0;
-  --radius-3xl: 0;
-  --radius-4xl: 0;
+  /* Radius aligné frontend — design anguleux 2px */
+  --radius-sm: 0.125rem;
+  --radius: 0.125rem;
+  --radius-md: 0.125rem;
+  --radius-lg: 0.125rem;
+  --radius-xl: 0.125rem;
+  --radius-2xl: 0.125rem;
+  --radius-3xl: 0.125rem;
+  --radius-4xl: 0.125rem;
 }
 
 /* ── Base styles ── */
@@ -47,7 +166,7 @@
     color: var(--color-foreground);
     font-family: var(--font-body);
     font-weight: 300;
-    font-size: 13px;
+    font-size: 14px;                    /* aligné frontend (était 13px) */
     letter-spacing: 0.4px;
     margin: 0;
     -webkit-font-smoothing: antialiased;
@@ -56,9 +175,9 @@
 
   h1 {
     font-family: var(--font-display);
-    font-weight: 400;
+    font-weight: 500;                   /* aligné weight ivyora (était 400 DM Serif Text) */
     font-size: 30px;
-    letter-spacing: 0.2px;
+    letter-spacing: 0;
   }
 
   h2 {
