@@ -1,6 +1,7 @@
 import { LogIn, LogOut, Car, Home, Trash2, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import GuideLayout from "@/components/GuideLayout";
+import SafeImage from "@/components/SafeImage";
 import { useGuideContext, useLocale } from "@/hooks";
 import { fmt, getIcon, RICHTEXT_CLASS } from "@/lib";
 import heroImage from "@/assets/hero-guide.jpg";
@@ -39,7 +40,7 @@ export default function GuideHome() {
     <GuideLayout hideEmergency>
       {/* Hero */}
       <div className="relative h-[280px] md:h-[340px] overflow-hidden">
-        <img
+        <SafeImage
           src={property.imagePrincipale ?? heroImage}
           alt={property.nom}
           className="w-full h-full object-cover"

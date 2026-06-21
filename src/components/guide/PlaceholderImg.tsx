@@ -1,19 +1,16 @@
 import React from "react";
 import { X } from "lucide-react";
+import SafeImage from "@/components/SafeImage";
 
 interface PlaceholderImgProps {
-  src: string;
+  src?: string | null;
   alt?: string;
 }
 
 export default function PlaceholderImg({ src, alt = "" }: PlaceholderImgProps) {
-  // States
   const [open, setOpen] = React.useState(false);
+  const isUrl = !!src && (src.startsWith("http") || src.startsWith("/"));
 
-  // Derived
-  const isUrl = src.startsWith("http") || src.startsWith("/");
-
-  // Effects
   React.useEffect(() => {
     if (!open) return;
     function onKeyDown(e: KeyboardEvent) {
@@ -23,24 +20,19 @@ export default function PlaceholderImg({ src, alt = "" }: PlaceholderImgProps) {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
-  // Render
   return (
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => isUrl && setOpen(true)}
         className="w-full flex items-center justify-center cursor-pointer overflow-hidden"
       >
-        {isUrl ? (
-          <img src={src} alt={alt} className="w-full h-auto block" />
-        ) : (
-          <span className="text-small text-muted-foreground aspect-video flex items-center justify-center">
-            {src}
-          </span>
-        )}
+        {/* SafeImage gère 2 cas : pas de src → placeholder logo CosyHome,
+            URL cassée → fallback automatique sur le même placeholder. */}
+        <SafeImage src={isUrl ? src : undefined} alt={alt} className="w-full aspect-video object-cover block" />
       </button>
 
-      {open && (
+      {open && isUrl && (
         <div
           className="fixed inset-0 z-100 bg-foreground/80 flex items-center justify-center p-4"
           onClick={() => setOpen(false)}
@@ -55,13 +47,7 @@ export default function PlaceholderImg({ src, alt = "" }: PlaceholderImgProps) {
             className="max-w-[90vw] max-h-[85vh] flex items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
-            {isUrl ? (
-              <img src={src} alt={alt} className="max-w-full max-h-[85vh] object-contain" />
-            ) : (
-              <div className="bg-muted border border-dashed w-[80vw] aspect-video flex items-center justify-center">
-                <span className="text-muted-foreground">{src}</span>
-              </div>
-            )}
+            <SafeImage src={src} alt={alt} className="max-w-full max-h-[85vh] object-contain" />
           </div>
         </div>
       )}
