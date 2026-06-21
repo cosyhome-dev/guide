@@ -1,6 +1,5 @@
 import { z } from "zod";
-import { staticContentSchema, type StaticContent } from "@/content/static";
-import { staticContent as mockData } from "@/content/static";
+import { staticContentSchema, type StaticContent, getStaticContentFallback } from "@/content/static";
 import { delay } from "./mock";
 import { USE_MOCK, strapiFetch, strapiImageSchema } from "./strapi";
 
@@ -170,13 +169,13 @@ const STATIC_POPULATE = [
 export async function fetchStaticContent(locale: string): Promise<StaticContent> {
   if (USE_MOCK) {
     await delay();
-    return staticContentSchema.parse(mockData);
+    return staticContentSchema.parse(getStaticContentFallback(locale));
   }
 
   // Si la cliente n'a pas (encore) saisi le contenu Strapi du singleType
   // ou n'a pas activé la permission `find` publique, Strapi retourne 404.
-  // On fallback sur le mock pour ne pas casser tout le guide — la cliente
-  // pourra customiser les textes UI plus tard.
+  // On fallback sur le mock LOCALISÉ (FR/EN/IT/DE) pour ne pas casser le
+  // guide — la cliente pourra customiser les textes UI plus tard via Strapi.
   try {
     const raw = await strapiFetch(`/guide-static-content?locale=${locale}&${STATIC_POPULATE}`);
     const response = strapiStaticResponseSchema.parse(raw);
@@ -184,6 +183,6 @@ export async function fetchStaticContent(locale: string): Promise<StaticContent>
   } catch (err) {
     // eslint-disable-next-line no-console
     console.warn("[fetchStaticContent] fallback sur mock —", err instanceof Error ? err.message : err);
-    return staticContentSchema.parse(mockData);
+    return staticContentSchema.parse(getStaticContentFallback(locale));
   }
 }
