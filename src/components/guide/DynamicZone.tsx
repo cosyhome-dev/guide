@@ -3,7 +3,6 @@ import Bloc from "./Bloc";
 import Note from "./Note";
 import Checklist from "./Checklist";
 import Dropdown from "./Dropdown";
-import AffichageRegion from "./AffichageRegion";
 
 interface DynamicZoneProps {
   blocks: DynamicZoneBlock[];
@@ -23,8 +22,6 @@ export default function DynamicZone({ blocks }: DynamicZoneProps) {
             return <Checklist key={key} data={block} />;
           case "guide.dropdown":
             return <Dropdown key={key} data={block} />;
-          case "guide.affichage-region":
-            return <AffichageRegion key={key} data={block} />;
         }
       })}
     </div>

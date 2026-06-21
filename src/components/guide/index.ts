@@ -1,5 +1,4 @@
 export { default as Accordion } from "./Accordion";
-export { default as AffichageRegion } from "./AffichageRegion";
 export { default as Bloc } from "./Bloc";
 export { default as Checklist } from "./Checklist";
 export { default as Dropdown } from "./Dropdown";

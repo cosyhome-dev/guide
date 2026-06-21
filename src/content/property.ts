@@ -56,18 +56,11 @@ const dropdownSchema = z.object({
   elements: z.array(elementDropdownSchema),
 });
 
-const affichageRegionSchema = z.object({
-  __component: z.literal("guide.affichage-region"),
-  id: z.number(),
-  afficher: z.boolean(),
-});
-
 export const dynamicZoneBlockSchema = z.discriminatedUnion("__component", [
   blocSchema,
   noteSchema,
   checklistSchema,
   dropdownSchema,
-  affichageRegionSchema,
 ]);
 
 export type DynamicZoneBlock = z.infer<typeof dynamicZoneBlockSchema>;
@@ -75,7 +68,6 @@ export type BlocBlock = z.infer<typeof blocSchema>;
 export type NoteBlock = z.infer<typeof noteSchema>;
 export type ChecklistBlock = z.infer<typeof checklistSchema>;
 export type DropdownBlock = z.infer<typeof dropdownSchema>;
-export type AffichageRegionBlock = z.infer<typeof affichageRegionSchema>;
 
 // ---------------------------------------------------------------------------
 // Property schema
