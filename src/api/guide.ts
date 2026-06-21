@@ -120,7 +120,7 @@ const strapiCustomPageSchema = z.object({
   documentId: z.string(),
   titre: z.string(),
   slug: z.string(),
-  ordre: z.number().default(0),
+  ordre: z.number().nullable().optional().transform((v) => v ?? 0),
   icone: z.string().nullable().optional(),
   contenu: z.array(strapiDynamicZoneSchema).nullable().optional().transform((v) => v ?? []),
 });
@@ -150,7 +150,7 @@ const strapiContenuReutilisableSchema = z.object({
   id: z.number(),
   nom: z.string(),
   pageDestinee: z.enum(REUSABLE_KEYS),
-  ordre: z.number().default(100),
+  ordre: z.number().nullable().optional().transform((v) => v ?? 100),
   contenu: z.array(strapiDynamicZoneSchema).nullable().optional().transform((v) => v ?? []),
 });
 
