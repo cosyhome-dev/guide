@@ -117,8 +117,11 @@ export const propertySchema = z.object({
 
   infos: z.object({
     heureArrivee: z.string(),
-    codeImmeuble: z.string(),
-    codeBoiteACles: z.string(),
+    codeImmeuble: z.string().optional(),
+    codeBoiteACles: z.string().optional(),
+    codesSupplementaires: z
+      .array(z.object({ nom: z.string(), valeur: z.string() }))
+      .default([]),
     heureDepart: z.string(),
     noteGenerale: z.string().optional(),
   }),
@@ -196,6 +199,7 @@ export const property: Property = {
     heureArrivee: "Dès 17h00",
     codeImmeuble: "4521",
     codeBoiteACles: "137617",
+    codesSupplementaires: [],
     heureDepart: "Avant 11h00",
   },
 

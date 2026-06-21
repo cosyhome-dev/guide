@@ -76,7 +76,7 @@ function AnimatedRoutes() {
               </GuideProvider>
             }
           />
-          <Route path="*" element={<Navigate to="" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

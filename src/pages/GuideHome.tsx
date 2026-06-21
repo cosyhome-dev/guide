@@ -30,6 +30,11 @@ export default function GuideHome() {
   const f = content.format;
   const s = content.sections;
 
+  const codeLines: string[] = [];
+  if (property.infos.codeImmeuble) codeLines.push(fmt(f.building, property.infos.codeImmeuble));
+  if (property.infos.codeBoiteACles) codeLines.push(fmt(f.keyBox, property.infos.codeBoiteACles));
+  for (const c of property.infos.codesSupplementaires) codeLines.push(`${c.nom} : ${c.valeur}`);
+
   return (
     <GuideLayout hideEmergency>
       {/* Hero */}
@@ -54,17 +59,12 @@ export default function GuideHome() {
           {/* Desktop */}
           <div className="hidden md:block">
             <div className="flex items-stretch divide-x divide-border border overflow-hidden bg-card">
-              <QuickInfoCell label={t.checkIn} value={property.infos.heureArrivee} />
-              <QuickInfoCell label={t.checkOut} value={property.infos.heureDepart} />
-              <QuickInfoCell
-                label={t.accessCodes}
-                value={fmt(f.building, property.infos.codeImmeuble)}
-                extra={fmt(f.keyBox, property.infos.codeBoiteACles)}
-              />
+              <QuickInfoCell label={t.checkIn} lines={[property.infos.heureArrivee]} />
+              <QuickInfoCell label={t.checkOut} lines={[property.infos.heureDepart]} />
+              <QuickInfoCell label={t.accessCodes} lines={codeLines} />
               <QuickInfoCell
                 label={t.wifi}
-                value={property.wifi.nomReseau}
-                extra={fmt(f.password, property.wifi.motDePasse)}
+                lines={[property.wifi.nomReseau, fmt(f.password, property.wifi.motDePasse)]}
               />
             </div>
           </div>
@@ -73,22 +73,17 @@ export default function GuideHome() {
           <div className="md:hidden">
             <div className="bg-card border p-5 space-y-4">
               <div className="flex justify-center gap-8">
-                <QuickInfoCell label={t.checkIn} value={property.infos.heureArrivee} />
+                <QuickInfoCell label={t.checkIn} lines={[property.infos.heureArrivee]} />
                 <div className="w-px bg-border" />
-                <QuickInfoCell label={t.checkOut} value={property.infos.heureDepart} />
+                <QuickInfoCell label={t.checkOut} lines={[property.infos.heureDepart]} />
               </div>
               <div className="h-px bg-border" />
               <div className="flex justify-center gap-8">
-                <QuickInfoCell
-                  label={t.accessCodes}
-                  value={fmt(f.building, property.infos.codeImmeuble)}
-                  extra={fmt(f.keyBox, property.infos.codeBoiteACles)}
-                />
+                <QuickInfoCell label={t.accessCodes} lines={codeLines} />
                 <div className="w-px bg-border" />
                 <QuickInfoCell
                   label={t.wifi}
-                  value={property.wifi.nomReseau}
-                  extra={fmt(f.password, property.wifi.motDePasse)}
+                  lines={[property.wifi.nomReseau, fmt(f.password, property.wifi.motDePasse)]}
                 />
               </div>
             </div>
@@ -149,12 +144,16 @@ export default function GuideHome() {
   );
 }
 
-function QuickInfoCell({ label, value, extra }: { label: string; value: string; extra?: string }) {
+function QuickInfoCell({ label, lines }: { label: string; lines: string[] }) {
+  const filtered = lines.filter(Boolean);
   return (
     <div className="flex-1 p-3 text-center">
       <p className="label-upper">{label}</p>
-      <p className="font-medium text-sm text-foreground mt-0.5">{value}</p>
-      {extra && <p className="font-medium text-sm text-foreground">{extra}</p>}
+      {filtered.map((line, i) => (
+        <p key={i} className={`font-medium text-sm text-foreground${i === 0 ? " mt-0.5" : ""}`}>
+          {line}
+        </p>
+      ))}
     </div>
   );
 }

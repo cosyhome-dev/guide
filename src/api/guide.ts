@@ -102,15 +102,11 @@ type StrapiDynamicZoneBlock = z.infer<typeof strapiDynamicZoneSchema>;
 // Strapi v5 guide response schema (fields directly on data, no attributes)
 // ---------------------------------------------------------------------------
 
-// Schema aligné sur le composant Strapi guide.localisation (champs à plat).
-// L'ancien format (value.coordinates.lat/lng) venait du plugin Google Maps
-// custom — abandonné au profit d'un composant simple lat/lng pour faciliter
-// la saisie cliente sans dépendance de plugin admin.
 const strapiLocalisationSchema = z.object({
   id: z.number().optional(),
   address: z.string(),
-  lat: z.coerce.number(),
-  lng: z.coerce.number(),
+  latitude: z.coerce.number(),
+  longitude: z.coerce.number(),
 });
 
 const strapiGestionnaireSchema = z
@@ -118,7 +114,7 @@ const strapiGestionnaireSchema = z
     id: z.number(),
     documentId: z.string().optional(),
     firstName: z.string(),
-    lastName: z.string(),
+    lastName: z.string().nullable().optional(),
     phone: z.string(),
   })
   .nullable();
@@ -143,33 +139,33 @@ const strapiDestinationSchema = z
   .nullable()
   .optional();
 
+const REUSABLE_KEYS = [
+  "arrivee",
+  "depart",
+  "parking",
+  "logement",
+  "dechets",
+  "region",
+  "reglement",
+] as const;
+type ReusableKey = (typeof REUSABLE_KEYS)[number];
+
 const strapiContenuReutilisableSchema = z.object({
   id: z.number(),
   nom: z.string(),
-  pageDestinee: z.string(),
-  ordre: z.number().default(0),
+  pageDestinee: z.enum(REUSABLE_KEYS),
+  ordre: z.number().default(100),
   contenu: z.array(strapiDynamicZoneSchema).default([]),
 });
 
+// Strapi renvoie la relation manyToMany sous forme de tableau plat.
+// On le groupe par pageDestinee côté client pour matcher la structure
+// attendue par GuideSection (un array par section).
 const strapiContenusReutilisablesSchema = z
-  .object({
-    arrivee: z.array(strapiContenuReutilisableSchema).default([]),
-    depart: z.array(strapiContenuReutilisableSchema).default([]),
-    parking: z.array(strapiContenuReutilisableSchema).default([]),
-    logement: z.array(strapiContenuReutilisableSchema).default([]),
-    dechets: z.array(strapiContenuReutilisableSchema).default([]),
-    region: z.array(strapiContenuReutilisableSchema).default([]),
-    reglement: z.array(strapiContenuReutilisableSchema).default([]),
-  })
-  .default({
-    arrivee: [],
-    depart: [],
-    parking: [],
-    logement: [],
-    dechets: [],
-    region: [],
-    reglement: [],
-  });
+  .array(strapiContenuReutilisableSchema)
+  .nullable()
+  .optional()
+  .transform((arr) => arr ?? []);
 
 const strapiGuideDataSchema = z.object({
   id: z.number(),
@@ -184,8 +180,11 @@ const strapiGuideDataSchema = z.object({
   infos: z.object({
     id: z.number().optional(),
     heureArrivee: z.string(),
-    codeImmeuble: z.string(),
-    codeBoiteACles: z.string(),
+    codeImmeuble: z.string().nullable().optional(),
+    codeBoiteACles: z.string().nullable().optional(),
+    codesSupplementaires: z
+      .array(z.object({ id: z.number().optional(), nom: z.string(), valeur: z.string() }))
+      .default([]),
     heureDepart: z.string(),
     noteGenerale: z.string().nullable().optional(),
   }),
@@ -279,18 +278,29 @@ function transformDynamicZoneBlock(block: StrapiDynamicZoneBlock): DynamicZoneBl
 function transformLocalisation(loc: z.infer<typeof strapiLocalisationSchema>) {
   return {
     address: loc.address,
-    mapsUrl: `https://www.google.com/maps?q=${loc.lat},${loc.lng}`,
+    mapsUrl: `https://www.google.com/maps?q=${loc.latitude},${loc.longitude}`,
   };
 }
 
 function transformContenusReutilisables(cr: z.infer<typeof strapiContenusReutilisablesSchema>) {
   const transformZone = (blocks: StrapiDynamicZoneBlock[]) => blocks.map(transformDynamicZoneBlock);
 
-  const result: Record<string, DynamicZoneBlock[][]> = {};
-  for (const key of Object.keys(cr) as ContenusReutilisablesKey[]) {
-    result[key] = cr[key].map((entry) => transformZone(entry.contenu));
+  // Initialise les 7 sections vides puis répartit les contenus selon
+  // leur pageDestinee, triés par ordre croissant (ordre=100 par défaut).
+  const result: Record<ReusableKey, DynamicZoneBlock[][]> = {
+    arrivee: [],
+    depart: [],
+    parking: [],
+    logement: [],
+    dechets: [],
+    region: [],
+    reglement: [],
+  };
+  const sorted = [...cr].sort((a, b) => a.ordre - b.ordre);
+  for (const entry of sorted) {
+    result[entry.pageDestinee].push(transformZone(entry.contenu));
   }
-  return result;
+  return result as Record<ContenusReutilisablesKey, DynamicZoneBlock[][]>;
 }
 
 function transformGuide(d: StrapiGuideData): Property {
@@ -305,8 +315,12 @@ function transformGuide(d: StrapiGuideData): Property {
     whatsapp: d.gestionnaire?.phone ?? "",
     infos: {
       heureArrivee: d.infos.heureArrivee,
-      codeImmeuble: d.infos.codeImmeuble,
-      codeBoiteACles: d.infos.codeBoiteACles,
+      codeImmeuble: d.infos.codeImmeuble ?? undefined,
+      codeBoiteACles: d.infos.codeBoiteACles ?? undefined,
+      codesSupplementaires: d.infos.codesSupplementaires.map((c) => ({
+        nom: c.nom,
+        valeur: c.valeur,
+      })),
       heureDepart: d.infos.heureDepart,
       noteGenerale: d.infos.noteGenerale ?? undefined,
     },
@@ -372,6 +386,10 @@ function buildGuideQuery(slug: string, locale: string): string {
         dechetsContenu: dynamicZonePopulate,
         regionContenu: dynamicZonePopulate,
         reglesContenu: dynamicZonePopulate,
+        contenusReutilisables: {
+          fields: ["id", "nom", "pageDestinee", "ordre"],
+          populate: { contenu: dynamicZonePopulate },
+        },
         customPages: {
           populate: {
             contenu: dynamicZonePopulate,
