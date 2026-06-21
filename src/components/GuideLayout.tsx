@@ -79,7 +79,7 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
             <div className="relative">
               <button
                 onClick={() => setLangOpen(!langOpen)}
-                className="flex items-center gap-1.5 label-upper hover:text-foreground transition-colors px-2 py-1 border border-transparent hover:border-border"
+                className="flex items-center gap-1.5 text-[11px] tracking-wider uppercase text-muted-foreground hover:text-foreground transition-colors px-2 py-1 border border-transparent hover:border-border"
               >
                 <Globe size={14} strokeWidth={1.5} />
                 <span>{LOCALE_LABELS[locale]}</span>
@@ -88,13 +88,13 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
               {langOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setLangOpen(false)} />
-                  <div className="absolute right-0 top-full mt-1 bg-card border shadow-sm z-50 overflow-hidden">
+                  <div className="absolute right-0 top-full mt-1 bg-card border rounded-sm shadow-sm z-50 overflow-hidden">
                     {LOCALES.map((lang) => (
                       <button
                         key={lang}
                         onClick={() => handleLangSelect(lang)}
                         className={cn(
-                          "block w-full text-left px-4 py-2 label-upper transition-colors",
+                          "block w-full text-left px-4 py-2 text-[11px] tracking-wider uppercase transition-colors",
                           lang === locale
                             ? "text-accent bg-accent/10"
                             : "text-muted-foreground hover:text-foreground hover:bg-muted",

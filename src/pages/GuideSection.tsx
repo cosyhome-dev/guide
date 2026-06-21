@@ -50,8 +50,8 @@ export default function GuideSection() {
           <span>{t.back}</span>
         </Link>
 
-        <h1 className="text-2xl mt-8 mb-3 text-center">{pageTitle}</h1>
-        <div className="w-14 h-px bg-accent mx-auto" />
+        <h1 className="text-3xl mt-8 mb-3 text-center">{pageTitle}</h1>
+        <div className="w-14 h-[0.5px] bg-accent mx-auto" />
       </div>
 
       <div className="mx-auto max-w-3xl px-4 pb-8">

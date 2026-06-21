@@ -46,8 +46,8 @@ export default function GuideHome() {
         />
         <div className="absolute inset-0 bg-linear-to-t from-primary/85 via-primary/40 to-primary/15" />
         <div className="absolute bottom-0 left-0 right-0 px-6 pb-[calc(1.5rem+10px)] md:px-8 md:pb-[calc(2rem+10px)] text-center">
-          <h1 className="text-primary-foreground text-3xl md:text-4xl mb-1">{t.welcome}</h1>
-          <p className="text-primary-foreground/80 tracking-[2px] uppercase text-[11px]">
+          <h1 className="text-primary-foreground text-4xl md:text-5xl mb-3">{t.welcome}</h1>
+          <p className="text-primary-foreground/80 tracking-[2px] uppercase text-[13px]">
             {property.nom}
           </p>
         </div>
@@ -58,7 +58,7 @@ export default function GuideHome() {
         <div className="my-6">
           {/* Desktop */}
           <div className="hidden md:block">
-            <div className="flex items-stretch divide-x divide-border border overflow-hidden bg-card">
+            <div className="flex items-stretch divide-x divide-border border rounded-sm overflow-hidden bg-card">
               <QuickInfoCell label={t.checkIn} lines={[property.infos.heureArrivee]} />
               <QuickInfoCell label={t.checkOut} lines={[property.infos.heureDepart]} />
               <QuickInfoCell label={t.accessCodes} lines={codeLines} />
@@ -71,7 +71,7 @@ export default function GuideHome() {
 
           {/* Mobile */}
           <div className="md:hidden">
-            <div className="bg-card border p-5 space-y-4">
+            <div className="bg-card border rounded-sm p-5 space-y-4">
               <div className="flex justify-center gap-8">
                 <QuickInfoCell label={t.checkIn} lines={[property.infos.heureArrivee]} />
                 <div className="w-px bg-border" />
@@ -98,14 +98,14 @@ export default function GuideHome() {
         </div>
 
         {/* Section grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-5 pb-12">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-[20px] pb-[50px]">
           {sectionKeys.map((key) => {
             const Icon = sectionIcons[key];
             return (
               <Link
                 key={key}
                 to={`/${locale}/guide/${property.slug}/${key}`}
-                className="bg-card border p-6 flex flex-col items-center gap-3 hover:border-accent/50 hover:shadow-xs transition-all group"
+                className="bg-card border rounded-sm p-6 flex flex-col items-center gap-3 hover:border-accent/50 hover:shadow-sm transition-all group"
               >
                 <Icon
                   size={26}
@@ -125,7 +125,7 @@ export default function GuideHome() {
               <Link
                 key={page.slug}
                 to={`/${locale}/guide/${property.slug}/${page.slug}`}
-                className="bg-card border p-6 flex flex-col items-center gap-3 hover:border-accent/50 hover:shadow-xs transition-all group"
+                className="bg-card border rounded-sm p-6 flex flex-col items-center gap-3 hover:border-accent/50 hover:shadow-sm transition-all group"
               >
                 <Icon
                   size={26}

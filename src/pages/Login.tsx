@@ -168,7 +168,7 @@ export default function Login() {
                   onChange={handleCodeChange}
                   placeholder={t.codePlaceholder}
                   autoFocus
-                  className="w-full bg-card border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full bg-card border border-border rounded-sm px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/40 transition-colors"
                 />
                 {error && <p className="text-destructive text-small mt-1.5">{error}</p>}
               </div>
@@ -176,7 +176,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={validateCode.isPending}
-                className="w-full bg-primary text-primary-foreground px-4 py-2.5 text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+                className="w-full bg-primary text-primary-foreground rounded-sm px-4 py-2.5 text-xs font-light uppercase tracking-wider hover:bg-primary/90 transition-colors disabled:opacity-50"
               >
                 {validateCode.isPending ? "..." : t.submit}
               </button>
