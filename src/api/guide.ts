@@ -105,8 +105,11 @@ type StrapiDynamicZoneBlock = z.infer<typeof strapiDynamicZoneSchema>;
 const strapiLocalisationSchema = z.object({
   id: z.number().optional(),
   address: z.string(),
-  latitude: z.coerce.number(),
-  longitude: z.coerce.number(),
+  // Tolérant : si la cliente n'a pas saisi les coordonnées, on fallback
+  // sur l'adresse dans le lien Maps (Google accepte une adresse texte en
+  // query). Évite de crasher tout le guide pour ce seul champ manquant.
+  latitude: z.coerce.number().nullable().optional(),
+  longitude: z.coerce.number().nullable().optional(),
 });
 
 const strapiGestionnaireSchema = z
@@ -276,9 +279,13 @@ function transformDynamicZoneBlock(block: StrapiDynamicZoneBlock): DynamicZoneBl
 }
 
 function transformLocalisation(loc: z.infer<typeof strapiLocalisationSchema>) {
+  const hasCoords = loc.latitude != null && loc.longitude != null;
+  const mapsQuery = hasCoords
+    ? `${loc.latitude},${loc.longitude}`
+    : encodeURIComponent(loc.address);
   return {
     address: loc.address,
-    mapsUrl: `https://www.google.com/maps?q=${loc.latitude},${loc.longitude}`,
+    mapsUrl: `https://www.google.com/maps?q=${mapsQuery}`,
   };
 }
 
