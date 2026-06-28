@@ -5,7 +5,6 @@ import {
   dynamicZoneBlockSchema,
   type Property,
   type DynamicZoneBlock,
-  type ContenusReutilisablesKey,
 } from "@/content/property";
 import { property as mockData } from "@/content/property";
 import { delay } from "./mock";
@@ -14,9 +13,7 @@ import {
   strapiFetch,
   strapiPost,
   strapiImageSchema,
-  strapiImagesSchema,
   extractImageUrl,
-  extractImageUrls,
 } from "./strapi";
 
 // ---------------------------------------------------------------------------
@@ -34,6 +31,13 @@ const strapiElementChecklistSchema = z.object({
   texte: z.string(),
 });
 
+// Wrapper repeatable autour d'un média — permet le drag-and-drop reorder
+// dans l'admin Strapi (composant `guide.bloc-image`).
+const strapiBlocImageSchema = z.object({
+  id: z.number(),
+  image: strapiImageSchema,
+});
+
 const strapiElementDropdownSchema = z.object({
   id: z.number(),
   titre: z.string(),
@@ -46,7 +50,7 @@ const strapiBlocSchema = z.object({
   titre: z.string(),
   surtitre: z.string().nullable().optional(),
   contenu: z.string().nullable(),
-  images: strapiImagesSchema.nullable().optional().transform((v) => v ?? []),
+  images: z.array(strapiBlocImageSchema).nullable().optional().transform((v) => v ?? []),
   liens: z.array(strapiLienExterneSchema).nullable().optional().transform((v) => v ?? []),
   misEnAvant: z.boolean(),
   centrerBouton: z
@@ -88,12 +92,39 @@ const strapiAdresseAccesSchema = z.object({
   note: z.string().nullable().optional(),
 });
 
-const strapiDynamicZoneSchema = z.discriminatedUnion("__component", [
+// Les "blocs concrets" qu'on peut trouver dans une DZ ou dans la DZ d'un
+// contenu réutilisable (i.e. sans le composant -ref pour éviter la récursion).
+const strapiInlineBlockSchema = z.discriminatedUnion("__component", [
   strapiBlocSchema,
   strapiNoteSchema,
   strapiChecklistSchema,
   strapiDropdownSchema,
   strapiAdresseAccesSchema,
+]);
+
+type StrapiInlineBlock = z.infer<typeof strapiInlineBlockSchema>;
+
+// Composant « insérer un contenu réutilisable » — résolu et aplati côté
+// frontend (le voyageur ne le voit jamais en tant que tel). Sa DZ `contenu`
+// est dépliée à la position du ref dans la DZ parente.
+const strapiContenuReutilisableRefSchema = z.object({
+  __component: z.literal("guide.contenu-reutilisable-ref"),
+  id: z.number(),
+  contenu: z
+    .object({
+      id: z.number(),
+      contenu: z.array(strapiInlineBlockSchema).nullable().optional(),
+    })
+    .nullable()
+    .optional(),
+});
+
+// Une DZ Guide peut contenir des blocs inline OU un ref vers un contenu
+// réutilisable. Côté admin, la cliente choisit lequel ajouter ; côté front
+// on aplatit les refs avant de rendre.
+const strapiDynamicZoneSchema = z.union([
+  strapiInlineBlockSchema,
+  strapiContenuReutilisableRefSchema,
 ]);
 
 type StrapiDynamicZoneBlock = z.infer<typeof strapiDynamicZoneSchema>;
@@ -122,16 +153,6 @@ const strapiGestionnaireSchema = z
   })
   .nullable();
 
-const strapiCustomPageSchema = z.object({
-  id: z.number(),
-  documentId: z.string(),
-  titre: z.string(),
-  slug: z.string(),
-  ordre: z.number().nullable().optional().transform((v) => v ?? 0),
-  icone: z.string().nullable().optional(),
-  contenu: z.array(strapiDynamicZoneSchema).nullable().optional().transform((v) => v ?? []),
-});
-
 // Aligné sur api::destination.destination du backend principal CosyHome :
 // champ `nom` (FR) et non `title`.
 const strapiDestinationSchema = z
@@ -141,34 +162,6 @@ const strapiDestinationSchema = z
   })
   .nullable()
   .optional();
-
-const REUSABLE_KEYS = [
-  "arrivee",
-  "depart",
-  "parking",
-  "logement",
-  "dechets",
-  "region",
-  "reglement",
-] as const;
-type ReusableKey = (typeof REUSABLE_KEYS)[number];
-
-const strapiContenuReutilisableSchema = z.object({
-  id: z.number(),
-  nom: z.string(),
-  pageDestinee: z.enum(REUSABLE_KEYS),
-  ordre: z.number().nullable().optional().transform((v) => v ?? 100),
-  contenu: z.array(strapiDynamicZoneSchema).nullable().optional().transform((v) => v ?? []),
-});
-
-// Strapi renvoie la relation manyToMany sous forme de tableau plat.
-// On le groupe par pageDestinee côté client pour matcher la structure
-// attendue par GuideSection (un array par section).
-const strapiContenusReutilisablesSchema = z
-  .array(strapiContenuReutilisableSchema)
-  .nullable()
-  .optional()
-  .transform((arr) => arr ?? []);
 
 const strapiGuideDataSchema = z.object({
   id: z.number(),
@@ -210,14 +203,6 @@ const strapiGuideDataSchema = z.object({
   regionContenu: z.array(strapiDynamicZoneSchema).nullable().optional().transform((v) => v ?? []),
   reglesContenu: z.array(strapiDynamicZoneSchema).nullable().optional().transform((v) => v ?? []),
 
-  contenusReutilisables: strapiContenusReutilisablesSchema,
-
-  customPages: z
-    .array(strapiCustomPageSchema)
-    .nullable()
-    .optional()
-    .transform((v) => v ?? []),
-
   createdAt: z.string(),
   updatedAt: z.string(),
   publishedAt: z.string(),
@@ -239,7 +224,7 @@ const accessResponseSchema = z.object({
 
 type StrapiGuideData = z.infer<typeof strapiGuideDataSchema>;
 
-function transformDynamicZoneBlock(block: StrapiDynamicZoneBlock): DynamicZoneBlock {
+function transformInlineBlock(block: StrapiInlineBlock): DynamicZoneBlock {
   switch (block.__component) {
     case "guide.bloc":
       return dynamicZoneBlockSchema.parse({
@@ -248,7 +233,11 @@ function transformDynamicZoneBlock(block: StrapiDynamicZoneBlock): DynamicZoneBl
         titre: block.titre,
         surtitre: block.surtitre ?? undefined,
         contenu: block.contenu ?? undefined,
-        images: extractImageUrls(block.images),
+        // Repeatable wrapper `guide.bloc-image` → on extrait l'URL de
+        // chaque item.image (et on skip les items où l'image manque).
+        images: block.images
+          .map((item) => extractImageUrl(item.image))
+          .filter((url): url is string => Boolean(url)),
         liens: block.liens?.map((l) => ({ label: l.label, url: l.url })),
         misEnAvant: block.misEnAvant,
         centrerBouton: block.centrerBouton,
@@ -284,6 +273,44 @@ function transformDynamicZoneBlock(block: StrapiDynamicZoneBlock): DynamicZoneBl
   }
 }
 
+/**
+ * Aplatit une DZ Strapi en blocs frontend :
+ *   - Bloc inline → transformé tel quel
+ *   - Ref contenu réutilisable → dépliée in-place avec ses blocs concrets
+ *
+ * Si le ref pointe vers un contenu supprimé/dépublié OU si la permission
+ * `find` n'est pas activée sur `contenu-reutilisable`, le populate renvoie
+ * `contenu: null` → log warning + skip silencieux (pas de crash).
+ *
+ * Pas de dédup ici : la cliente peut légitimement vouloir insérer le même
+ * contenu réutilisable plusieurs fois dans une section (ex. rappel d'un
+ * tip à 2 endroits). L'architecture oneToOne du ref garantit qu'il n'y a
+ * pas de duplication parasite Strapi-side.
+ */
+function transformDynamicZone(blocks: StrapiDynamicZoneBlock[]): DynamicZoneBlock[] {
+  const out: DynamicZoneBlock[] = [];
+  const isDev = import.meta.env.DEV;
+
+  for (const block of blocks) {
+    if (block.__component === "guide.contenu-reutilisable-ref") {
+      if (!block.contenu) {
+        if (isDev) {
+          console.warn(
+            `[transformDynamicZone] ref #${block.id} pointe vers un contenu réutilisable supprimé/dépublié ou inaccessible (vérifier les permissions Strapi find/findOne sur contenu-reutilisable) — bloc ignoré.`,
+          );
+        }
+        continue;
+      }
+      const nested = block.contenu.contenu ?? [];
+      for (const b of nested) out.push(transformInlineBlock(b));
+    } else {
+      out.push(transformInlineBlock(block));
+    }
+  }
+
+  return out;
+}
+
 function transformLocalisation(loc: z.infer<typeof strapiLocalisationSchema>) {
   const hasCoords = loc.latitude != null && loc.longitude != null;
   const mapsQuery = hasCoords
@@ -295,30 +322,7 @@ function transformLocalisation(loc: z.infer<typeof strapiLocalisationSchema>) {
   };
 }
 
-function transformContenusReutilisables(cr: z.infer<typeof strapiContenusReutilisablesSchema>) {
-  const transformZone = (blocks: StrapiDynamicZoneBlock[]) => blocks.map(transformDynamicZoneBlock);
-
-  // Initialise les 7 sections vides puis répartit les contenus selon
-  // leur pageDestinee, triés par ordre croissant (ordre=100 par défaut).
-  const result: Record<ReusableKey, DynamicZoneBlock[][]> = {
-    arrivee: [],
-    depart: [],
-    parking: [],
-    logement: [],
-    dechets: [],
-    region: [],
-    reglement: [],
-  };
-  const sorted = [...cr].sort((a, b) => a.ordre - b.ordre);
-  for (const entry of sorted) {
-    result[entry.pageDestinee].push(transformZone(entry.contenu));
-  }
-  return result as Record<ContenusReutilisablesKey, DynamicZoneBlock[][]>;
-}
-
 function transformGuide(d: StrapiGuideData): Property {
-  const transformZone = (blocks: StrapiDynamicZoneBlock[]) => blocks.map(transformDynamicZoneBlock);
-
   return propertySchema.parse({
     nom: d.nom,
     slug: d.slug,
@@ -341,23 +345,13 @@ function transformGuide(d: StrapiGuideData): Property {
       nomReseau: d.wifi.nomReseau ?? "",
       motDePasse: d.wifi.motDePasse ?? "",
     },
-    arriveeContenu: transformZone(d.arriveeContenu),
-    departContenu: transformZone(d.departContenu),
-    parkingContenu: transformZone(d.parkingContenu),
-    logementContenu: transformZone(d.logementContenu),
-    dechetsContenu: transformZone(d.dechetsContenu),
-    regionContenu: transformZone(d.regionContenu),
-    reglesContenu: transformZone(d.reglesContenu),
-    contenusReutilisables: transformContenusReutilisables(d.contenusReutilisables),
-    customPages: d.customPages
-      .sort((a, b) => a.ordre - b.ordre)
-      .map((cp) => ({
-        titre: cp.titre,
-        slug: cp.slug,
-        ordre: cp.ordre,
-        icone: cp.icone ?? undefined,
-        contenu: transformZone(cp.contenu),
-      })),
+    arriveeContenu: transformDynamicZone(d.arriveeContenu),
+    departContenu: transformDynamicZone(d.departContenu),
+    parkingContenu: transformDynamicZone(d.parkingContenu),
+    logementContenu: transformDynamicZone(d.logementContenu),
+    dechetsContenu: transformDynamicZone(d.dechetsContenu),
+    regionContenu: transformDynamicZone(d.regionContenu),
+    reglesContenu: transformDynamicZone(d.reglesContenu),
   });
 }
 
@@ -365,18 +359,35 @@ function transformGuide(d: StrapiGuideData): Property {
 // Populate query — Strapi v5 syntax with [on] for dynamic zones
 // ---------------------------------------------------------------------------
 
+// Populate pour les composants concrets (sans le ref pour éviter la récursion).
+const inlineComponentsPopulate = {
+  "guide.bloc": {
+    populate: {
+      images: {
+        populate: { image: { fields: ["url", "alternativeText"] } },
+      },
+      liens: { populate: "*" },
+    },
+  },
+  "guide.note": { populate: "*" },
+  "guide.checklist": { populate: { elements: { populate: "*" } } },
+  "guide.dropdown": { populate: { elements: { populate: "*" } } },
+  "guide.adresse-acces": { populate: "*" },
+};
+
 const dynamicZonePopulate = {
   on: {
-    "guide.bloc": {
+    ...inlineComponentsPopulate,
+    "guide.contenu-reutilisable-ref": {
       populate: {
-        images: { fields: ["url", "alternativeText"] },
-        liens: { populate: "*" },
+        contenu: {
+          fields: ["id"],
+          populate: {
+            contenu: { on: inlineComponentsPopulate },
+          },
+        },
       },
     },
-    "guide.note": { populate: "*" },
-    "guide.checklist": { populate: { elements: { populate: "*" } } },
-    "guide.dropdown": { populate: { elements: { populate: "*" } } },
-    "guide.adresse-acces": { populate: "*" },
   },
 };
 
@@ -399,10 +410,6 @@ function buildGuideQuery(slug: string, locale: string): string {
         dechetsContenu: dynamicZonePopulate,
         regionContenu: dynamicZonePopulate,
         reglesContenu: dynamicZonePopulate,
-        contenusReutilisables: {
-          fields: ["id", "nom", "pageDestinee", "ordre"],
-          populate: { contenu: dynamicZonePopulate },
-        },
       },
     },
     { encodeValuesOnly: true },

@@ -1,42 +1,28 @@
 import React from "react";
 
 interface SafeImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src"> {
-  /** URL de l'image. Si vide / null / cassée → placeholder logo CosyHome. */
+  /** URL de l'image. Si vide / null / cassée → ne rend rien. */
   src?: string | null;
   /** Texte alternatif (toujours requis pour l'accessibilité). */
   alt: string;
 }
 
 /**
- * Wrapper `<img>` qui affiche un placeholder visuel (fond beige + logo
- * CosyHome translucide) dans 2 cas :
+ * Wrapper `<img>` qui se rend SILENCIEUX (null) dans 2 cas :
  *   1. `src` est null/undefined/chaîne vide (image jamais saisie côté Strapi)
  *   2. L'image échoue à charger (URL cassée, S3 down, etc.)
  *
- * À utiliser à la place de `<img>` partout où une image user-data peut
- * manquer (Bloc Strapi, hero GuideHome, Pieces, etc.).
+ * Auparavant un placeholder beige + logo CosyHome s'affichait à la place,
+ * mais ça confondait la cliente (« il met une image par défaut alors que
+ * je n'ai rien saisi » — retour 2026-06-28). En prod : pas d'image saisie
+ * = pas d'image rendue.
+ *
+ * Pour avoir un fallback visuel (ex. hero du guide), passer un asset par
+ * défaut au niveau du parent : `<SafeImage src={property.imagePrincipale ?? heroImage} ... />`.
  */
 export default function SafeImage({ src, alt, className, style, ...rest }: SafeImageProps) {
   const [errored, setErrored] = React.useState(false);
-  const usePlaceholder = !src || errored;
-
-  if (usePlaceholder) {
-    return (
-      <div
-        className={`bg-foreground/5 flex items-center justify-center overflow-hidden ${className ?? ""}`}
-        style={style}
-        role="img"
-        aria-label={alt}
-      >
-        <img
-          src="/favicon.svg"
-          alt=""
-          aria-hidden="true"
-          className="w-1/4 h-1/4 min-w-[40px] min-h-[40px] max-w-[96px] max-h-[96px] opacity-25 object-contain"
-        />
-      </div>
-    );
-  }
+  if (!src || errored) return null;
 
   return (
     <img

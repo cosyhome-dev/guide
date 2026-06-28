@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import GuideLayout from "@/components/GuideLayout";
 import SafeImage from "@/components/SafeImage";
 import { useGuideContext, useLocale } from "@/hooks";
-import { fmt, getIcon } from "@/lib";
+import { fmt } from "@/lib";
 import heroImage from "@/assets/hero-guide.jpg";
 
 const sectionKeys = [
@@ -125,25 +125,6 @@ export default function GuideHome() {
             );
           })}
 
-          {property.customPages.map((page) => {
-            const Icon = getIcon(page.icone);
-            return (
-              <Link
-                key={page.slug}
-                to={`/${locale}/${property.slug}/guide/${page.slug}`}
-                className="bg-card border rounded-sm p-6 flex flex-col items-center gap-3 hover:border-accent/50 hover:shadow-sm transition-all group"
-              >
-                <Icon
-                  size={26}
-                  strokeWidth={1.2}
-                  className="text-muted-foreground group-hover:text-accent transition-colors"
-                />
-                <span className="text-[11px] tracking-wider uppercase text-center text-muted-foreground group-hover:text-foreground transition-colors">
-                  {page.titre}
-                </span>
-              </Link>
-            );
-          })}
         </div>
       </div>
     </GuideLayout>

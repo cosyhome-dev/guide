@@ -46,7 +46,12 @@ export function extractImageUrl(media: StrapiImage | undefined): string | undefi
 
 export function extractImageUrls(media: StrapiImages | undefined): string[] {
   if (!media) return [];
-  return media.map((item) => resolveUrl(item.url));
+  // Filter out entries with missing/empty url — défensif contre une éventuelle
+  // entrée Strapi dégradée (référence orpheline, upload S3 échoué…). Sinon
+  // resolveUrl("") produirait une URL bidon qui afficherait une 404 image.
+  return media
+    .filter((item) => item.url && item.url.trim() !== "")
+    .map((item) => resolveUrl(item.url));
 }
 
 // ---------------------------------------------------------------------------

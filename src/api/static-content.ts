@@ -4,70 +4,76 @@ import { delay } from "./mock";
 import { USE_MOCK, strapiFetch, strapiImageSchema } from "./strapi";
 
 // ---------------------------------------------------------------------------
-// Strapi v5 response schema (fields directly on data, no attributes wrapper)
+// Strapi v5 response schema
+//
+// Tous les champs sont optionnels (la cliente peut remplir uniquement les
+// libellés qu'elle veut customiser). Les champs vides sont remplacés par
+// la valeur par défaut localisée du frontend dans transformStaticContent.
 // ---------------------------------------------------------------------------
+
+const optStr = z.string().nullable().optional();
 
 const strapiStaticDataSchema = z.object({
   id: z.number(),
   documentId: z.string(),
 
-  loginTitle: z.string(),
-  loginDescription: z.string(),
-  loginCodeLabel: z.string(),
-  loginCodePlaceholder: z.string(),
-  loginSubmit: z.string(),
-  loginNoCodePrefix: z.string(),
-  loginNoCodeLink: z.string(),
-  loginNoCodeWhatsapp: z.string(),
-  loginError: z.string(),
+  loginTitle: optStr,
+  loginDescription: optStr,
+  loginCodeLabel: optStr,
+  loginCodePlaceholder: optStr,
+  loginSubmit: optStr,
+  loginNoCodePrefix: optStr,
+  loginNoCodeLink: optStr,
+  loginNoCodeWhatsapp: optStr,
+  loginError: optStr,
 
-  navHome: z.string(),
-  navRules: z.string(),
-  navContact: z.string(),
-  navRoute: z.string(),
+  navHome: optStr,
+  navRules: optStr,
+  navContact: optStr,
+  navRoute: optStr,
 
-  homeWelcome: z.string(),
-  homeCheckIn: z.string(),
-  homeCheckOut: z.string(),
-  homeAccessCodes: z.string(),
-  homeWifi: z.string(),
+  homeWelcome: optStr,
+  homeCheckIn: optStr,
+  homeCheckOut: optStr,
+  homeAccessCodes: optStr,
+  homeWifi: optStr,
 
-  sectionBack: z.string(),
-  sectionNotFound: z.string(),
-  sectionOpenMaps: z.string(),
-  sectionStepLabel: z.string(),
-  sectionArrivee: z.string(),
-  sectionDepart: z.string(),
-  sectionParking: z.string(),
-  sectionLogement: z.string(),
-  sectionDechets: z.string(),
-  sectionRegion: z.string(),
-  sectionRegles: z.string(),
+  sectionBack: optStr,
+  sectionNotFound: optStr,
+  sectionOpenMaps: optStr,
+  sectionStepLabel: optStr,
+  sectionArrivee: optStr,
+  sectionDepart: optStr,
+  sectionParking: optStr,
+  sectionLogement: optStr,
+  sectionDechets: optStr,
+  sectionRegion: optStr,
+  sectionRegles: optStr,
 
-  departCheckoutLabel: z.string(),
-  departChecklistTitle: z.string(),
+  departCheckoutLabel: optStr,
+  departChecklistTitle: optStr,
 
-  notFoundTitle: z.string(),
-  notFoundMessage: z.string(),
-  notFoundLink: z.string(),
+  notFoundTitle: optStr,
+  notFoundMessage: optStr,
+  notFoundLink: optStr,
 
-  altBrand: z.string(),
+  altBrand: optStr,
 
-  formatBuilding: z.string(),
-  formatKeyBox: z.string(),
-  formatPassword: z.string(),
+  formatBuilding: optStr,
+  formatKeyBox: optStr,
+  formatPassword: optStr,
 
-  urgencesLabel: z.string(),
-  urgencesTel: z.string(),
-  policeLabel: z.string(),
-  policeTel: z.string(),
-  pompiersLabel: z.string(),
-  pompiersTel: z.string(),
+  urgencesLabel: optStr,
+  urgencesTel: optStr,
+  policeLabel: optStr,
+  policeTel: optStr,
+  pompiersLabel: optStr,
+  pompiersTel: optStr,
 
-  logoLight: strapiImageSchema,
-  logoDark: strapiImageSchema,
-  logoCircle: strapiImageSchema,
-  logoCopyright: strapiImageSchema,
+  logoLight: strapiImageSchema.optional(),
+  logoDark: strapiImageSchema.optional(),
+  logoCircle: strapiImageSchema.optional(),
+  logoCopyright: strapiImageSchema.optional(),
 
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -82,75 +88,83 @@ const strapiStaticResponseSchema = z.object({
 
 // ---------------------------------------------------------------------------
 // Transformer: Strapi flat → StaticContent nested
+// Merge per-field avec le fallback localisé : chaque champ vide / null côté
+// Strapi prend la valeur par défaut du code (FR/EN/IT/DE). Ainsi la cliente
+// peut ne customiser que 1 ou 2 libellés, tout le reste reste sur les
+// valeurs par défaut.
 // ---------------------------------------------------------------------------
 
 type StrapiStaticData = z.infer<typeof strapiStaticDataSchema>;
 
-function transformStaticContent(d: StrapiStaticData): StaticContent {
+const pick = (v: string | null | undefined, fallback: string): string =>
+  v && v.trim() !== "" ? v : fallback;
+
+function transformStaticContent(d: StrapiStaticData, locale: string): StaticContent {
+  const fb = getStaticContentFallback(locale);
   return staticContentSchema.parse({
     login: {
-      title: d.loginTitle,
-      description: d.loginDescription,
-      codeLabel: d.loginCodeLabel,
-      codePlaceholder: d.loginCodePlaceholder,
-      submit: d.loginSubmit,
-      noCodePrefix: d.loginNoCodePrefix,
-      noCodeLink: d.loginNoCodeLink,
-      noCodeWhatsapp: d.loginNoCodeWhatsapp,
-      error: d.loginError,
+      title: pick(d.loginTitle, fb.login.title),
+      description: pick(d.loginDescription, fb.login.description),
+      codeLabel: pick(d.loginCodeLabel, fb.login.codeLabel),
+      codePlaceholder: pick(d.loginCodePlaceholder, fb.login.codePlaceholder),
+      submit: pick(d.loginSubmit, fb.login.submit),
+      noCodePrefix: pick(d.loginNoCodePrefix, fb.login.noCodePrefix),
+      noCodeLink: pick(d.loginNoCodeLink, fb.login.noCodeLink),
+      noCodeWhatsapp: pick(d.loginNoCodeWhatsapp, fb.login.noCodeWhatsapp),
+      error: pick(d.loginError, fb.login.error),
     },
     nav: {
-      home: d.navHome,
-      rules: d.navRules,
-      contact: d.navContact,
-      route: d.navRoute,
+      home: pick(d.navHome, fb.nav.home),
+      rules: pick(d.navRules, fb.nav.rules),
+      contact: pick(d.navContact, fb.nav.contact),
+      route: pick(d.navRoute, fb.nav.route),
     },
     home: {
-      welcome: d.homeWelcome,
-      checkIn: d.homeCheckIn,
-      checkOut: d.homeCheckOut,
-      accessCodes: d.homeAccessCodes,
-      wifi: d.homeWifi,
+      welcome: pick(d.homeWelcome, fb.home.welcome),
+      checkIn: pick(d.homeCheckIn, fb.home.checkIn),
+      checkOut: pick(d.homeCheckOut, fb.home.checkOut),
+      accessCodes: pick(d.homeAccessCodes, fb.home.accessCodes),
+      wifi: pick(d.homeWifi, fb.home.wifi),
     },
     sections: {
-      "check-in": d.sectionArrivee,
-      "check-out": d.sectionDepart,
-      parking: d.sectionParking,
-      property: d.sectionLogement,
-      "waste-recycling": d.sectionDechets,
-      area: d.sectionRegion,
-      rules: d.sectionRegles,
+      "check-in": pick(d.sectionArrivee, fb.sections["check-in"]),
+      "check-out": pick(d.sectionDepart, fb.sections["check-out"]),
+      parking: pick(d.sectionParking, fb.sections.parking),
+      property: pick(d.sectionLogement, fb.sections.property),
+      "waste-recycling": pick(d.sectionDechets, fb.sections["waste-recycling"]),
+      area: pick(d.sectionRegion, fb.sections.area),
+      rules: pick(d.sectionRegles, fb.sections.rules),
     },
     section: {
-      back: d.sectionBack,
-      notFound: d.sectionNotFound,
-      openMaps: d.sectionOpenMaps,
-      stepLabel: d.sectionStepLabel,
+      back: pick(d.sectionBack, fb.section.back),
+      notFound: pick(d.sectionNotFound, fb.section.notFound),
+      openMaps: pick(d.sectionOpenMaps, fb.section.openMaps),
+      stepLabel: pick(d.sectionStepLabel, fb.section.stepLabel),
     },
     depart: {
-      checkoutLabel: d.departCheckoutLabel,
-      checklistTitle: d.departChecklistTitle,
+      checkoutLabel: pick(d.departCheckoutLabel, fb.depart.checkoutLabel),
+      checklistTitle: pick(d.departChecklistTitle, fb.depart.checklistTitle),
     },
     notFound: {
-      title: d.notFoundTitle,
-      message: d.notFoundMessage,
-      link: d.notFoundLink,
+      title: pick(d.notFoundTitle, fb.notFound.title),
+      message: pick(d.notFoundMessage, fb.notFound.message),
+      link: pick(d.notFoundLink, fb.notFound.link),
     },
     alt: {
-      brand: d.altBrand,
+      brand: pick(d.altBrand, fb.alt.brand),
     },
     format: {
-      building: d.formatBuilding,
-      keyBox: d.formatKeyBox,
-      password: d.formatPassword,
+      building: pick(d.formatBuilding, fb.format.building),
+      keyBox: pick(d.formatKeyBox, fb.format.keyBox),
+      password: pick(d.formatPassword, fb.format.password),
     },
     urgences: {
-      urgencesLabel: d.urgencesLabel,
-      urgencesTel: d.urgencesTel,
-      policeLabel: d.policeLabel,
-      policeTel: d.policeTel,
-      pompiersLabel: d.pompiersLabel,
-      pompiersTel: d.pompiersTel,
+      urgencesLabel: pick(d.urgencesLabel, fb.urgences.urgencesLabel),
+      urgencesTel: pick(d.urgencesTel, fb.urgences.urgencesTel),
+      policeLabel: pick(d.policeLabel, fb.urgences.policeLabel),
+      policeTel: pick(d.policeTel, fb.urgences.policeTel),
+      pompiersLabel: pick(d.pompiersLabel, fb.urgences.pompiersLabel),
+      pompiersTel: pick(d.pompiersTel, fb.urgences.pompiersTel),
     },
   });
 }
@@ -169,7 +183,7 @@ const STATIC_POPULATE = [
 export async function fetchStaticContent(locale: string): Promise<StaticContent> {
   if (USE_MOCK) {
     await delay();
-    return staticContentSchema.parse(getStaticContentFallback(locale));
+    return getStaticContentFallback(locale);
   }
 
   // Si la cliente n'a pas (encore) saisi le contenu Strapi du singleType
@@ -179,10 +193,10 @@ export async function fetchStaticContent(locale: string): Promise<StaticContent>
   try {
     const raw = await strapiFetch(`/guide-static-content?locale=${locale}&${STATIC_POPULATE}`);
     const response = strapiStaticResponseSchema.parse(raw);
-    return transformStaticContent(response.data);
+    return transformStaticContent(response.data, locale);
   } catch (err) {
     // eslint-disable-next-line no-console
     console.warn("[fetchStaticContent] fallback sur mock —", err instanceof Error ? err.message : err);
-    return staticContentSchema.parse(getStaticContentFallback(locale));
+    return getStaticContentFallback(locale);
   }
 }

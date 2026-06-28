@@ -20,16 +20,19 @@ export default function PlaceholderImg({ src, alt = "" }: PlaceholderImgProps) {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
+  // Pas d'URL valide → on ne rend rien (pas même le wrapper button).
+  // Évite l'affichage d'un placeholder fantôme côté voyageur quand la
+  // cliente n'a pas saisi d'image (cf. SafeImage retour cliente 2026-06-28).
+  if (!isUrl) return null;
+
   return (
     <>
       <button
         type="button"
-        onClick={() => isUrl && setOpen(true)}
+        onClick={() => setOpen(true)}
         className="w-full flex items-center justify-center cursor-pointer overflow-hidden"
       >
-        {/* SafeImage gère 2 cas : pas de src → placeholder logo CosyHome,
-            URL cassée → fallback automatique sur le même placeholder. */}
-        <SafeImage src={isUrl ? src : undefined} alt={alt} className="w-full aspect-video object-cover block" />
+        <SafeImage src={src} alt={alt} className="w-full aspect-video object-cover block" />
       </button>
 
       {open && isUrl && (

@@ -62,6 +62,9 @@ const adresseAccesSchema = z.object({
   note: z.string().optional(),
 });
 
+// Le composant `guide.contenu-reutilisable-ref` n'apparaît jamais comme bloc
+// final côté frontend — il est résolu et aplati en blocs concrets dans
+// `transformDynamicZone` (api/guide.ts). Le voyageur ne le voit jamais.
 export const dynamicZoneBlockSchema = z.discriminatedUnion("__component", [
   blocSchema,
   noteSchema,
@@ -80,29 +83,6 @@ export type AdresseAccesBlock = z.infer<typeof adresseAccesSchema>;
 // ---------------------------------------------------------------------------
 // Property schema
 // ---------------------------------------------------------------------------
-
-export const customPageSchema = z.object({
-  titre: z.string(),
-  slug: z.string(),
-  ordre: z.number(),
-  icone: z.string().optional(),
-  contenu: z.array(dynamicZoneBlockSchema),
-});
-
-export type CustomPage = z.infer<typeof customPageSchema>;
-
-const contenusReutilisablesSchema = z.object({
-  arrivee: z.array(z.array(dynamicZoneBlockSchema)).default([]),
-  depart: z.array(z.array(dynamicZoneBlockSchema)).default([]),
-  parking: z.array(z.array(dynamicZoneBlockSchema)).default([]),
-  logement: z.array(z.array(dynamicZoneBlockSchema)).default([]),
-  dechets: z.array(z.array(dynamicZoneBlockSchema)).default([]),
-  region: z.array(z.array(dynamicZoneBlockSchema)).default([]),
-  reglement: z.array(z.array(dynamicZoneBlockSchema)).default([]),
-});
-
-export type ContenusReutilisables = z.infer<typeof contenusReutilisablesSchema>;
-export type ContenusReutilisablesKey = keyof ContenusReutilisables;
 
 export const propertySchema = z.object({
   nom: z.string(),
@@ -138,18 +118,6 @@ export const propertySchema = z.object({
   dechetsContenu: z.array(dynamicZoneBlockSchema),
   regionContenu: z.array(dynamicZoneBlockSchema),
   reglesContenu: z.array(dynamicZoneBlockSchema),
-
-  contenusReutilisables: contenusReutilisablesSchema.default({
-    arrivee: [],
-    depart: [],
-    parking: [],
-    logement: [],
-    dechets: [],
-    region: [],
-    reglement: [],
-  }),
-
-  customPages: z.array(customPageSchema).default([]),
 });
 
 export type Property = z.infer<typeof propertySchema>;
@@ -169,16 +137,6 @@ export const SECTION_CONTENU_KEYS = {
 } as const satisfies Record<string, keyof Property>;
 
 export type SectionKey = keyof typeof SECTION_CONTENU_KEYS;
-
-export const SECTION_REUSABLE_KEYS: Record<SectionKey, ContenusReutilisablesKey> = {
-  "check-in": "arrivee",
-  "check-out": "depart",
-  parking: "parking",
-  property: "logement",
-  "waste-recycling": "dechets",
-  area: "region",
-  rules: "reglement",
-};
 
 // ---------------------------------------------------------------------------
 // Mock data
@@ -437,26 +395,6 @@ export const property: Property = {
     },
   ],
 
-  customPages: [
-    {
-      titre: "Jacuzzi",
-      slug: "jacuzzi",
-      ordre: 1,
-      icone: "bath",
-      contenu: [
-        {
-          __component: "guide.bloc",
-          id: 100,
-          titre: "Utilisation du jacuzzi",
-          contenu:
-            "Le jacuzzi est disponible de 9h à 22h. Merci de respecter les horaires pour le confort de tous les résidents.",
-          images: [],
-          misEnAvant: false,
-        },
-      ],
-    },
-  ],
-
   reglesContenu: [
     {
       __component: "guide.dropdown",
@@ -504,14 +442,4 @@ export const property: Property = {
       ],
     },
   ],
-
-  contenusReutilisables: {
-    arrivee: [],
-    depart: [],
-    parking: [],
-    logement: [],
-    dechets: [],
-    region: [],
-    reglement: [],
-  },
 };

@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import GuideLayout from "@/components/GuideLayout";
 import { DynamicZone } from "@/components/guide";
 import { useGuideContext, useLocale } from "@/hooks";
-import { SECTION_CONTENU_KEYS, SECTION_REUSABLE_KEYS, type SectionKey } from "@/content/property";
+import { SECTION_CONTENU_KEYS, type SectionKey } from "@/content/property";
 
 export default function GuideSection() {
   const { section } = useParams<{ slug: string; section: string }>();
@@ -14,10 +14,8 @@ export default function GuideSection() {
 
   const key = section as SectionKey;
   const contenuKey = SECTION_CONTENU_KEYS[key];
-  const title = contenuKey ? s[key as keyof typeof s] : undefined;
-  const customPage = !contenuKey ? property.customPages.find((p) => p.slug === section) : undefined;
 
-  if (!contenuKey && !customPage) {
+  if (!contenuKey) {
     return (
       <GuideLayout>
         <div className="mx-auto max-w-3xl px-4 py-16 text-center">
@@ -33,11 +31,8 @@ export default function GuideSection() {
     );
   }
 
-  const reusableKey = contenuKey ? SECTION_REUSABLE_KEYS[key] : undefined;
-  const reusableBlocks = reusableKey ? property.contenusReutilisables[reusableKey].flat() : [];
-  const specificBlocks = contenuKey ? property[contenuKey] : customPage!.contenu;
-  const blocks = [...reusableBlocks, ...specificBlocks];
-  const pageTitle = contenuKey ? title! : customPage!.titre;
+  const blocks = property[contenuKey];
+  const pageTitle = s[key as keyof typeof s];
 
   return (
     <GuideLayout>
