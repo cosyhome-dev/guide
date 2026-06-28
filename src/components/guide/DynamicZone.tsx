@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import type { DynamicZoneBlock } from "@/content/property";
 import { Separator } from "@/components/ui/separator";
+import AddressCard from "./AddressCard";
 import Bloc from "./Bloc";
 import Note from "./Note";
 import Checklist from "./Checklist";
@@ -27,6 +28,8 @@ function renderBlock(block: DynamicZoneBlock) {
       return <Checklist data={block} />;
     case "guide.dropdown":
       return <Dropdown data={block} />;
+    case "guide.adresse-acces":
+      return <AddressCard data={block} />;
   }
 }
 

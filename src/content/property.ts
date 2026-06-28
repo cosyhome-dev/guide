@@ -56,11 +56,18 @@ const dropdownSchema = z.object({
   elements: z.array(elementDropdownSchema),
 });
 
+const adresseAccesSchema = z.object({
+  __component: z.literal("guide.adresse-acces"),
+  id: z.number(),
+  note: z.string().optional(),
+});
+
 export const dynamicZoneBlockSchema = z.discriminatedUnion("__component", [
   blocSchema,
   noteSchema,
   checklistSchema,
   dropdownSchema,
+  adresseAccesSchema,
 ]);
 
 export type DynamicZoneBlock = z.infer<typeof dynamicZoneBlockSchema>;
@@ -68,6 +75,7 @@ export type BlocBlock = z.infer<typeof blocSchema>;
 export type NoteBlock = z.infer<typeof noteSchema>;
 export type ChecklistBlock = z.infer<typeof checklistSchema>;
 export type DropdownBlock = z.infer<typeof dropdownSchema>;
+export type AdresseAccesBlock = z.infer<typeof adresseAccesSchema>;
 
 // ---------------------------------------------------------------------------
 // Property schema

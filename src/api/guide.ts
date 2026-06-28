@@ -82,11 +82,18 @@ const strapiDropdownSchema = z.object({
   elements: z.array(strapiElementDropdownSchema),
 });
 
+const strapiAdresseAccesSchema = z.object({
+  __component: z.literal("guide.adresse-acces"),
+  id: z.number(),
+  note: z.string().nullable().optional(),
+});
+
 const strapiDynamicZoneSchema = z.discriminatedUnion("__component", [
   strapiBlocSchema,
   strapiNoteSchema,
   strapiChecklistSchema,
   strapiDropdownSchema,
+  strapiAdresseAccesSchema,
 ]);
 
 type StrapiDynamicZoneBlock = z.infer<typeof strapiDynamicZoneSchema>;
@@ -268,6 +275,12 @@ function transformDynamicZoneBlock(block: StrapiDynamicZoneBlock): DynamicZoneBl
         id: block.id,
         elements: block.elements.map((e) => ({ titre: e.titre, description: e.description })),
       };
+    case "guide.adresse-acces":
+      return {
+        __component: "guide.adresse-acces",
+        id: block.id,
+        note: block.note ?? undefined,
+      };
   }
 }
 
@@ -363,6 +376,7 @@ const dynamicZonePopulate = {
     "guide.note": { populate: "*" },
     "guide.checklist": { populate: { elements: { populate: "*" } } },
     "guide.dropdown": { populate: { elements: { populate: "*" } } },
+    "guide.adresse-acces": { populate: "*" },
   },
 };
 
