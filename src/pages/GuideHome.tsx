@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import GuideLayout from "@/components/GuideLayout";
 import SafeImage from "@/components/SafeImage";
 import { useGuideContext, useLocale } from "@/hooks";
-import { fmt, getIcon, RICHTEXT_CLASS } from "@/lib";
+import { fmt, getIcon } from "@/lib";
 import heroImage from "@/assets/hero-guide.jpg";
 
 const sectionKeys = [
@@ -37,7 +37,7 @@ export default function GuideHome() {
   for (const c of property.infos.codesSupplementaires) codeLines.push(`${c.nom} : ${c.valeur}`);
 
   return (
-    <GuideLayout hideEmergency>
+    <GuideLayout overlayHeader hideEmergency>
       {/* Hero */}
       <div className="relative h-[280px] md:h-[340px] overflow-hidden">
         <SafeImage
@@ -54,16 +54,17 @@ export default function GuideHome() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-5xl px-4">
+      <div className="container max-w-5xl mx-auto px-4">
         {/* Quick info */}
         <div className="mt-10 mb-6">
-          {/* Desktop */}
+          {/* Desktop / Tablet */}
           <div className="hidden md:block">
             <div className="flex items-stretch divide-x divide-border rounded-sm overflow-hidden bg-card">
-              <QuickInfoCell label={t.checkIn} lines={[property.infos.heureArrivee]} />
-              <QuickInfoCell label={t.checkOut} lines={[property.infos.heureDepart]} />
-              <QuickInfoCell label={t.accessCodes} lines={codeLines} />
+              <QuickInfoCell variant="desktop" label={t.checkIn} lines={[property.infos.heureArrivee]} />
+              <QuickInfoCell variant="desktop" label={t.checkOut} lines={[property.infos.heureDepart]} />
+              <QuickInfoCell variant="desktop" label={t.accessCodes} lines={codeLines} />
               <QuickInfoCell
+                variant="desktop"
                 label={t.wifi}
                 lines={[property.wifi.nomReseau, fmt(f.password, property.wifi.motDePasse)]}
               />
@@ -74,29 +75,32 @@ export default function GuideHome() {
           <div className="md:hidden">
             <div className="bg-card rounded-sm p-5 space-y-4">
               <div className="flex justify-center gap-8">
-                <QuickInfoCell label={t.checkIn} lines={[property.infos.heureArrivee]} />
+                <QuickInfoCell variant="mobile" label={t.checkIn} lines={[property.infos.heureArrivee]} />
                 <div className="w-px bg-border" />
-                <QuickInfoCell label={t.checkOut} lines={[property.infos.heureDepart]} />
+                <QuickInfoCell variant="mobile" label={t.checkOut} lines={[property.infos.heureDepart]} />
               </div>
               <div className="h-px bg-border" />
               <div className="flex justify-center gap-8">
-                <QuickInfoCell label={t.accessCodes} lines={codeLines} />
+                <QuickInfoCell variant="mobile" label={t.accessCodes} lines={codeLines} />
                 <div className="w-px bg-border" />
                 <QuickInfoCell
+                  variant="mobile"
                   label={t.wifi}
                   lines={[property.wifi.nomReseau, fmt(f.password, property.wifi.motDePasse)]}
                 />
               </div>
             </div>
           </div>
-
-          {property.infos.noteGenerale && (
-            <div
-              className={RICHTEXT_CLASS}
-              dangerouslySetInnerHTML={{ __html: property.infos.noteGenerale }}
-            />
-          )}
         </div>
+
+        {/* Note générale (style ref Lovable : text-small + text-center + mb-8).
+            Côté ref c'est hardcodé "La clé ouvre la porte...". Côté guide,
+            vient du champ Strapi property.infos.noteGenerale (texte plain). */}
+        {property.infos.noteGenerale && (
+          <p className="text-small text-muted-foreground text-center mb-8">
+            {property.infos.noteGenerale}
+          </p>
+        )}
 
         {/* Section grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-[20px] pb-[50px]">
@@ -105,7 +109,7 @@ export default function GuideHome() {
             return (
               <Link
                 key={key}
-                to={`/${locale}/guide/${property.slug}/${key}`}
+                to={`/${locale}/${property.slug}/guide/${key}`}
                 className="bg-card border rounded-sm p-6 flex flex-col items-center gap-3 hover:border-accent/50 hover:shadow-sm transition-all group"
               >
                 <Icon
@@ -125,7 +129,7 @@ export default function GuideHome() {
             return (
               <Link
                 key={page.slug}
-                to={`/${locale}/guide/${property.slug}/${page.slug}`}
+                to={`/${locale}/${property.slug}/guide/${page.slug}`}
                 className="bg-card border rounded-sm p-6 flex flex-col items-center gap-3 hover:border-accent/50 hover:shadow-sm transition-all group"
               >
                 <Icon
@@ -145,13 +149,39 @@ export default function GuideHome() {
   );
 }
 
-function QuickInfoCell({ label, lines }: { label: string; lines: string[] }) {
+/**
+ * Cell info — 2 variantes alignées strict ref Lovable :
+ *   desktop : flex-1 p-3 text-center / valeurs font-medium text-sm mt-0.5
+ *   mobile  : flex-1 text-center (sans p-3) / valeurs font-medium mt-1
+ *            (sans text-sm → hérite body 13px)
+ */
+function QuickInfoCell({
+  label,
+  lines,
+  variant,
+}: {
+  label: string;
+  lines: string[];
+  variant: "desktop" | "mobile";
+}) {
   const filtered = lines.filter(Boolean);
+  if (variant === "desktop") {
+    return (
+      <div className="flex-1 p-3 text-center">
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
+        {filtered.map((line, i) => (
+          <p key={i} className={`font-medium text-sm text-foreground${i === 0 ? " mt-0.5" : ""}`}>
+            {line}
+          </p>
+        ))}
+      </div>
+    );
+  }
   return (
-    <div className="flex-1 p-3 text-center">
-      <p className="label-upper">{label}</p>
+    <div className="flex-1 text-center">
+      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
       {filtered.map((line, i) => (
-        <p key={i} className={`font-medium text-sm text-foreground${i === 0 ? " mt-0.5" : ""}`}>
+        <p key={i} className={`font-medium text-foreground${i === 0 ? " mt-1" : ""}`}>
           {line}
         </p>
       ))}

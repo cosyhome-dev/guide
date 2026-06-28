@@ -10,9 +10,15 @@ import logoRectDark from "@/assets/logo-cosyhome-rect-dark.png";
 interface GuideLayoutProps {
   children: React.ReactNode;
   hideEmergency?: boolean;
+  /**
+   * Si true → header en overlay sur le hero image (absolute, gradient
+   * black/40 → transparent, logo blanc, texts blancs). Utilisé sur
+   * GuideHome (ref Lovable pattern : image hero qui passe sous le header).
+   */
+  overlayHeader?: boolean;
 }
 
-export default function GuideLayout({ children, hideEmergency = false }: GuideLayoutProps) {
+export default function GuideLayout({ children, hideEmergency = false, overlayHeader = false }: GuideLayoutProps) {
   // Hooks
   const { content, property } = useGuideContext();
   const { locale, setLocale } = useLocale();
@@ -23,7 +29,7 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
   const [langOpen, setLangOpen] = React.useState(false);
 
   // Derived
-  const basePath = `/${locale}/guide/${property.slug}`;
+  const basePath = `/${locale}/${property.slug}/guide`;
   const navItems = [
     { icon: Home, label: content.nav.home, to: basePath },
     { icon: Shield, label: content.nav.rules, to: `${basePath}/rules` },
@@ -51,26 +57,51 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
   // Render
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* Header */}
-      <header className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50">
+      {/* Header (sticky par défaut, overlay sur hero si overlayHeader=true) */}
+      <header
+        className={cn(
+          "z-50",
+          overlayHeader
+            ? "absolute top-0 left-0 right-0 bg-gradient-to-b from-black/40 to-transparent"
+            : "border-b bg-card/80 backdrop-blur-sm sticky top-0",
+        )}
+      >
         <div className="mx-auto max-w-5xl px-4 py-3 flex items-center justify-between">
           <Link to={basePath}>
             <img
               src={logoRectDark}
               alt={content.alt.brand}
-              className="h-10 w-auto object-contain"
+              className={cn(
+                "h-[40px] w-auto object-contain",
+                overlayHeader && "brightness-0 invert",
+              )}
             />
           </Link>
 
           <div className="flex items-center gap-4">
-            <span className="text-muted-foreground hidden sm:block font-display text-[15px]">
+            <span
+              className={cn(
+                "hidden sm:block",
+                overlayHeader ? "text-white/90" : "text-muted-foreground",
+              )}
+              style={{
+                fontFamily: "'ivyora-display', ui-serif, Georgia, serif",
+                fontSize: "15px",
+                fontWeight: 500,
+              }}
+            >
               {property.nom}
             </span>
 
             {/* Logout */}
             <button
               onClick={handleLogout}
-              className="text-muted-foreground hover:text-foreground transition-colors p-1"
+              className={cn(
+                "transition-colors p-1",
+                overlayHeader
+                  ? "text-white/80 hover:text-white"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
             >
               <LogOut size={16} strokeWidth={1.5} />
             </button>
@@ -79,7 +110,12 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
             <div className="relative">
               <button
                 onClick={() => setLangOpen(!langOpen)}
-                className="flex items-center gap-1.5 text-[11px] tracking-wider uppercase text-muted-foreground hover:text-foreground transition-colors px-2 py-1 border border-transparent hover:border-border"
+                className={cn(
+                  "flex items-center gap-1.5 text-[11px] tracking-wider uppercase px-2 py-1 rounded-sm border transition-colors",
+                  overlayHeader
+                    ? "text-white/80 hover:text-white border-white/20 hover:border-white/40"
+                    : "text-muted-foreground hover:text-foreground border-transparent hover:border-border",
+                )}
               >
                 <Globe size={14} strokeWidth={1.5} />
                 <span>{LOCALE_LABELS[locale]}</span>
@@ -88,7 +124,7 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
               {langOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setLangOpen(false)} />
-                  <div className="absolute right-0 top-full mt-1 bg-card border rounded-sm shadow-sm z-50 overflow-hidden">
+                  <div className="absolute right-0 top-full mt-1 bg-card border rounded-sm shadow-lg z-50 overflow-hidden">
                     {LOCALES.map((lang) => (
                       <button
                         key={lang}
@@ -141,7 +177,7 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
           <div className="flex justify-around py-2">
             {navItems.map((item) => {
               const itemClass = cn(
-                "flex flex-col items-center gap-1 px-3 py-2.5 transition-colors",
+                "flex flex-col items-center gap-1 px-3 py-1.5 rounded-sm transition-colors",
                 "to" in item && location.pathname === item.to
                   ? "text-accent"
                   : "text-muted-foreground hover:text-foreground",

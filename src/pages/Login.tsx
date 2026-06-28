@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useStaticContent, useValidateCode, useLocale, setSlug, type Locale } from "@/hooks";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,6 +75,7 @@ export default function Login() {
   const [code, setCode] = React.useState("");
   const [error, setError] = React.useState("");
   const navigate = useNavigate();
+  const { slug: slugFromUrl } = useParams<{ slug: string }>();
 
   const { locale } = useLocale();
   const { data: content } = useStaticContent();
@@ -101,8 +102,16 @@ export default function Login() {
     }
     validateCode.mutate(code, {
       onSuccess: (result) => {
+        // Sécurité : le code saisi doit correspondre au logement de l'URL.
+        // Si la cliente a partagé /fr/au-bon-coeur/ et que le voyageur entre
+        // un code valide pour un AUTRE bien, on refuse — évite que les
+        // voyageurs interchangent codes inter-biens.
+        if (slugFromUrl && result.slug !== slugFromUrl) {
+          setError(t.error);
+          return;
+        }
         setSlug(result.slug);
-        navigate(`/${locale}/guide/${result.slug}`);
+        navigate(`/${locale}/${result.slug}/guide/`);
       },
       onError: () => setError(t.error),
     });

@@ -11,9 +11,10 @@ export default function GuideProvider({ children }: { children: React.ReactNode 
   const { locale } = useLocale();
   const storedSlug = getSlug();
 
-  // Redirect to login if no stored slug or URL slug mismatch
+  // Redirect to login (de ce bien) si pas de session ou mismatch slug.
+  // Nouveau routing : /:locale/:slug/guide/... → Login = /:locale/:slug/
   if (!slug || !storedSlug || slug !== storedSlug) {
-    return <Navigate to={`/${locale}`} replace />;
+    return <Navigate to={`/${locale}/${slug ?? ""}`} replace />;
   }
 
   const { data: content, isLoading: contentLoading } = useStaticContent();

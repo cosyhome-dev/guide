@@ -1,4 +1,6 @@
+import { Fragment } from "react";
 import type { DynamicZoneBlock } from "@/content/property";
+import { Separator } from "@/components/ui/separator";
 import Bloc from "./Bloc";
 import Note from "./Note";
 import Checklist from "./Checklist";
@@ -8,21 +10,41 @@ interface DynamicZoneProps {
   blocks: DynamicZoneBlock[];
 }
 
+/**
+ * Renderer générique des blocs Strapi d'une section.
+ *
+ * Un séparateur horizontal (style ref Lovable : <div className="py-2"><Separator/></div>)
+ * est intercalé automatiquement entre chaque paire de blocs successifs
+ * — demande cliente : "ça fait vite serré entre les blocs".
+ */
+function renderBlock(block: DynamicZoneBlock) {
+  switch (block.__component) {
+    case "guide.bloc":
+      return <Bloc data={block} />;
+    case "guide.note":
+      return <Note data={block} />;
+    case "guide.checklist":
+      return <Checklist data={block} />;
+    case "guide.dropdown":
+      return <Dropdown data={block} />;
+  }
+}
+
 export default function DynamicZone({ blocks }: DynamicZoneProps) {
   return (
     <div className="space-y-6">
-      {blocks.map((block) => {
+      {blocks.map((block, i) => {
         const key = `${block.__component}-${block.id}`;
-        switch (block.__component) {
-          case "guide.bloc":
-            return <Bloc key={key} data={block} />;
-          case "guide.note":
-            return <Note key={key} data={block} />;
-          case "guide.checklist":
-            return <Checklist key={key} data={block} />;
-          case "guide.dropdown":
-            return <Dropdown key={key} data={block} />;
-        }
+        return (
+          <Fragment key={key}>
+            {i > 0 && (
+              <div className="py-2">
+                <Separator />
+              </div>
+            )}
+            {renderBlock(block)}
+          </Fragment>
+        );
       })}
     </div>
   );

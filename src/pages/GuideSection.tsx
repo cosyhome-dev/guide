@@ -23,7 +23,7 @@ export default function GuideSection() {
         <div className="mx-auto max-w-3xl px-4 py-16 text-center">
           <h1 className="text-2xl mb-4">{t.notFound}</h1>
           <Link
-            to={`/${locale}/guide/${property.slug}`}
+            to={`/${locale}/${property.slug}/guide`}
             className="text-accent hover:underline text-sm"
           >
             {t.back}
@@ -43,7 +43,7 @@ export default function GuideSection() {
     <GuideLayout>
       <div className="mx-auto max-w-3xl px-4 pt-6 pb-6">
         <Link
-          to={`/${locale}/guide/${property.slug}`}
+          to={`/${locale}/${property.slug}/guide`}
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-small transition-colors"
         >
           <ArrowLeft size={14} />
