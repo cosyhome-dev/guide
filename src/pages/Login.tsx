@@ -1,78 +1,71 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useStaticContent, useValidateCode, useLocale, setSlug, type Locale } from "@/hooks";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import heroImage from "@/assets/hero-guide.jpg";
 import cosyhomeLogo from "@/assets/logo-cosyhome.png";
 import logoCopyright from "@/assets/logo-copyright-blanc.png";
 
 /**
- * Fallback i18n minimal — utilisé si Strapi n'a pas encore répondu
- * (network lent, instance qui redémarre, etc.) afin que la page ne
- * reste jamais blanche. Le copy principal vient de Strapi (login.*),
- * ce dictionnaire est juste un filet de sécurité.
+ * Page Login — port pixel-perfect de reference-design-guide/Login.tsx.
+ * Layout split (hero gauche / form droite), form visible direct.
+ *
+ * Fallback i18n inline FR/EN/IT/DE pour fonctionner même si Strapi
+ * static-content est down ou pas saisi.
  */
+
 const FALLBACK_COPY: Record<Locale, {
   title: string;
-  waitingMessage: string;
-  haveCodeToggle: string;
+  description: string;
   codeLabel: string;
   codePlaceholder: string;
   submit: string;
-  noCodePrefix: string;
-  noCodeLink: string;
-  noCodeWhatsapp: string;
+  noCodeLine: string;
   error: string;
   brand: string;
 }> = {
   fr: {
-    title: "Votre guide de séjour",
-    waitingMessage: "Votre guide de séjour est accessible à tout moment via le lien communiqué par votre concierge.",
-    haveCodeToggle: "Vous avez reçu un code d'accès ?",
+    title: "Guide de séjour",
+    description:
+      "Entrez le code d'accès fourni dans votre confirmation de réservation pour accéder au guide de votre logement.",
     codeLabel: "Code d'accès",
     codePlaceholder: "Entrez votre code",
     submit: "Accéder au guide",
-    noCodePrefix: "Vous n'avez pas reçu de code ?",
-    noCodeLink: "Contactez votre concierge",
-    noCodeWhatsapp: "+41791234567",
+    noCodeLine: "Vous n'avez pas reçu de code ? Contactez votre concierge.",
     error: "Veuillez entrer votre code d'accès",
     brand: "CosyHome Conciergerie",
   },
   en: {
-    title: "Your stay guide",
-    waitingMessage: "Your stay guide is accessible at any time through the link provided by your concierge.",
-    haveCodeToggle: "Did you receive an access code?",
+    title: "Stay guide",
+    description:
+      "Enter the access code provided in your booking confirmation to access your property guide.",
     codeLabel: "Access code",
     codePlaceholder: "Enter your code",
     submit: "Access guide",
-    noCodePrefix: "Didn't receive a code?",
-    noCodeLink: "Contact your concierge",
-    noCodeWhatsapp: "+41791234567",
+    noCodeLine: "Didn't receive a code? Contact your concierge.",
     error: "Please enter your access code",
     brand: "CosyHome Conciergerie",
   },
   it: {
-    title: "La sua guida di soggiorno",
-    waitingMessage: "La sua guida di soggiorno è accessibile in qualsiasi momento tramite il link comunicato dal concierge.",
-    haveCodeToggle: "Ha ricevuto un codice d'accesso?",
+    title: "Guida di soggiorno",
+    description:
+      "Inserisca il codice d'accesso fornito nella conferma di prenotazione per accedere alla guida del suo alloggio.",
     codeLabel: "Codice d'accesso",
-    codePlaceholder: "Inserisca il suo codice",
+    codePlaceholder: "Inserisca il codice",
     submit: "Accedi alla guida",
-    noCodePrefix: "Non ha ricevuto un codice?",
-    noCodeLink: "Contatti il suo concierge",
-    noCodeWhatsapp: "+41791234567",
-    error: "La preghiamo di inserire il suo codice",
+    noCodeLine: "Non ha ricevuto un codice? Contatti il suo concierge.",
+    error: "Inserisca il codice d'accesso",
     brand: "CosyHome Conciergerie",
   },
   de: {
-    title: "Ihr Aufenthaltsleitfaden",
-    waitingMessage: "Ihr Aufenthaltsleitfaden ist jederzeit über den von Ihrem Concierge mitgeteilten Link zugänglich.",
-    haveCodeToggle: "Haben Sie einen Zugangscode erhalten?",
+    title: "Aufenthaltsleitfaden",
+    description:
+      "Geben Sie den in Ihrer Buchungsbestätigung erhaltenen Zugangscode ein, um auf den Leitfaden Ihrer Unterkunft zuzugreifen.",
     codeLabel: "Zugangscode",
-    codePlaceholder: "Geben Sie Ihren Code ein",
+    codePlaceholder: "Code eingeben",
     submit: "Zum Leitfaden",
-    noCodePrefix: "Keinen Code erhalten?",
-    noCodeLink: "Kontaktieren Sie Ihren Concierge",
-    noCodeWhatsapp: "+41791234567",
+    noCodeLine: "Keinen Code erhalten? Kontaktieren Sie Ihren Concierge.",
     error: "Bitte geben Sie Ihren Zugangscode ein",
     brand: "CosyHome Conciergerie",
   },
@@ -81,7 +74,6 @@ const FALLBACK_COPY: Record<Locale, {
 export default function Login() {
   const [code, setCode] = React.useState("");
   const [error, setError] = React.useState("");
-  const [codeFormOpen, setCodeFormOpen] = React.useState(false);
   const navigate = useNavigate();
 
   const { locale } = useLocale();
@@ -89,18 +81,14 @@ export default function Login() {
   const validateCode = useValidateCode();
 
   // Copy : Strapi en priorité, fallback i18n inline si pas encore chargé
-  // (évite la page blanche quand l'API met du temps à répondre).
   const fb = FALLBACK_COPY[locale] ?? FALLBACK_COPY.fr;
   const t = {
-    title: fb.title,
-    waitingMessage: fb.waitingMessage,
-    haveCodeToggle: fb.haveCodeToggle,
+    title: content?.login.title ?? fb.title,
+    description: content?.login.description ?? fb.description,
     codeLabel: content?.login.codeLabel ?? fb.codeLabel,
     codePlaceholder: content?.login.codePlaceholder ?? fb.codePlaceholder,
     submit: content?.login.submit ?? fb.submit,
-    noCodePrefix: content?.login.noCodePrefix ?? fb.noCodePrefix,
-    noCodeLink: content?.login.noCodeLink ?? fb.noCodeLink,
-    noCodeWhatsapp: content?.login.noCodeWhatsapp ?? fb.noCodeWhatsapp,
+    noCodeLine: fb.noCodeLine,
     error: content?.login.error ?? fb.error,
     brand: content?.alt.brand ?? fb.brand,
   };
@@ -111,15 +99,12 @@ export default function Login() {
       setError(t.error);
       return;
     }
-
     validateCode.mutate(code, {
       onSuccess: (result) => {
         setSlug(result.slug);
         navigate(`/${locale}/guide/${result.slug}`);
       },
-      onError: () => {
-        setError(t.error);
-      },
+      onError: () => setError(t.error),
     });
   }
 
@@ -134,7 +119,7 @@ export default function Login() {
       <div className="relative h-[40vh] md:h-screen md:w-1/2">
         <img src={heroImage} alt={t.brand} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-primary/40" />
-        <div className="absolute inset-0 flex items-center justify-center opacity-25">
+        <div className="absolute inset-0 flex items-center justify-center opacity-[0.25]">
           <img src={cosyhomeLogo} alt="" className="w-[250px] md:w-[320px] h-auto" />
         </div>
         <div className="absolute inset-0 flex items-center justify-center">
@@ -142,58 +127,38 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Right — Welcome message + (optional) code form */}
-      <div className="flex-1 flex items-center justify-center p-8 md:p-16 bg-background">
+      {/* Right — Login form (visible direct, comme la ref Lovable) */}
+      <div className="flex-1 flex items-center justify-center p-8 md:p-16 bg-white">
         <div className="w-full max-w-sm">
-          <div className="mb-8">
-            <h1 className="text-2xl mb-3">{t.title}</h1>
-            <p className="text-muted-foreground text-sm leading-relaxed">{t.waitingMessage}</p>
+          <div className="mb-10">
+            <h1 className="mb-3 text-foreground">{t.title}</h1>
+            <p className="text-muted-foreground text-sm leading-relaxed">{t.description}</p>
           </div>
 
-          {!codeFormOpen ? (
-            <button
-              type="button"
-              onClick={() => setCodeFormOpen(true)}
-              className="text-small text-accent underline underline-offset-2 hover:text-foreground transition-colors"
-            >
-              {t.haveCodeToggle}
-            </button>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="label-upper mb-1.5 block">{t.codeLabel}</label>
-                <input
-                  type="text"
-                  value={code}
-                  onChange={handleCodeChange}
-                  placeholder={t.codePlaceholder}
-                  autoFocus
-                  className="w-full bg-card border border-border rounded-sm px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground/40 transition-colors"
-                />
-                {error && <p className="text-destructive text-small mt-1.5">{error}</p>}
-              </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5 block">
+                {t.codeLabel}
+              </label>
+              <Input
+                value={code}
+                onChange={handleCodeChange}
+                placeholder={t.codePlaceholder}
+                className="bg-white border-border"
+              />
+              {error && <p className="text-destructive text-small mt-1.5">{error}</p>}
+            </div>
 
-              <button
-                type="submit"
-                disabled={validateCode.isPending}
-                className="w-full bg-primary text-primary-foreground rounded-sm px-4 py-2.5 text-xs font-light uppercase tracking-wider hover:bg-primary/90 transition-colors disabled:opacity-50"
-              >
-                {validateCode.isPending ? "..." : t.submit}
-              </button>
-            </form>
-          )}
-
-          <p className="text-small text-muted-foreground mt-8 text-center">
-            {t.noCodePrefix}{" "}
-            <a
-              href={`https://wa.me/${t.noCodeWhatsapp.replace(/\+/g, "")}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-accent underline underline-offset-2 hover:text-foreground transition-colors"
+            <Button
+              type="submit"
+              disabled={validateCode.isPending}
+              className="w-full text-xs font-light uppercase tracking-wider"
             >
-              {t.noCodeLink}
-            </a>
-          </p>
+              {validateCode.isPending ? "..." : t.submit}
+            </Button>
+          </form>
+
+          <p className="text-xs text-muted-foreground mt-8 text-left">{t.noCodeLine}</p>
         </div>
       </div>
     </div>

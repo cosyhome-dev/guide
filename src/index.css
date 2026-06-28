@@ -116,8 +116,10 @@
 }
 
 /* ============================================
-   DESIGN TOKENS — alignés sur frontend (globals.css)
-   Source de vérité : frontend/app/globals.css (charte CosyHome).
+   DESIGN TOKENS — pixel-perfect reference-design-guide (Lovable)
+   Source de vérité : reference-design-guide/src/index.css
+   ⚠️ NE PAS aligner sur le frontend CosyHome — le guide doit matcher
+   STRICTEMENT la ref Lovable validée par la cliente.
    ============================================ */
 
 @theme {
@@ -126,32 +128,38 @@
   --font-display: "ivyora-display", serif;
   --font-body: "dm-sans", sans-serif;
 
-  /* Couleurs alignées HSL frontend */
-  --color-background: hsl(37 10% 89%);          /* #E5E3E0 beige */
-  --color-foreground: hsl(0 0% 17%);            /* #2B2B2B */
-  --color-primary: hsl(20 4% 18%);              /* #312e2c marron foncé */
+  /* Couleurs HSL strictement alignées sur reference-design-guide/src/index.css */
+  --color-background: hsl(0 0% 100%);            /* blanc pur */
+  --color-foreground: hsl(25 8% 18%);            /* brun foncé chaud */
+  --color-primary: hsl(25 8% 30%);               /* marron moyen Lovable #524c47 */
   --color-primary-foreground: hsl(0 0% 100%);
-  --color-secondary: hsl(20 5% 25%);            /* #423f3c */
-  --color-secondary-foreground: hsl(0 0% 100%);
-  --color-accent: hsl(24 16% 59%);              /* #A59687 taupe signature */
+  --color-secondary: hsl(30 13% 91%);            /* beige clair */
+  --color-secondary-foreground: hsl(25 8% 18%);
+  --color-accent: hsl(28 10% 58%);               /* taupe Lovable */
   --color-accent-foreground: hsl(0 0% 100%);
-  --color-muted: hsl(0 0% 98%);
-  --color-muted-foreground: hsl(0 0% 63%);
-  --color-card: hsl(0 0% 98%);
-  --color-card-foreground: hsl(0 0% 17%);
-  --color-border: hsl(27 18% 84%);              /* #DDD5CE */
-  --color-destructive: hsl(0 84.2% 60.2%);
-  --color-destructive-foreground: hsl(0 0% 98%);
+  --color-muted: hsl(30 6% 95%);
+  --color-muted-foreground: hsl(30 2% 32%);      /* brun-gris foncé ref */
+  --color-card: hsl(0 0% 100%);                  /* blanc pur */
+  --color-card-foreground: hsl(25 8% 18%);
+  --color-border: hsl(30 6% 88%);                /* border ref */
+  --color-input: hsl(30 6% 88%);
+  --color-ring: hsl(25 8% 30%);
+  --color-destructive: hsl(8 42% 48%);
+  --color-destructive-foreground: hsl(0 0% 100%);
 
-  /* Radius aligné frontend — design anguleux 2px */
-  --radius-sm: 0.125rem;
-  --radius: 0.125rem;
+  /* Radius alignés strict ref Lovable (Tailwind v3 calc) :
+       rounded-sm = calc(0.25rem - 4px) = 0px (carré)
+       rounded-md = calc(0.25rem - 2px) = 2px
+       rounded-lg = var(--radius)       = 4px
+     Note : Shadcn Button/Input utilisent rounded-md → 2px côté ref. */
+  --radius: 0.25rem;
+  --radius-sm: 0;
   --radius-md: 0.125rem;
-  --radius-lg: 0.125rem;
-  --radius-xl: 0.125rem;
-  --radius-2xl: 0.125rem;
-  --radius-3xl: 0.125rem;
-  --radius-4xl: 0.125rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.375rem;
+  --radius-2xl: 0.5rem;
+  --radius-3xl: 0.75rem;
+  --radius-4xl: 1rem;
 }
 
 /* ── Base styles ── */
@@ -175,9 +183,9 @@
 
   h1 {
     font-family: var(--font-display);
-    font-weight: 500;                   /* aligné weight ivyora (était 400 DM Serif Text) */
+    font-weight: 500;
     font-size: 30px;
-    letter-spacing: 0;
+    letter-spacing: 0.2px;
   }
 
   h2 {

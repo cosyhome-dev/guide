@@ -136,7 +136,7 @@ export default function GuideLayout({ children, hideEmergency = false }: GuideLa
       )}
 
       {/* Bottom navigation */}
-      <nav className="border-t bg-card/90 backdrop-blur-sm sticky bottom-0 z-50">
+      <nav className="border-t bg-[hsl(30,17%,91%)] sticky bottom-0 z-50">
         <div className="mx-auto max-w-5xl px-2">
           <div className="flex justify-around py-2">
             {navItems.map((item) => {

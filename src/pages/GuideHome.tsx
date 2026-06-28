@@ -45,7 +45,7 @@ export default function GuideHome() {
           alt={property.nom}
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-linear-to-t from-primary/85 via-primary/40 to-primary/15" />
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/85 via-primary/40 to-primary/15" />
         <div className="absolute bottom-0 left-0 right-0 px-6 pb-[calc(1.5rem+10px)] md:px-8 md:pb-[calc(2rem+10px)] text-center">
           <h1 className="text-primary-foreground text-4xl md:text-5xl mb-3">{t.welcome}</h1>
           <p className="text-primary-foreground/80 tracking-[2px] uppercase text-[13px]">
@@ -56,10 +56,10 @@ export default function GuideHome() {
 
       <div className="mx-auto max-w-5xl px-4">
         {/* Quick info */}
-        <div className="my-6">
+        <div className="mt-10 mb-6">
           {/* Desktop */}
           <div className="hidden md:block">
-            <div className="flex items-stretch divide-x divide-border border rounded-sm overflow-hidden bg-card">
+            <div className="flex items-stretch divide-x divide-border rounded-sm overflow-hidden bg-card">
               <QuickInfoCell label={t.checkIn} lines={[property.infos.heureArrivee]} />
               <QuickInfoCell label={t.checkOut} lines={[property.infos.heureDepart]} />
               <QuickInfoCell label={t.accessCodes} lines={codeLines} />
@@ -72,7 +72,7 @@ export default function GuideHome() {
 
           {/* Mobile */}
           <div className="md:hidden">
-            <div className="bg-card border rounded-sm p-5 space-y-4">
+            <div className="bg-card rounded-sm p-5 space-y-4">
               <div className="flex justify-center gap-8">
                 <QuickInfoCell label={t.checkIn} lines={[property.infos.heureArrivee]} />
                 <div className="w-px bg-border" />
@@ -113,7 +113,7 @@ export default function GuideHome() {
                   strokeWidth={1.2}
                   className="text-muted-foreground group-hover:text-accent transition-colors"
                 />
-                <span className="label-upper text-center group-hover:text-foreground transition-colors">
+                <span className="text-[11px] tracking-wider uppercase text-center text-muted-foreground group-hover:text-foreground transition-colors">
                   {s[key]}
                 </span>
               </Link>
@@ -133,7 +133,7 @@ export default function GuideHome() {
                   strokeWidth={1.2}
                   className="text-muted-foreground group-hover:text-accent transition-colors"
                 />
-                <span className="label-upper text-center group-hover:text-foreground transition-colors">
+                <span className="text-[11px] tracking-wider uppercase text-center text-muted-foreground group-hover:text-foreground transition-colors">
                   {page.titre}
                 </span>
               </Link>
