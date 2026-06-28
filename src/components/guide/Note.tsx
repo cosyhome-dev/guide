@@ -12,7 +12,7 @@ export default function Note({ data }: NoteProps) {
       <Info size={16} className="text-accent shrink-0 mt-0.5" strokeWidth={1.5} />
       <div className={data.centre ? "text-center w-full" : ""}>
         {data.surtitre && (
-          <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+          <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
             {data.surtitre}
           </p>
         )}

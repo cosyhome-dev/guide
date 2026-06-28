@@ -14,7 +14,7 @@ export default function Bloc({ data }: BlocProps) {
       {(data.surtitre || data.titre) && (
         <div className="space-y-0.5">
           {data.surtitre && (
-            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
               {data.surtitre}
             </p>
           )}
@@ -25,7 +25,11 @@ export default function Bloc({ data }: BlocProps) {
         <div className={RICHTEXT_CLASS} dangerouslySetInnerHTML={{ __html: data.contenu }} />
       )}
       {data.liens && data.liens.length > 0 && (
-        <div className={`flex flex-wrap gap-2${data.centrerBouton ? " justify-center" : ""}`}>
+        <div
+          className={`flex flex-wrap gap-2 pt-1 pb-4${
+            data.centrerBouton ? " justify-center" : ""
+          }`}
+        >
           {data.liens.map((lien) => (
             <LinkButton key={lien.url} title={lien.label} url={lien.url} />
           ))}

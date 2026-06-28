@@ -11,7 +11,7 @@ export default function LinkButton({ title, url }: LinkButtonProps) {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group inline-flex items-center gap-3 bg-accent px-5 py-2.5 text-sm text-accent-foreground transition-all duration-300 hover:bg-accent/85"
+      className="group inline-flex items-center gap-3 bg-accent rounded-sm px-5 py-2.5 text-sm text-accent-foreground transition-all duration-300 hover:bg-accent/85"
     >
       <span>{title}</span>
       <MoveRight

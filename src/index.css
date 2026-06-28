@@ -132,8 +132,9 @@
     font-size: 13px;                    /* aligné référence Lovable (densité guide) */
     letter-spacing: 0.4px;
     margin: 0;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    /* Pas de font-smoothing forcé : la ref Lovable laisse le rendu subpixel
+       par défaut → texte plus dense ("plus noir") + bouton primary moins
+       "froid". Forcer antialiased rendait tout subtilement plus clair. */
   }
 
   h1 {

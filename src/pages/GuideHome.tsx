@@ -55,11 +55,12 @@ export default function GuideHome() {
       </div>
 
       <div className="container max-w-5xl mx-auto px-4">
-        {/* Quick info */}
-        <div className="mt-10 mb-6">
+        {/* Quick info — pas de bordure externe (cliente) ; juste dividers
+            internes + padding cellule augmenté pour respirer. */}
+        <div className="mt-10 mb-8">
           {/* Desktop / Tablet */}
           <div className="hidden md:block">
-            <div className="flex items-stretch divide-x divide-border rounded-sm overflow-hidden bg-card">
+            <div className="flex items-stretch divide-x divide-border">
               <QuickInfoCell variant="desktop" label={t.checkIn} lines={[property.infos.heureArrivee]} />
               <QuickInfoCell variant="desktop" label={t.checkOut} lines={[property.infos.heureDepart]} />
               <QuickInfoCell variant="desktop" label={t.accessCodes} lines={codeLines} />
@@ -73,7 +74,7 @@ export default function GuideHome() {
 
           {/* Mobile */}
           <div className="md:hidden">
-            <div className="bg-card rounded-sm p-5 space-y-4">
+            <div className="space-y-5">
               <div className="flex justify-center gap-8">
                 <QuickInfoCell variant="mobile" label={t.checkIn} lines={[property.infos.heureArrivee]} />
                 <div className="w-px bg-border" />
@@ -167,7 +168,7 @@ function QuickInfoCell({
   const filtered = lines.filter(Boolean);
   if (variant === "desktop") {
     return (
-      <div className="flex-1 p-3 text-center">
+      <div className="flex-1 px-4 py-5 text-center">
         <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
         {filtered.map((line, i) => (
           <p key={i} className={`font-medium text-sm text-foreground${i === 0 ? " mt-0.5" : ""}`}>

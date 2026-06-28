@@ -41,7 +41,7 @@ export default function GuideSection() {
 
   return (
     <GuideLayout>
-      <div className="mx-auto max-w-3xl px-4 pt-6 pb-6">
+      <div className="mx-auto max-w-3xl px-4 pt-4 pb-12 md:pt-6 md:pb-14">
         <Link
           to={`/${locale}/${property.slug}/guide`}
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-small transition-colors"
@@ -54,7 +54,7 @@ export default function GuideSection() {
         <div className="w-14 h-[0.5px] bg-accent mx-auto" />
       </div>
 
-      <div className="mx-auto max-w-3xl px-4 pb-8">
+      <div className="mx-auto max-w-3xl px-4 pb-6 md:pb-8">
         <DynamicZone blocks={blocks} />
       </div>
     </GuideLayout>
