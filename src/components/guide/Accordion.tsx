@@ -27,21 +27,21 @@ export default function Accordion({ items }: AccordionProps) {
 
   // Render
   return (
-    <div className="w-full divide-y divide-border border-y">
+    <div className="w-full">
       {items.map((item, i) => {
         const isOpen = openItems.has(i);
         return (
-          <div key={i}>
+          <div key={i} className="border-b">
             <button
               onClick={() => toggle(i)}
-              className="flex w-full items-center justify-between py-4 text-left transition-colors hover:text-foreground"
+              className="flex w-full items-center justify-between py-4 text-left transition-all hover:underline"
             >
               <h2 className="text-left">{item.title}</h2>
               <ChevronDown
                 size={16}
-                strokeWidth={1.5}
+                strokeWidth={2}
                 className={cn(
-                  "shrink-0 text-muted-foreground transition-transform duration-200",
+                  "shrink-0 transition-transform duration-200",
                   isOpen && "rotate-180",
                 )}
               />

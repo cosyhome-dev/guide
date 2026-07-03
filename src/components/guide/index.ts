@@ -1,10 +1,5 @@
 export { default as Accordion } from "./Accordion";
-export { default as AddressCard } from "./AddressCard";
-export { default as Bloc } from "./Bloc";
-export { default as Checklist } from "./Checklist";
-export { default as Dropdown } from "./Dropdown";
 export { default as DynamicZone } from "./DynamicZone";
 export { default as ImageGrid } from "./ImageGrid";
 export { default as LinkButton } from "./LinkButton";
-export { default as Note } from "./Note";
 export { default as PlaceholderImg } from "./PlaceholderImg";
