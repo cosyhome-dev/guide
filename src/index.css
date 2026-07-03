@@ -65,10 +65,41 @@
   src: url("/fonts/ivyora-display/IvyOraDisplay-BoldItalic.woff2") format("woff2");
 }
 
-/* DM Sans : chargé via Google Fonts CDN dans index.html — matche
-   pixel-perfect le rendu ref Lovable (les fichiers self-hosted webfont
-   pouvaient subtilement diverger du rendu CDN, notamment sur les weights
-   500/600 utilisés sur QuickInfo). */
+/* DM Sans self-hosted (public/fonts/dm-sans, statiques v17 latin) —
+   remplace le CDN Google Fonts : même police, mêmes graisses 300/400/500/600
+   que l'ancienne URL css2, donc rendu identique à la ref Lovable ;
+   supprime la requête render-blocking + dépendance externe (RGPD).
+   Seuls les poids droits réellement utilisés sont déclarés
+   (300 corps, 400 défaut, 500/600 QuickInfo & titres). */
+
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/dm-sans/dm-sans-v17-latin-300.woff2") format("woff2");
+}
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/dm-sans/dm-sans-v17-latin-regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/dm-sans/dm-sans-v17-latin-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/dm-sans/dm-sans-v17-latin-600.woff2") format("woff2");
+}
 
 /* ============================================
    DESIGN TOKENS — pixel-perfect reference-design-guide (Lovable)
@@ -193,5 +224,4 @@
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--color-muted-foreground);
 }

@@ -49,7 +49,7 @@ export default function GuideAccess() {
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Left - Image */}
       <div className="relative h-[40vh] md:h-screen md:w-1/2">
-        <img src={heroImage} alt={t.brand} className="w-full h-full object-cover" />
+        <img src={heroImage} alt={t.brand} fetchPriority="high" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-primary/40" />
         <div className="absolute inset-0 flex items-center justify-center opacity-[0.25]">
           <img src={cosyhomeLogo} alt="" className="w-[250px] md:w-[320px] h-auto" />

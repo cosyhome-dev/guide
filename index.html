@@ -7,12 +7,14 @@
     <title>CosyHome — Guide de séjour</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/favicon.svg" />
-    <!-- DM Sans via Google Fonts CDN — matche pixel-perfect le rendu ref Lovable -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" />
-    <!-- IvyOra Display reste self-hosted (pas dispo Google Fonts) -->
+    <!-- Fonts 100% self-hosted (DM Sans + IvyOra) — mêmes graisses que
+         l'ancien CDN Google Fonts (300/400/500/600), rendu identique ;
+         supprime la requête render-blocking + le tracking Google (RGPD).
+         Les @font-face sont déclarés dans src/index.css. -->
+    <link rel="preload" href="/fonts/dm-sans/dm-sans-v17-latin-300.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/ivyora-display/IvyOraDisplay-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- Hero login/attente (LCP) — Vite réécrit ce href vers l'asset hashé au build -->
+    <link rel="preload" href="/src/assets/hero-guide.jpg" as="image" fetchpriority="high" />
   </head>
   <body>
     <div id="root"></div>

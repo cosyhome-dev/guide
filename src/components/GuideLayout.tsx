@@ -153,7 +153,7 @@ export default function GuideLayout({ children, hideEmergency = false, overlayHe
       {/* Emergency footer */}
       {!hideEmergency && (
         <div className="border-t bg-card/50 py-3">
-          <div className="mx-auto max-w-5xl px-4 flex justify-center gap-6 label-upper">
+          <div className="mx-auto max-w-5xl px-4 flex justify-center gap-6 label-upper text-muted-foreground">
             {[
               { label: urgences.urgencesLabel, tel: urgences.urgencesTel },
               { label: urgences.policeLabel, tel: urgences.policeTel },

@@ -1,4 +1,3 @@
-import qs from "qs";
 import { z } from "zod";
 import {
   propertySchema,
@@ -15,6 +14,7 @@ import {
   strapiImageSchema,
   extractImageUrl,
 } from "./strapi";
+import { getToken, clearSlug } from "@/hooks/useAccessCode";
 
 // ---------------------------------------------------------------------------
 // Strapi v5 dynamic zone schemas
@@ -214,8 +214,12 @@ const strapiGuideResponseSchema = z.object({
   meta: z.object({}).passthrough(),
 });
 
+// Réponse de POST /guides/access : jeton signé HMAC (3 jours) à présenter
+// en Bearer sur GET /guides/access/:slug. `expiresAt` informatif (ms epoch).
 const accessResponseSchema = z.object({
   slug: z.string(),
+  token: z.string(),
+  expiresAt: z.number().optional(),
 });
 
 // ---------------------------------------------------------------------------
@@ -356,78 +360,28 @@ function transformGuide(d: StrapiGuideData): Property {
 }
 
 // ---------------------------------------------------------------------------
-// Populate query — Strapi v5 syntax with [on] for dynamic zones
-// ---------------------------------------------------------------------------
-
-// Populate pour les composants concrets (sans le ref pour éviter la récursion).
-const inlineComponentsPopulate = {
-  "guide.bloc": {
-    populate: {
-      images: {
-        populate: { image: { fields: ["url", "alternativeText"] } },
-      },
-      liens: { populate: "*" },
-    },
-  },
-  "guide.note": { populate: "*" },
-  "guide.checklist": { populate: { elements: { populate: "*" } } },
-  "guide.dropdown": { populate: { elements: { populate: "*" } } },
-  "guide.adresse-acces": { populate: "*" },
-};
-
-const dynamicZonePopulate = {
-  on: {
-    ...inlineComponentsPopulate,
-    "guide.contenu-reutilisable-ref": {
-      populate: {
-        contenu: {
-          fields: ["id"],
-          populate: {
-            contenu: { on: inlineComponentsPopulate },
-          },
-        },
-      },
-    },
-  },
-};
-
-function buildGuideQuery(slug: string, locale: string): string {
-  return qs.stringify(
-    {
-      filters: { slug: { $eq: slug } },
-      locale,
-      populate: {
-        imagePrincipale: { fields: ["url", "alternativeText"] },
-        localisation: { populate: "*" },
-        gestionnaire: { populate: "*" },
-        destination: { fields: ["id", "nom"] },
-        wifi: { populate: "*" },
-        infos: { populate: "*" },
-        arriveeContenu: dynamicZonePopulate,
-        departContenu: dynamicZonePopulate,
-        parkingContenu: dynamicZonePopulate,
-        logementContenu: dynamicZonePopulate,
-        dechetsContenu: dynamicZonePopulate,
-        regionContenu: dynamicZonePopulate,
-        reglesContenu: dynamicZonePopulate,
-      },
-    },
-    { encodeValuesOnly: true },
-  );
-}
-
-// ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
-export async function validateCode(code: string): Promise<{ slug: string }> {
+/**
+ * POST /guides/access — valide le couple (slug, code) et retourne le jeton
+ * signé. Le populate du guide est désormais FIXÉ CÔTÉ SERVEUR (endpoint
+ * protégé GET /guides/access/:slug) : plus aucune query publique.
+ *
+ * Le backend répond 404 générique que le slug soit inconnu ou le code
+ * invalide — l'existence d'un guide ne se vérifie QUE via cet appel.
+ */
+export async function validateCode(
+  slug: string,
+  code: string,
+): Promise<{ slug: string; token: string }> {
   if (USE_MOCK) {
     await delay(200);
     if (!code.trim()) throw new Error("CODE_REQUIRED");
-    return { slug: "le-saint-georges" };
+    return { slug: slug || "le-saint-georges", token: "mock-token" };
   }
 
-  const raw = await strapiPost("/guides/access", { code });
+  const raw = await strapiPost("/guides/access", { slug, code });
   return accessResponseSchema.parse(raw);
 }
 
@@ -437,7 +391,24 @@ export async function fetchGuide(slug: string, locale: string): Promise<Property
     return propertySchema.parse(mockData);
   }
 
-  const raw = await strapiFetch(`/guides?${buildGuideQuery(slug, locale)}`);
+  const token = getToken();
+  if (!token) throw new Error("UNAUTHORIZED");
+
+  let raw: unknown;
+  try {
+    // Endpoint protégé : jeton signé en Bearer, populate défini côté serveur
+    // (même shape de réponse que l'ancien GET /guides?filters[slug]=…).
+    raw = await strapiFetch(
+      `/guides/access/${encodeURIComponent(slug)}?locale=${encodeURIComponent(locale)}`,
+      { token },
+    );
+  } catch (err) {
+    // Jeton expiré/invalide côté serveur → on purge la session locale pour
+    // que GuideProvider redirige vers le login du bien.
+    if (err instanceof Error && err.message === "UNAUTHORIZED") clearSlug();
+    throw err;
+  }
+
   const isDev = import.meta.env.DEV;
   if (isDev) console.log("[fetchGuide] raw response:", JSON.stringify(raw, null, 2));
   try {

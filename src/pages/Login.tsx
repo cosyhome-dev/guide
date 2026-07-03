@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useStaticContent, useValidateCode, useLocale, setSlug, type Locale } from "@/hooks";
+import { useStaticContent, useValidateCode, useLocale, setAccess, type Locale } from "@/hooks";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import heroImage from "@/assets/hero-guide.jpg";
@@ -23,6 +23,7 @@ const FALLBACK_COPY: Record<Locale, {
   submit: string;
   noCodeLine: string;
   error: string;
+  rateLimited: string;
   brand: string;
 }> = {
   fr: {
@@ -34,6 +35,7 @@ const FALLBACK_COPY: Record<Locale, {
     submit: "Accéder au guide",
     noCodeLine: "Vous n'avez pas reçu de code ? Contactez votre concierge.",
     error: "Veuillez entrer votre code d'accès",
+    rateLimited: "Trop de tentatives — réessayez dans quelques minutes.",
     brand: "CosyHome Conciergerie",
   },
   en: {
@@ -45,6 +47,7 @@ const FALLBACK_COPY: Record<Locale, {
     submit: "Access guide",
     noCodeLine: "Didn't receive a code? Contact your concierge.",
     error: "Please enter your access code",
+    rateLimited: "Too many attempts — please try again in a few minutes.",
     brand: "CosyHome Conciergerie",
   },
   it: {
@@ -56,6 +59,7 @@ const FALLBACK_COPY: Record<Locale, {
     submit: "Accedi alla guida",
     noCodeLine: "Non ha ricevuto un codice? Contatti il suo concierge.",
     error: "Inserisca il codice d'accesso",
+    rateLimited: "Troppi tentativi — riprovi tra qualche minuto.",
     brand: "CosyHome Conciergerie",
   },
   de: {
@@ -67,6 +71,7 @@ const FALLBACK_COPY: Record<Locale, {
     submit: "Zum Leitfaden",
     noCodeLine: "Keinen Code erhalten? Kontaktieren Sie Ihren Concierge.",
     error: "Bitte geben Sie Ihren Zugangscode ein",
+    rateLimited: "Zu viele Versuche — bitte versuchen Sie es in einigen Minuten erneut.",
     brand: "CosyHome Conciergerie",
   },
 };
@@ -91,30 +96,30 @@ export default function Login() {
     submit: content?.login.submit ?? fb.submit,
     noCodeLine: fb.noCodeLine,
     error: content?.login.error ?? fb.error,
+    rateLimited: fb.rateLimited,
     brand: content?.alt.brand ?? fb.brand,
   };
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!code.trim()) {
+    if (!code.trim() || !slugFromUrl) {
       setError(t.error);
       return;
     }
-    validateCode.mutate(code, {
-      onSuccess: (result) => {
-        // Sécurité : le code saisi doit correspondre au logement de l'URL.
-        // Si la cliente a partagé /fr/au-bon-coeur/ et que le voyageur entre
-        // un code valide pour un AUTRE bien, on refuse — évite que les
-        // voyageurs interchangent codes inter-biens.
-        if (slugFromUrl && result.slug !== slugFromUrl) {
-          setError(t.error);
-          return;
-        }
-        setSlug(result.slug);
-        navigate(`/${locale}/${result.slug}/guide/`);
+    // Sécurité : la validation slug + code est faite CÔTÉ SERVEUR (réponse
+    // générique anti-énumération) et le jeton signé retourné est lié au
+    // slug — un code valide pour un AUTRE bien ne donne jamais accès.
+    validateCode.mutate(
+      { slug: slugFromUrl, code },
+      {
+        onSuccess: (result) => {
+          setAccess(result.slug, result.token);
+          navigate(`/${locale}/${result.slug}/guide/`);
+        },
+        onError: (err) =>
+          setError(err instanceof Error && err.message === "RATE_LIMITED" ? t.rateLimited : t.error),
       },
-      onError: () => setError(t.error),
-    });
+    );
   }
 
   function handleCodeChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -126,7 +131,7 @@ export default function Login() {
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Left — Hero image */}
       <div className="relative h-[40vh] md:h-screen md:w-1/2">
-        <img src={heroImage} alt={t.brand} className="w-full h-full object-cover" />
+        <img src={heroImage} alt={t.brand} fetchPriority="high" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-primary/40" />
         <div className="absolute inset-0 flex items-center justify-center opacity-[0.25]">
           <img src={cosyhomeLogo} alt="" className="w-[250px] md:w-[320px] h-auto" />

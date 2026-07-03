@@ -21,9 +21,11 @@ interface NoteProps {
  */
 export default function Note({ data }: NoteProps) {
   const hasHeader = Boolean(data.surtitre || data.titre);
+  // Ref : titre seul (SectionDechets) = space-y-3 ; surtitre + valeur
+  // (SectionDepart check-out) = space-y-2.
   const wrapperClass = [
     "bg-secondary/40 border rounded-sm p-4",
-    hasHeader ? "space-y-2" : "",
+    hasHeader ? (data.surtitre ? "space-y-2" : "space-y-3") : "",
     data.centre ? "text-center" : "",
   ]
     .filter(Boolean)

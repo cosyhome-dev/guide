@@ -7,14 +7,14 @@ interface BlocProps {
 }
 
 export default function Bloc({ data }: BlocProps) {
-  const wrapperClass = data.misEnAvant ? "bg-[#f4f2f0] border p-4 space-y-3" : "space-y-3";
+  const wrapperClass = data.misEnAvant ? "bg-secondary/40 border p-4 space-y-3" : "space-y-3";
 
   return (
     <div className={wrapperClass}>
       {(data.surtitre || data.titre) && (
-        <div className="space-y-0.5">
+        <div className="space-y-1">
           {data.surtitre && (
-            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
               {data.surtitre}
             </p>
           )}

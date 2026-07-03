@@ -3,6 +3,7 @@ import { validateCode } from "@/api";
 
 export function useValidateCode() {
   return useMutation({
-    mutationFn: (code: string) => validateCode(code),
+    mutationFn: ({ slug, code }: { slug: string; code: string }) =>
+      validateCode(slug, code),
   });
 }

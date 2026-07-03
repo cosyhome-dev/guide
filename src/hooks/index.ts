@@ -1,8 +1,6 @@
 export { useStaticContent } from "./useStaticContent";
-export { useGuide } from "./useGuide";
-export { useGuideExists } from "./useGuideExists";
 export { useValidateCode } from "./useValidateCode";
-export { getSlug, setSlug, clearSlug } from "./useAccessCode";
+export { setAccess } from "./useAccessCode";
 export { useGuideContext } from "./guideContext";
 export { default as GuideProvider } from "./GuideProvider";
 export {
