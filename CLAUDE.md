@@ -13,6 +13,7 @@ Site privé (noindex, nofollow, robots.txt Disallow) sécurisé par code d'accè
 - lucide-react (icônes)
 - clsx + tailwind-merge (cn utility)
 - Fonts : DM Serif Text (titres) + DM Sans (body) via Google Fonts
+- Package manager : **pnpm** (lockfile unique `pnpm-lock.yaml` — `package-lock.json` supprimé)
 
 ## Architecture
 
