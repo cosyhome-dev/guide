@@ -58,9 +58,15 @@ export function extractImageUrls(media: StrapiImages | undefined): string[] {
 // Fetch helpers
 // ---------------------------------------------------------------------------
 
-export async function strapiFetch<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`);
+export async function strapiFetch<T>(
+  path: string,
+  options?: { token?: string },
+): Promise<T> {
+  const headers: Record<string, string> = {};
+  if (options?.token) headers.Authorization = `Bearer ${options.token}`;
+  const res = await fetch(`${API_URL}${path}`, { headers });
   if (!res.ok) {
+    if (res.status === 401) throw new Error("UNAUTHORIZED");
     if (res.status === 404) throw new Error("NOT_FOUND");
     throw new Error(`API_ERROR_${res.status}`);
   }
@@ -74,8 +80,10 @@ export async function strapiPost<T>(path: string, body: unknown): Promise<T> {
     body: JSON.stringify(body),
   });
   if (!res.ok) {
+    // 404 générique côté backend : slug inconnu OU code invalide (anti-énumération)
     if (res.status === 404) throw new Error("INVALID_CODE");
     if (res.status === 400) throw new Error("BAD_REQUEST");
+    if (res.status === 429) throw new Error("RATE_LIMITED");
     throw new Error(`API_ERROR_${res.status}`);
   }
   return res.json();
