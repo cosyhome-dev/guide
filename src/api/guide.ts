@@ -136,9 +136,13 @@ type StrapiDynamicZoneBlock = z.infer<typeof strapiDynamicZoneSchema>;
 const strapiLocalisationSchema = z.object({
   id: z.number().optional(),
   address: z.string(),
+  // Champ GPS unique : la cliente colle « 46.30855, 7.48218 » tel que
+  // Google Maps le donne — parsé côté guide, ordre indifférent.
+  gps: z.string().nullable().optional(),
   // Tolérant : si la cliente n'a pas saisi les coordonnées, on fallback
   // sur l'adresse dans le lien Maps (Google accepte une adresse texte en
   // query). Évite de crasher tout le guide pour ce seul champ manquant.
+  // (Anciens champs — conservés pour les données déjà saisies.)
   latitude: z.coerce.number().nullable().optional(),
   longitude: z.coerce.number().nullable().optional(),
 });
@@ -329,11 +333,29 @@ function normalizeSwissCoords(lat: number, lng: number): [number, number] {
   return [lat, lng];
 }
 
+/**
+ * Parse le champ GPS unique (« 46.30855, 7.48218 » collé tel quel depuis
+ * Google Maps). Séparateur libre (virgule/espace/point-virgule), ordre
+ * indifférent (normalisé via normalizeSwissCoords). Null si illisible.
+ */
+function parseGps(gps: string): [number, number] | null {
+  const nums = gps.match(/-?\d+(?:\.\d+)?/g);
+  if (!nums || nums.length < 2) return null;
+  const a = Number(nums[0]);
+  const b = Number(nums[1]);
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
+  return normalizeSwissCoords(a, b);
+}
+
 function transformLocalisation(loc: z.infer<typeof strapiLocalisationSchema>) {
-  const hasCoords = loc.latitude != null && loc.longitude != null;
-  const mapsQuery = hasCoords
-    ? normalizeSwissCoords(loc.latitude!, loc.longitude!).join(",")
-    : encodeURIComponent(loc.address);
+  // Priorité : champ GPS unique → anciens champs lat/lng → adresse texte.
+  const fromGps = loc.gps ? parseGps(loc.gps) : null;
+  const coords =
+    fromGps ??
+    (loc.latitude != null && loc.longitude != null
+      ? normalizeSwissCoords(loc.latitude, loc.longitude)
+      : null);
+  const mapsQuery = coords ? coords.join(",") : encodeURIComponent(loc.address);
   return {
     address: loc.address,
     mapsUrl: `https://www.google.com/maps?q=${mapsQuery}`,
