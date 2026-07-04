@@ -315,10 +315,24 @@ function transformDynamicZone(blocks: StrapiDynamicZoneBlock[]): DynamicZoneBloc
   return out;
 }
 
+/**
+ * Corrige une saisie lat/lng inversée (retour cliente 2026-07-04 : le lien
+ * « Itinéraire » envoyait en Éthiopie). Google Maps donne « 46.299, 7.455 »
+ * d'un bloc — facile de coller les deux nombres dans les mauvais champs.
+ * En Suisse la latitude est toujours ~45.5–48 et la longitude ~5.5–11 :
+ * l'inversion est détectable sans ambiguïté, on la répare silencieusement.
+ */
+function normalizeSwissCoords(lat: number, lng: number): [number, number] {
+  const isSwissLat = (n: number) => n >= 45.5 && n <= 48;
+  const isSwissLng = (n: number) => n >= 5.5 && n <= 11;
+  if (!isSwissLat(lat) && isSwissLng(lat) && isSwissLat(lng)) return [lng, lat];
+  return [lat, lng];
+}
+
 function transformLocalisation(loc: z.infer<typeof strapiLocalisationSchema>) {
   const hasCoords = loc.latitude != null && loc.longitude != null;
   const mapsQuery = hasCoords
-    ? `${loc.latitude},${loc.longitude}`
+    ? normalizeSwissCoords(loc.latitude!, loc.longitude!).join(",")
     : encodeURIComponent(loc.address);
   return {
     address: loc.address,
