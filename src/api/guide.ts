@@ -31,13 +31,6 @@ const strapiElementChecklistSchema = z.object({
   texte: z.string(),
 });
 
-// Wrapper repeatable autour d'un média — permet le drag-and-drop reorder
-// dans l'admin Strapi (composant `guide.bloc-image`).
-const strapiBlocImageSchema = z.object({
-  id: z.number(),
-  image: strapiImageSchema,
-});
-
 const strapiElementDropdownSchema = z.object({
   id: z.number(),
   titre: z.string(),
@@ -53,7 +46,9 @@ const strapiBlocSchema = z.object({
   titre: z.string().nullable().optional(),
   surtitre: z.string().nullable().optional(),
   contenu: z.string().nullable(),
-  images: z.array(strapiBlocImageSchema).nullable().optional().transform((v) => v ?? []),
+  // `images` = champ média multiple Strapi (avant : composant bloc-image) →
+  // tableau de médias direct.
+  images: z.array(strapiImageSchema).nullable().optional().transform((v) => v ?? []),
   liens: z.array(strapiLienExterneSchema).nullable().optional().transform((v) => v ?? []),
   misEnAvant: z
     .boolean()
@@ -248,10 +243,10 @@ function transformInlineBlock(block: StrapiInlineBlock): DynamicZoneBlock {
         titre: block.titre ?? undefined,
         surtitre: block.surtitre ?? undefined,
         contenu: block.contenu ?? undefined,
-        // Repeatable wrapper `guide.bloc-image` → on extrait l'URL de
-        // chaque item.image (et on skip les items où l'image manque).
+        // `images` = champ média multiple → on extrait l'URL de chaque
+        // média (et on skip ceux dont l'URL manque).
         images: block.images
-          .map((item) => extractImageUrl(item.image))
+          .map((img) => extractImageUrl(img))
           .filter((url): url is string => Boolean(url)),
         liens: block.liens?.map((l) => ({ label: l.label, url: l.url })),
         misEnAvant: block.misEnAvant,
