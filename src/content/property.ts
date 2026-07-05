@@ -25,7 +25,7 @@ const elementDropdownSchema = z.object({
 const blocSchema = z.object({
   __component: z.literal("guide.bloc"),
   id: z.number(),
-  titre: z.string(),
+  titre: z.string().optional(),
   surtitre: z.string().optional(),
   contenu: z.string().optional(),
   images: z.array(z.string()),

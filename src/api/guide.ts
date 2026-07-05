@@ -47,12 +47,19 @@ const strapiElementDropdownSchema = z.object({
 const strapiBlocSchema = z.object({
   __component: z.literal("guide.bloc"),
   id: z.number(),
-  titre: z.string(),
+  // titre OPTIONNEL côté Strapi (« laisser vide pour un bloc sans titre »,
+  // ex. un règlement = juste du texte). Le front doit être aussi permissif,
+  // sinon le bloc échoue la validation et est ignoré (retour cliente 2026-07-05).
+  titre: z.string().nullable().optional(),
   surtitre: z.string().nullable().optional(),
   contenu: z.string().nullable(),
   images: z.array(strapiBlocImageSchema).nullable().optional().transform((v) => v ?? []),
   liens: z.array(strapiLienExterneSchema).nullable().optional().transform((v) => v ?? []),
-  misEnAvant: z.boolean(),
+  misEnAvant: z
+    .boolean()
+    .nullable()
+    .optional()
+    .transform((v) => v ?? false),
   centrerBouton: z
     .boolean()
     .nullable()
@@ -238,7 +245,7 @@ function transformInlineBlock(block: StrapiInlineBlock): DynamicZoneBlock {
       return dynamicZoneBlockSchema.parse({
         __component: "guide.bloc",
         id: block.id,
-        titre: block.titre,
+        titre: block.titre ?? undefined,
         surtitre: block.surtitre ?? undefined,
         contenu: block.contenu ?? undefined,
         // Repeatable wrapper `guide.bloc-image` → on extrait l'URL de
