@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import GuideLayout from "@/components/GuideLayout";
 import SafeImage from "@/components/SafeImage";
 import { useGuideContext, useLocale } from "@/hooks";
-import { fmt } from "@/lib";
+import { fmt, RICHTEXT_CLASS } from "@/lib";
 import heroImage from "@/assets/hero-guide.jpg";
 
 const sectionKeys = [
@@ -96,11 +96,13 @@ export default function GuideHome() {
 
         {/* Note générale (style ref Lovable : text-small + text-center + mb-8).
             Côté ref c'est hardcodé "La clé ouvre la porte...". Côté guide,
-            vient du champ Strapi property.infos.noteGenerale (texte plain). */}
+            vient du champ Strapi property.infos.noteGenerale (rich text HTML
+            CKEditor → rendu via RICHTEXT_CLASS comme les autres blocs). */}
         {property.infos.noteGenerale && (
-          <p className="text-small text-muted-foreground text-center mb-8">
-            {property.infos.noteGenerale}
-          </p>
+          <div
+            className={`${RICHTEXT_CLASS} text-small text-muted-foreground text-center mb-8`}
+            dangerouslySetInnerHTML={{ __html: property.infos.noteGenerale }}
+          />
         )}
 
         {/* Section grid */}

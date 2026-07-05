@@ -113,7 +113,11 @@ const strapiContenuReutilisableRefSchema = z.object({
   contenu: z
     .object({
       id: z.number(),
-      contenu: z.array(strapiInlineBlockSchema).nullable().optional(),
+      // Tolérant : on accepte n'importe quel bloc ici et on valide chaque
+      // bloc UN PAR UN dans transformDynamicZone (safeParse). Ainsi un seul
+      // sous-bloc mal formé (champ requis vide côté Strapi) n'invalide pas
+      // tout le contenu réutilisable — et surtout pas tout le guide.
+      contenu: z.array(z.unknown()).nullable().optional(),
     })
     .nullable()
     .optional(),
@@ -122,12 +126,12 @@ const strapiContenuReutilisableRefSchema = z.object({
 // Une DZ Guide peut contenir des blocs inline OU un ref vers un contenu
 // réutilisable. Côté admin, la cliente choisit lequel ajouter ; côté front
 // on aplatit les refs avant de rendre.
-const strapiDynamicZoneSchema = z.union([
-  strapiInlineBlockSchema,
-  strapiContenuReutilisableRefSchema,
-]);
-
-type StrapiDynamicZoneBlock = z.infer<typeof strapiDynamicZoneSchema>;
+//
+// ⚠️ Résilience : les DZ sont typées `z.unknown()` au niveau du schéma guide
+// (voir strapiGuideDataSchema) et chaque bloc est validé UN PAR UN dans
+// transformDynamicZone. Un bloc invalide (champ requis laissé vide par la
+// cliente) est ignoré + loggé au lieu de faire échouer TOUT le guide — ce
+// qui provoquait une redirection perçue comme une déconnexion.
 
 // ---------------------------------------------------------------------------
 // Strapi v5 guide response schema (fields directly on data, no attributes)
@@ -137,14 +141,10 @@ const strapiLocalisationSchema = z.object({
   id: z.number().optional(),
   address: z.string(),
   // Champ GPS unique : la cliente colle « 46.30855, 7.48218 » tel que
-  // Google Maps le donne — parsé côté guide, ordre indifférent.
+  // Google Maps le donne — parsé côté guide, ordre indifférent. Si vide,
+  // le lien Maps retombe sur l'adresse texte (Google accepte une adresse
+  // en query) — évite de crasher le guide pour ce seul champ optionnel.
   gps: z.string().nullable().optional(),
-  // Tolérant : si la cliente n'a pas saisi les coordonnées, on fallback
-  // sur l'adresse dans le lien Maps (Google accepte une adresse texte en
-  // query). Évite de crasher tout le guide pour ce seul champ manquant.
-  // (Anciens champs — conservés pour les données déjà saisies.)
-  latitude: z.coerce.number().nullable().optional(),
-  longitude: z.coerce.number().nullable().optional(),
 });
 
 const strapiGestionnaireSchema = z
@@ -199,13 +199,13 @@ const strapiGuideDataSchema = z.object({
 
   gestionnaire: strapiGestionnaireSchema,
 
-  arriveeContenu: z.array(strapiDynamicZoneSchema).nullable().optional().transform((v) => v ?? []),
-  departContenu: z.array(strapiDynamicZoneSchema).nullable().optional().transform((v) => v ?? []),
-  parkingContenu: z.array(strapiDynamicZoneSchema).nullable().optional().transform((v) => v ?? []),
-  logementContenu: z.array(strapiDynamicZoneSchema).nullable().optional().transform((v) => v ?? []),
-  dechetsContenu: z.array(strapiDynamicZoneSchema).nullable().optional().transform((v) => v ?? []),
-  regionContenu: z.array(strapiDynamicZoneSchema).nullable().optional().transform((v) => v ?? []),
-  reglesContenu: z.array(strapiDynamicZoneSchema).nullable().optional().transform((v) => v ?? []),
+  arriveeContenu: z.array(z.unknown()).nullable().optional().transform((v) => v ?? []),
+  departContenu: z.array(z.unknown()).nullable().optional().transform((v) => v ?? []),
+  parkingContenu: z.array(z.unknown()).nullable().optional().transform((v) => v ?? []),
+  logementContenu: z.array(z.unknown()).nullable().optional().transform((v) => v ?? []),
+  dechetsContenu: z.array(z.unknown()).nullable().optional().transform((v) => v ?? []),
+  regionContenu: z.array(z.unknown()).nullable().optional().transform((v) => v ?? []),
+  reglesContenu: z.array(z.unknown()).nullable().optional().transform((v) => v ?? []),
 
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -295,25 +295,47 @@ function transformInlineBlock(block: StrapiInlineBlock): DynamicZoneBlock {
  * tip à 2 endroits). L'architecture oneToOne du ref garantit qu'il n'y a
  * pas de duplication parasite Strapi-side.
  */
-function transformDynamicZone(blocks: StrapiDynamicZoneBlock[]): DynamicZoneBlock[] {
+function transformDynamicZone(blocks: unknown[]): DynamicZoneBlock[] {
   const out: DynamicZoneBlock[] = [];
   const isDev = import.meta.env.DEV;
 
-  for (const block of blocks) {
-    if (block.__component === "guide.contenu-reutilisable-ref") {
-      if (!block.contenu) {
+  // Valide + transforme UN bloc inline. En cas d'échec (champ requis laissé
+  // vide dans l'admin, __component inconnu, transform qui lève) : on ignore
+  // ce seul bloc + warning, au lieu de faire planter tout le guide.
+  const pushInline = (raw: unknown, ctx: string) => {
+    const parsed = strapiInlineBlockSchema.safeParse(raw);
+    if (!parsed.success) {
+      console.warn(
+        `[transformDynamicZone] ${ctx} : bloc ignoré (validation Strapi échouée — un champ requis est probablement vide).`,
+        isDev ? parsed.error.issues : "",
+      );
+      return;
+    }
+    try {
+      out.push(transformInlineBlock(parsed.data));
+    } catch (err) {
+      console.warn(`[transformDynamicZone] ${ctx} : bloc ignoré (transform échoué).`, err);
+    }
+  };
+
+  for (const raw of blocks) {
+    // 1) Ref vers un contenu réutilisable → on déplie ses blocs concrets.
+    const ref = strapiContenuReutilisableRefSchema.safeParse(raw);
+    if (ref.success) {
+      if (!ref.data.contenu) {
         if (isDev) {
           console.warn(
-            `[transformDynamicZone] ref #${block.id} pointe vers un contenu réutilisable supprimé/dépublié ou inaccessible (vérifier les permissions Strapi find/findOne sur contenu-reutilisable) — bloc ignoré.`,
+            `[transformDynamicZone] ref #${ref.data.id} pointe vers un contenu réutilisable supprimé/dépublié ou inaccessible (vérifier les permissions Strapi + le statut publié) — bloc ignoré.`,
           );
         }
         continue;
       }
-      const nested = block.contenu.contenu ?? [];
-      for (const b of nested) out.push(transformInlineBlock(b));
-    } else {
-      out.push(transformInlineBlock(block));
+      const nested = ref.data.contenu.contenu ?? [];
+      for (const b of nested) pushInline(b, `contenu réutilisable #${ref.data.contenu.id}`);
+      continue;
     }
+    // 2) Sinon : bloc inline direct posé dans la DZ.
+    pushInline(raw, "bloc de section");
   }
 
   return out;
@@ -348,13 +370,9 @@ function parseGps(gps: string): [number, number] | null {
 }
 
 function transformLocalisation(loc: z.infer<typeof strapiLocalisationSchema>) {
-  // Priorité : champ GPS unique → anciens champs lat/lng → adresse texte.
-  const fromGps = loc.gps ? parseGps(loc.gps) : null;
-  const coords =
-    fromGps ??
-    (loc.latitude != null && loc.longitude != null
-      ? normalizeSwissCoords(loc.latitude, loc.longitude)
-      : null);
+  // Priorité : champ GPS unique → sinon adresse texte (Google Maps accepte
+  // une adresse en query).
+  const coords = loc.gps ? parseGps(loc.gps) : null;
   const mapsQuery = coords ? coords.join(",") : encodeURIComponent(loc.address);
   return {
     address: loc.address,

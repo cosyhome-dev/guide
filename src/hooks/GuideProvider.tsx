@@ -5,6 +5,7 @@ import { useLocale } from "./useLocale";
 import { getSlug, getToken } from "./useAccessCode";
 import { GuideContext } from "./guideContext";
 import GuideSkeleton from "@/components/GuideSkeleton";
+import NotFound from "@/pages/NotFound";
 
 export default function GuideProvider({ children }: { children: React.ReactNode }) {
   const { slug } = useParams<{ slug: string }>();
@@ -12,20 +13,36 @@ export default function GuideProvider({ children }: { children: React.ReactNode 
   const storedSlug = getSlug();
   const token = getToken();
 
-  // Redirect to login (de ce bien) si pas de session (slug + jeton signé)
-  // ou mismatch slug. Routing : /:locale/:slug/guide/... → Login = /:locale/:slug/
-  if (!slug || !storedSlug || slug !== storedSlug || !token) {
+  // Session valide = slug d'URL présent, identique au slug stocké, + jeton signé.
+  const hasSession = Boolean(slug && storedSlug && slug === storedSlug && token);
+
+  // ⚠️ Hooks appelés INCONDITIONNELLEMENT (rules-of-hooks) : on ne fait PLUS
+  // de return AVANT ces hooks. La requête guide n'est déclenchée que si la
+  // session est valide (param `enabled` de useGuide).
+  const { data: content, isLoading: contentLoading } = useStaticContent();
+  const {
+    data: property,
+    isLoading: guideLoading,
+    isError: guideError,
+  } = useGuide(slug ?? "", hasSession);
+
+  // Pas de session (pas de jeton ou mismatch slug) → login DE CE BIEN.
+  // Routing : /:locale/:slug/guide/... → Login = /:locale/:slug/
+  if (!hasSession) {
     return <Navigate to={`/${locale}/${slug ?? ""}`} replace />;
   }
-
-  const { data: content, isLoading: contentLoading } = useStaticContent();
-  const { data: property, isLoading: guideLoading } = useGuide(slug);
 
   if (contentLoading || guideLoading) {
     return <GuideSkeleton />;
   }
 
-  if (!content || !property) return <Navigate to={`/${locale}`} replace />;
+  // Slug a priori conforme mais le guide ne se résout/charge pas (bien
+  // dépublié ou supprimé, données Strapi cassées, réseau…) : on affiche une
+  // vraie page « introuvable » AU LIEU de rediriger vers l'accueil — ce qui
+  // donnait l'illusion d'une déconnexion (retour cliente) ou d'une page
+  // normale. La session (jeton signé) n'est PAS purgée : un simple refresh
+  // rechargera le guide si le problème côté Strapi est corrigé.
+  if (guideError || !property || !content) return <NotFound />;
 
   return <GuideContext value={{ content, property }}>{children}</GuideContext>;
 }
