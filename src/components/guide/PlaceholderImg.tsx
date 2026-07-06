@@ -30,7 +30,7 @@ export default function PlaceholderImg({ src, alt = "" }: PlaceholderImgProps) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="w-full flex items-center justify-center cursor-pointer overflow-hidden mt-6!"
+        className="w-full flex items-center justify-center cursor-pointer overflow-hidden"
       >
         <SafeImage src={src} alt={alt} className="w-full aspect-video object-cover block" />
       </button>
