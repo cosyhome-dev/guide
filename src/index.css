@@ -211,6 +211,27 @@
   }
 }
 
+/* Lightbox de galerie (retour cliente 2026-07-07) : fondu d'ouverture. */
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes zoom-in {
+  from {
+    opacity: 0;
+    scale: 0.96;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
 /* ── Utilities ── */
 
 @utility text-small {
