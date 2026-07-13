@@ -11,8 +11,8 @@ interface PlaceholderImgProps {
  * Vignette cliquable d'une image de guide.
  *
  * Bouton d'affichage pur : l'ouverture plein écran (lightbox + navigation) est
- * portée par le parent `ImageGrid` (retour cliente 2026-07-07). Effet de survol
- * discret pour signaler que l'image est cliquable.
+ * portée par le parent `ImageGrid` (retour cliente 2026-07-07). Pas d'animation
+ * de zoom au survol (retour cliente 2026-07-07) — seul le curseur signale le clic.
  */
 export default function PlaceholderImg({ src, alt = "", onOpen }: PlaceholderImgProps) {
   const isUrl = !!src && (src.startsWith("http") || src.startsWith("/"));
@@ -26,13 +26,9 @@ export default function PlaceholderImg({ src, alt = "", onOpen }: PlaceholderImg
     <button
       type="button"
       onClick={onOpen}
-      className="group w-full flex items-center justify-center cursor-pointer overflow-hidden"
+      className="w-full flex items-center justify-center cursor-pointer overflow-hidden"
     >
-      <SafeImage
-        src={src}
-        alt={alt}
-        className="w-full aspect-video object-cover block transition-transform duration-300 group-hover:scale-105"
-      />
+      <SafeImage src={src} alt={alt} className="w-full aspect-video object-cover block" />
     </button>
   );
 }

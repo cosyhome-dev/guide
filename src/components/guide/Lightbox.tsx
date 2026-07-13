@@ -16,17 +16,18 @@ interface LightboxProps {
 }
 
 /**
- * Galerie plein écran (lightbox) — retour cliente 2026-07-07.
+ * Galerie plein écran (lightbox) — retours cliente 2026-07-07.
  *
  * Ouvre une image et permet de parcourir toute la galerie sans revenir à la
  * page : flèches ←/→ (desktop) + clavier, swipe (mobile), fermeture croix /
- * clic à l'extérieur / Échap. Ouverture en fondu.
+ * clic à l'extérieur / Échap. Ouverture en fondu ; navigation en SLIDE
+ * horizontal (piste translateX).
  *
  * Rendue dans un portal sur <body> → jamais clippée par un ancêtre
  * `overflow-hidden` (ex. l'animation d'accordéon).
  *
  * ⚠️ Comportement à garder aligné avec la lightbox du site principal
- * (frontend/components/property/photos-lightbox.tsx) — même UX, deux stacks.
+ * (frontend/components/common/image-lightbox.tsx) — même UX, deux stacks.
  */
 export default function Lightbox({
   images,
@@ -82,18 +83,35 @@ export default function Lightbox({
     touchStartX.current = null;
   }
 
-  const src = images[index];
-
   return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-label="Galerie d'images"
-      className="fixed inset-0 z-100 flex items-center justify-center bg-foreground/90 p-4 animate-[overlay-in_200ms_ease-out]"
+      className="fixed inset-0 z-100 overflow-hidden bg-foreground/90 animate-[overlay-in_200ms_ease-out]"
       onClick={onClose}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
+      {/* Piste horizontale : toutes les images côte à côte, translatée sur
+          l'index courant → transition en slide. Clic hors image = fermeture
+          (seule l'image stoppe la propagation). */}
+      <div
+        className="flex h-full transition-transform duration-300 ease-out"
+        style={{ transform: `translateX(-${index * 100}%)` }}
+      >
+        {images.map((s, i) => (
+          <div key={i} className="flex h-full w-full shrink-0 items-center justify-center p-4">
+            <SafeImage
+              src={s}
+              alt={alt}
+              onClick={(e) => e.stopPropagation()}
+              className="max-h-[85vh] max-w-[90vw] object-contain"
+            />
+          </div>
+        ))}
+      </div>
+
       <button
         type="button"
         aria-label="Fermer"
@@ -104,50 +122,33 @@ export default function Lightbox({
       </button>
 
       {hasMultiple && (
-        <button
-          type="button"
-          aria-label="Image précédente"
-          className="absolute left-2 z-10 p-2 text-background transition-colors hover:text-background/70 sm:left-4"
-          onClick={(e) => {
-            e.stopPropagation();
-            goPrev();
-          }}
-        >
-          <ChevronLeft size={40} strokeWidth={1.5} />
-        </button>
-      )}
-
-      <div
-        className="flex max-h-[85vh] max-w-[90vw] items-center justify-center"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* key={src} → l'animation de fondu se rejoue à chaque changement d'image. */}
-        <SafeImage
-          key={src}
-          src={src}
-          alt={alt}
-          className="max-h-[85vh] max-w-full object-contain animate-[zoom-in_200ms_ease-out]"
-        />
-      </div>
-
-      {hasMultiple && (
-        <button
-          type="button"
-          aria-label="Image suivante"
-          className="absolute right-2 z-10 p-2 text-background transition-colors hover:text-background/70 sm:right-4"
-          onClick={(e) => {
-            e.stopPropagation();
-            goNext();
-          }}
-        >
-          <ChevronRight size={40} strokeWidth={1.5} />
-        </button>
-      )}
-
-      {hasMultiple && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-sm tracking-wide text-background/80">
-          {index + 1} / {count}
-        </div>
+        <>
+          <button
+            type="button"
+            aria-label="Image précédente"
+            className="absolute left-2 top-1/2 z-10 -translate-y-1/2 p-2 text-background transition-colors hover:text-background/70 sm:left-4"
+            onClick={(e) => {
+              e.stopPropagation();
+              goPrev();
+            }}
+          >
+            <ChevronLeft size={40} strokeWidth={1.5} />
+          </button>
+          <button
+            type="button"
+            aria-label="Image suivante"
+            className="absolute right-2 top-1/2 z-10 -translate-y-1/2 p-2 text-background transition-colors hover:text-background/70 sm:right-4"
+            onClick={(e) => {
+              e.stopPropagation();
+              goNext();
+            }}
+          >
+            <ChevronRight size={40} strokeWidth={1.5} />
+          </button>
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-sm tracking-wide text-background/80">
+            {index + 1} / {count}
+          </div>
+        </>
       )}
     </div>,
     document.body,
