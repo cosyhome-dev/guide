@@ -68,6 +68,29 @@ export default function Lightbox({
     };
   }, []);
 
+  // Trackpad (desktop) : un swipe deux doigts génère des `wheel` avec deltaX
+  // (PAS des événements tactiles) → on fait défiler les images (retour cliente
+  // MacBook). Écouteur natif non-passif pour pouvoir preventDefault, sinon
+  // macOS déclenche la navigation arrière du navigateur. Un cooldown évite de
+  // sauter plusieurs images pour un seul geste (le trackpad émet une rafale).
+  const overlayRef = React.useRef<HTMLDivElement>(null);
+  const wheelLockRef = React.useRef(false);
+  React.useEffect(() => {
+    const el = overlayRef.current;
+    if (!el || !hasMultiple) return;
+    function onWheel(e: WheelEvent) {
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY) || Math.abs(e.deltaX) < 20) return;
+      e.preventDefault();
+      if (wheelLockRef.current) return;
+      wheelLockRef.current = true;
+      if (e.deltaX > 0) goNext();
+      else goPrev();
+      window.setTimeout(() => (wheelLockRef.current = false), 500);
+    }
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [hasMultiple, goNext, goPrev]);
+
   // Swipe tactile (mobile) : seuil 50px pour éviter les faux positifs.
   const touchStartX = React.useRef<number | null>(null);
   // Un swipe se termine par un `touchend` sur l'overlay, suivi d'un `click`
@@ -99,6 +122,7 @@ export default function Lightbox({
 
   return createPortal(
     <div
+      ref={overlayRef}
       role="dialog"
       aria-modal="true"
       aria-label="Galerie d'images"
