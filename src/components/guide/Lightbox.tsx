@@ -70,17 +70,31 @@ export default function Lightbox({
 
   // Swipe tactile (mobile) : seuil 50px pour éviter les faux positifs.
   const touchStartX = React.useRef<number | null>(null);
+  // Un swipe se termine par un `touchend` sur l'overlay, suivi d'un `click`
+  // synthétique — sans ce flag, ce click fermerait la lightbox juste après la
+  // navigation. On l'arme au swipe et on ignore le click qui suit.
+  const swipedRef = React.useRef(false);
   function onTouchStart(e: React.TouchEvent) {
     touchStartX.current = e.touches[0]?.clientX ?? null;
+    swipedRef.current = false;
   }
   function onTouchEnd(e: React.TouchEvent) {
     if (touchStartX.current === null || !hasMultiple) return;
     const dx = (e.changedTouches[0]?.clientX ?? 0) - touchStartX.current;
     if (Math.abs(dx) > 50) {
+      swipedRef.current = true;
       if (dx < 0) goNext();
       else goPrev();
     }
     touchStartX.current = null;
+  }
+  function onBackdropClick() {
+    // Ignore le click synthétique émis juste après un swipe de navigation.
+    if (swipedRef.current) {
+      swipedRef.current = false;
+      return;
+    }
+    onClose();
   }
 
   return createPortal(
@@ -89,7 +103,7 @@ export default function Lightbox({
       aria-modal="true"
       aria-label="Galerie d'images"
       className="fixed inset-0 z-100 overflow-hidden bg-foreground/90 animate-[overlay-in_200ms_ease-out]"
-      onClick={onClose}
+      onClick={onBackdropClick}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
