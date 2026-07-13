@@ -68,36 +68,60 @@ export default function Lightbox({
     };
   }, []);
 
-  // Swipe "drag-suivi-doigt" (mobile) : la piste suit le doigt pendant le geste
-  // puis se cale sur l'image voisine au relâchement (retour cliente : le slide
-  // doit se faire AU DOIGT, comme un scroll horizontal — pas un saut au seuil).
-  const startXRef = React.useRef<number | null>(null);
-  const [drag, setDrag] = React.useState(0);
+  // Drag tactile (mobile) avec VERROUILLAGE D'AXE (retour cliente) :
+  //  - horizontal → la piste suit le doigt puis se cale sur l'image voisine ;
+  //  - vertical   → l'image suit le doigt et se FERME si on tire assez (dismiss).
+  // L'axe est verrouillé au 1er mouvement significatif → les deux gestes ne se
+  // marchent pas dessus.
+  const startRef = React.useRef<{ x: number; y: number } | null>(null);
+  const axisRef = React.useRef<"x" | "y" | null>(null);
+  const [dragX, setDragX] = React.useState(0);
+  const [dragY, setDragY] = React.useState(0);
   const [dragging, setDragging] = React.useState(false);
-  // Un drag se termine par un `touchend` suivi d'un `click` synthétique sur
-  // l'overlay — ce flag l'ignore pour ne pas fermer juste après le geste.
+  // Un drag se termine par un `click` synthétique sur l'overlay → ce flag
+  // l'ignore pour ne pas fermer juste après le geste.
   const swipedRef = React.useRef(false);
 
   function onTouchStart(e: React.TouchEvent) {
-    startXRef.current = e.touches[0]?.clientX ?? null;
+    const t = e.touches[0];
+    startRef.current = t ? { x: t.clientX, y: t.clientY } : null;
+    axisRef.current = null;
     setDragging(true);
-    setDrag(0);
+    setDragX(0);
+    setDragY(0);
     swipedRef.current = false;
   }
   function onTouchMove(e: React.TouchEvent) {
-    if (startXRef.current === null) return;
-    setDrag((e.touches[0]?.clientX ?? startXRef.current) - startXRef.current);
+    const s = startRef.current;
+    const t = e.touches[0];
+    if (!s || !t) return;
+    const dx = t.clientX - s.x;
+    const dy = t.clientY - s.y;
+    if (axisRef.current === null) {
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return; // pas encore assez bougé
+      axisRef.current = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
+    }
+    if (axisRef.current === "x") setDragX(dx);
+    else setDragY(dy);
   }
   function onTouchEnd(e: React.TouchEvent) {
-    if (startXRef.current === null) return;
-    const dx = (e.changedTouches[0]?.clientX ?? startXRef.current) - startXRef.current;
+    const s = startRef.current;
+    if (!s) return;
+    const t = e.changedTouches[0];
+    const dx = (t?.clientX ?? s.x) - s.x;
+    const dy = (t?.clientY ?? s.y) - s.y;
+    const axis = axisRef.current;
     setDragging(false);
-    setDrag(0);
-    startXRef.current = null;
-    if (Math.abs(dx) > 10) swipedRef.current = true; // tout drag notable neutralise le click de fermeture
-    if (hasMultiple && Math.abs(dx) > 60) {
+    setDragX(0);
+    setDragY(0);
+    startRef.current = null;
+    axisRef.current = null;
+    if (Math.abs(dx) > 10 || Math.abs(dy) > 10) swipedRef.current = true;
+    if (axis === "x" && hasMultiple && Math.abs(dx) > 60) {
       if (dx < 0) goNext();
       else goPrev();
+    } else if (axis === "y" && Math.abs(dy) > 100) {
+      onClose(); // drag vertical suffisant → fermeture (dismiss)
     }
   }
   function onBackdropClick() {
@@ -127,7 +151,7 @@ export default function Lightbox({
       <div
         className="flex h-full"
         style={{
-          transform: `translateX(calc(-${index * 100}% + ${drag}px))`,
+          transform: `translateX(calc(-${index * 100}% + ${dragX}px)) translateY(${dragY}px)`,
           transition: dragging ? "none" : "transform 300ms ease-out",
         }}
       >
