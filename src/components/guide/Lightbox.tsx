@@ -79,9 +79,13 @@ export default function Lightbox({
     const el = overlayRef.current;
     if (!el || !hasMultiple) return;
     function onWheel(e: WheelEvent) {
-      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY) || Math.abs(e.deltaX) < 20) return;
+      // Geste vertical → on laisse passer.
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+      // Geste horizontal → on bloque TOUJOURS le défilement (y compris les
+      // petits mouvements + l'inertie) pour empêcher le swipe-back macOS.
       e.preventDefault();
-      if (wheelLockRef.current) return;
+      // Navigation seulement au-delà du seuil, avec cooldown (1 image/geste).
+      if (Math.abs(e.deltaX) < 20 || wheelLockRef.current) return;
       wheelLockRef.current = true;
       if (e.deltaX > 0) goNext();
       else goPrev();
@@ -126,7 +130,7 @@ export default function Lightbox({
       role="dialog"
       aria-modal="true"
       aria-label="Galerie d'images"
-      className="fixed inset-0 z-100 overflow-hidden bg-foreground/90 animate-[overlay-in_200ms_ease-out]"
+      className="fixed inset-0 z-100 overflow-hidden overscroll-none bg-foreground/90 animate-[overlay-in_200ms_ease-out]"
       onClick={onBackdropClick}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
