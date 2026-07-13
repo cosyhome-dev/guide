@@ -68,28 +68,40 @@ export default function Lightbox({
     };
   }, []);
 
-  // Swipe tactile (mobile) : seuil 50px pour éviter les faux positifs.
-  const touchStartX = React.useRef<number | null>(null);
-  // Un swipe se termine par un `touchend` sur l'overlay, suivi d'un `click`
-  // synthétique — sans ce flag, ce click fermerait la lightbox juste après la
-  // navigation. On l'arme au swipe et on ignore le click qui suit.
+  // Swipe "drag-suivi-doigt" (mobile) : la piste suit le doigt pendant le geste
+  // puis se cale sur l'image voisine au relâchement (retour cliente : le slide
+  // doit se faire AU DOIGT, comme un scroll horizontal — pas un saut au seuil).
+  const startXRef = React.useRef<number | null>(null);
+  const [drag, setDrag] = React.useState(0);
+  const [dragging, setDragging] = React.useState(false);
+  // Un drag se termine par un `touchend` suivi d'un `click` synthétique sur
+  // l'overlay — ce flag l'ignore pour ne pas fermer juste après le geste.
   const swipedRef = React.useRef(false);
+
   function onTouchStart(e: React.TouchEvent) {
-    touchStartX.current = e.touches[0]?.clientX ?? null;
+    startXRef.current = e.touches[0]?.clientX ?? null;
+    setDragging(true);
+    setDrag(0);
     swipedRef.current = false;
   }
+  function onTouchMove(e: React.TouchEvent) {
+    if (startXRef.current === null) return;
+    setDrag((e.touches[0]?.clientX ?? startXRef.current) - startXRef.current);
+  }
   function onTouchEnd(e: React.TouchEvent) {
-    if (touchStartX.current === null || !hasMultiple) return;
-    const dx = (e.changedTouches[0]?.clientX ?? 0) - touchStartX.current;
-    if (Math.abs(dx) > 50) {
-      swipedRef.current = true;
+    if (startXRef.current === null) return;
+    const dx = (e.changedTouches[0]?.clientX ?? startXRef.current) - startXRef.current;
+    setDragging(false);
+    setDrag(0);
+    startXRef.current = null;
+    if (Math.abs(dx) > 10) swipedRef.current = true; // tout drag notable neutralise le click de fermeture
+    if (hasMultiple && Math.abs(dx) > 60) {
       if (dx < 0) goNext();
       else goPrev();
     }
-    touchStartX.current = null;
   }
   function onBackdropClick() {
-    // Ignore le click synthétique émis juste après un swipe de navigation.
+    // Ignore le click synthétique émis juste après un drag.
     if (swipedRef.current) {
       swipedRef.current = false;
       return;
@@ -102,17 +114,22 @@ export default function Lightbox({
       role="dialog"
       aria-modal="true"
       aria-label="Galerie d'images"
-      className="fixed inset-0 z-100 overflow-hidden bg-foreground/90 animate-[overlay-in_200ms_ease-out]"
+      className="fixed inset-0 z-100 touch-none overflow-hidden bg-foreground/90 animate-[overlay-in_200ms_ease-out]"
       onClick={onBackdropClick}
       onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      {/* Piste horizontale : toutes les images côte à côte, translatée sur
-          l'index courant → transition en slide. Clic hors image = fermeture
-          (seule l'image stoppe la propagation). */}
+      {/* Piste horizontale : images côte à côte, translatée sur l'index courant
+          + l'offset de drag en cours → slide qui suit le doigt puis se cale.
+          Pas de transition pendant le drag (suivi 1:1), transition au snap.
+          Clic hors image = fermeture (seule l'image stoppe la propagation). */}
       <div
-        className="flex h-full transition-transform duration-300 ease-out"
-        style={{ transform: `translateX(-${index * 100}%)` }}
+        className="flex h-full"
+        style={{
+          transform: `translateX(calc(-${index * 100}% + ${drag}px))`,
+          transition: dragging ? "none" : "transform 300ms ease-out",
+        }}
       >
         {images.map((s, i) => (
           <div key={i} className="flex h-full w-full shrink-0 items-center justify-center p-4">
