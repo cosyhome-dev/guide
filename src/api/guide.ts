@@ -7,13 +7,7 @@ import {
 } from "@/content/property";
 import { property as mockData } from "@/content/property";
 import { delay } from "./mock";
-import {
-  USE_MOCK,
-  strapiFetch,
-  strapiPost,
-  strapiImageSchema,
-  extractImageUrl,
-} from "./strapi";
+import { USE_MOCK, strapiFetch, strapiPost, strapiImageSchema, extractImageUrl } from "./strapi";
 import { getToken, clearSlug } from "@/hooks/useAccessCode";
 
 // ---------------------------------------------------------------------------
@@ -35,6 +29,13 @@ const strapiElementDropdownSchema = z.object({
   id: z.number(),
   titre: z.string(),
   description: z.string(),
+  // Images par entrée d'accordéon (retour cliente 2026-07-07). Champ média
+  // multiple Strapi → tableau de médias.
+  images: z
+    .array(strapiImageSchema)
+    .nullable()
+    .optional()
+    .transform((v) => v ?? []),
 });
 
 const strapiBlocSchema = z.object({
@@ -48,8 +49,16 @@ const strapiBlocSchema = z.object({
   contenu: z.string().nullable(),
   // `images` = champ média multiple Strapi (avant : composant bloc-image) →
   // tableau de médias direct.
-  images: z.array(strapiImageSchema).nullable().optional().transform((v) => v ?? []),
-  liens: z.array(strapiLienExterneSchema).nullable().optional().transform((v) => v ?? []),
+  images: z
+    .array(strapiImageSchema)
+    .nullable()
+    .optional()
+    .transform((v) => v ?? []),
+  liens: z
+    .array(strapiLienExterneSchema)
+    .nullable()
+    .optional()
+    .transform((v) => v ?? []),
   misEnAvant: z
     .boolean()
     .nullable()
@@ -123,14 +132,13 @@ const strapiContenuReutilisableRefSchema = z.object({
     })
     .nullable()
     .optional(),
-  // Surcharge par logement (retour cliente 2026-07-07) : en plus du contenu
-  // réutilisable mutualisé ci-dessus, la cliente peut ajouter un texte + une
-  // photo perso à CE logement. Chaque bloc est piloté par son toggle Oui/Non ;
-  // affichés APRÈS le contenu réutilisable (voir transformDynamicZone).
-  avecTexteSupplementaire: z.boolean().nullable().optional(),
+  // Surcharge par logement (retours cliente 2026-07-07) : en plus du contenu
+  // réutilisable mutualisé, la cliente peut ajouter un texte + des photos perso
+  // à CE logement. Champ vide = non affiché (pas de toggle). Ces éléments sont
+  // FUSIONNÉS dans le dernier bloc du contenu réutilisable (même bloc, avant le
+  // séparateur) — voir transformDynamicZone.
   texteSupplementaire: z.string().nullable().optional(),
-  avecPhotoSupplementaire: z.boolean().nullable().optional(),
-  photoSupplementaire: strapiImageSchema.nullable().optional(),
+  photosSupplementaires: z.array(strapiImageSchema).nullable().optional(),
 });
 
 // Une DZ Guide peut contenir des blocs inline OU un ref vers un contenu
@@ -209,13 +217,41 @@ const strapiGuideDataSchema = z.object({
 
   gestionnaire: strapiGestionnaireSchema,
 
-  arriveeContenu: z.array(z.unknown()).nullable().optional().transform((v) => v ?? []),
-  departContenu: z.array(z.unknown()).nullable().optional().transform((v) => v ?? []),
-  parkingContenu: z.array(z.unknown()).nullable().optional().transform((v) => v ?? []),
-  logementContenu: z.array(z.unknown()).nullable().optional().transform((v) => v ?? []),
-  dechetsContenu: z.array(z.unknown()).nullable().optional().transform((v) => v ?? []),
-  regionContenu: z.array(z.unknown()).nullable().optional().transform((v) => v ?? []),
-  reglesContenu: z.array(z.unknown()).nullable().optional().transform((v) => v ?? []),
+  arriveeContenu: z
+    .array(z.unknown())
+    .nullable()
+    .optional()
+    .transform((v) => v ?? []),
+  departContenu: z
+    .array(z.unknown())
+    .nullable()
+    .optional()
+    .transform((v) => v ?? []),
+  parkingContenu: z
+    .array(z.unknown())
+    .nullable()
+    .optional()
+    .transform((v) => v ?? []),
+  logementContenu: z
+    .array(z.unknown())
+    .nullable()
+    .optional()
+    .transform((v) => v ?? []),
+  dechetsContenu: z
+    .array(z.unknown())
+    .nullable()
+    .optional()
+    .transform((v) => v ?? []),
+  regionContenu: z
+    .array(z.unknown())
+    .nullable()
+    .optional()
+    .transform((v) => v ?? []),
+  reglesContenu: z
+    .array(z.unknown())
+    .nullable()
+    .optional()
+    .transform((v) => v ?? []),
 
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -280,7 +316,13 @@ function transformInlineBlock(block: StrapiInlineBlock): DynamicZoneBlock {
       return {
         __component: "guide.dropdown",
         id: block.id,
-        elements: block.elements.map((e) => ({ titre: e.titre, description: e.description })),
+        elements: block.elements.map((e) => ({
+          titre: e.titre,
+          description: e.description,
+          images: e.images
+            .map((img) => extractImageUrl(img))
+            .filter((url): url is string => Boolean(url)),
+        })),
       };
     case "guide.adresse-acces":
       return {
@@ -340,43 +382,54 @@ function transformDynamicZone(blocks: unknown[]): DynamicZoneBlock[] {
         }
         continue;
       }
+      const startLen = out.length;
       const nested = ref.data.contenu.contenu ?? [];
       for (const b of nested) pushInline(b, `contenu réutilisable #${ref.data.contenu.id}`);
 
-      // Surcharge par logement : texte + photo perso, affichés APRÈS le
-      // contenu réutilisable mutualisé (retour cliente 2026-07-07). On émet
-      // UN guide.bloc synthétique (texte puis image) → rendu par le composant
-      // Bloc existant ; l'image passe par ImageGrid donc bénéficie de la même
-      // galerie/lightbox que les autres images du guide.
-      const texteSupp =
-        ref.data.avecTexteSupplementaire && ref.data.texteSupplementaire
-          ? ref.data.texteSupplementaire.trim()
-          : "";
-      const photoSuppUrl =
-        ref.data.avecPhotoSupplementaire && ref.data.photoSupplementaire
-          ? extractImageUrl(ref.data.photoSupplementaire)
-          : undefined;
-      if (texteSupp.length > 0 || photoSuppUrl) {
-        try {
-          out.push(
-            dynamicZoneBlockSchema.parse({
-              __component: "guide.bloc",
-              // Espace d'id dédié : les ids de composants Strapi se recouvrent
-              // entre tables (un guide.bloc et un -ref peuvent partager le même
-              // id) → offset pour éviter une collision de clé React côté DZ.
-              id: 1_000_000_000 + ref.data.id,
-              contenu: texteSupp.length > 0 ? texteSupp : undefined,
-              images: photoSuppUrl ? [photoSuppUrl] : [],
-              liens: [],
-              misEnAvant: false,
-              centrerBouton: false,
-            }),
-          );
-        } catch (err) {
-          console.warn(
-            `[transformDynamicZone] surcharge du ref #${ref.data.id} ignorée (transform échoué).`,
-            isDev ? err : "",
-          );
+      // Surcharge par logement (retours cliente 2026-07-07) : texte + photos
+      // perso propres à CE logement. Champ vide = ignoré (plus de toggle). On
+      // les FUSIONNE dans le MÊME bloc que le contenu réutilisable — pas de bloc
+      // séparé, donc pas de séparateur au milieu. Bloc.tsx rend `contenu` puis
+      // `ImageGrid(images)`, donc l'ordre voulu est respecté : texte réutilisable
+      // → texte perso → photos réutilisables → photos perso. Les photos perso
+      // héritent de la lightbox de galerie.
+      const texteSupp = ref.data.texteSupplementaire?.trim() ?? "";
+      const photosSupp = (ref.data.photosSupplementaires ?? [])
+        .map((img) => extractImageUrl(img))
+        .filter((url): url is string => Boolean(url));
+
+      if (texteSupp.length > 0 || photosSupp.length > 0) {
+        // Cible = dernier bloc issu de CE contenu réutilisable, si c'est un
+        // guide.bloc (fusion in-place, objet local non partagé). Sinon fallback
+        // sur un guide.bloc synthétique.
+        const target = out
+          .slice(startLen)
+          .reverse()
+          .find((b) => b.__component === "guide.bloc");
+        if (target && target.__component === "guide.bloc") {
+          if (texteSupp.length > 0) target.contenu = `${target.contenu ?? ""}${texteSupp}`;
+          if (photosSupp.length > 0) target.images = [...target.images, ...photosSupp];
+        } else {
+          try {
+            out.push(
+              dynamicZoneBlockSchema.parse({
+                __component: "guide.bloc",
+                // Espace d'id dédié : les ids de composants Strapi se recouvrent
+                // entre tables → offset pour éviter une collision de clé React.
+                id: 1_000_000_000 + ref.data.id,
+                contenu: texteSupp.length > 0 ? texteSupp : undefined,
+                images: photosSupp,
+                liens: [],
+                misEnAvant: false,
+                centrerBouton: false,
+              }),
+            );
+          } catch (err) {
+            console.warn(
+              `[transformDynamicZone] surcharge du ref #${ref.data.id} ignorée (transform échoué).`,
+              isDev ? err : "",
+            );
+          }
         }
       }
       continue;

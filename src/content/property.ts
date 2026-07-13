@@ -16,6 +16,11 @@ const elementChecklistSchema = z.object({
 const elementDropdownSchema = z.object({
   titre: z.string(),
   description: z.string(),
+  // Images optionnelles par entrée d'accordéon (retour cliente 2026-07-07 :
+  // section Logement « il manque les images »). Tableau d'URLs déjà extraites.
+  // Optionnel dans le type (le mock n'en a pas) ; le transform réel remplit
+  // toujours un tableau.
+  images: z.array(z.string()).optional(),
 });
 
 // ---------------------------------------------------------------------------
@@ -99,9 +104,7 @@ export const propertySchema = z.object({
     heureArrivee: z.string(),
     codeImmeuble: z.string().optional(),
     codeBoiteACles: z.string().optional(),
-    codesSupplementaires: z
-      .array(z.object({ nom: z.string(), valeur: z.string() }))
-      .default([]),
+    codesSupplementaires: z.array(z.object({ nom: z.string(), valeur: z.string() })).default([]),
     heureDepart: z.string(),
     noteGenerale: z.string().optional(),
   }),
