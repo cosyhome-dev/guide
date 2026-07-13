@@ -18,7 +18,11 @@ interface GuideLayoutProps {
   overlayHeader?: boolean;
 }
 
-export default function GuideLayout({ children, hideEmergency = false, overlayHeader = false }: GuideLayoutProps) {
+export default function GuideLayout({
+  children,
+  hideEmergency = false,
+  overlayHeader = false,
+}: GuideLayoutProps) {
   // Hooks
   const { content, property } = useGuideContext();
   const { locale, setLocale } = useLocale();
@@ -36,7 +40,11 @@ export default function GuideLayout({ children, hideEmergency = false, overlayHe
     {
       icon: Phone,
       label: content.nav.contact,
-      href: `https://wa.me/${property.whatsapp.replace(/\+/g, "")}`,
+      // wa.me exige des CHIFFRES uniquement (indicatif inclus, sans + ni
+      // espaces). On strippe tout non-chiffre — le numéro saisi côté Strapi peut
+      // être humanisé, ex. « +41 79 915 85 00 » → « 41799158500 » (retour cliente
+      // 2026-07-07 : espaces dans l'URL → lien cassé).
+      href: `https://wa.me/${property.whatsapp.replace(/\D/g, "")}`,
     },
     { icon: MapPin, label: content.nav.route, href: property.localisation.mapsUrl },
   ] as const;
