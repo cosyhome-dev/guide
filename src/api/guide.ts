@@ -2,8 +2,10 @@ import { z } from "zod";
 import {
   propertySchema,
   dynamicZoneBlockSchema,
+  customPageSchema,
   type Property,
   type DynamicZoneBlock,
+  type CustomPage,
 } from "@/content/property";
 import { property as mockData } from "@/content/property";
 import { delay } from "./mock";
@@ -141,6 +143,17 @@ const strapiContenuReutilisableRefSchema = z.object({
   photosSupplementaires: z.array(strapiImageSchema).nullable().optional(),
 });
 
+// Page personnalisée (retour cliente 2026-07-07) — content-type relié
+// `api::guide-page.guide-page`. Tolérant : `contenu` en z.unknown() validé
+// bloc par bloc dans transformDynamicZone.
+const strapiCustomPageSchema = z.object({
+  id: z.number(),
+  titre: z.string(),
+  icone: z.string().nullable().optional(),
+  ordre: z.number().nullable().optional(),
+  contenu: z.array(z.unknown()).nullable().optional(),
+});
+
 // Une DZ Guide peut contenir des blocs inline OU un ref vers un contenu
 // réutilisable. Côté admin, la cliente choisit lequel ajouter ; côté front
 // on aplatit les refs avant de rendre.
@@ -248,6 +261,12 @@ const strapiGuideDataSchema = z.object({
     .optional()
     .transform((v) => v ?? []),
   reglesContenu: z
+    .array(z.unknown())
+    .nullable()
+    .optional()
+    .transform((v) => v ?? []),
+
+  pagesPersonnalisees: z
     .array(z.unknown())
     .nullable()
     .optional()
@@ -480,6 +499,38 @@ function transformLocalisation(loc: z.infer<typeof strapiLocalisationSchema>) {
   };
 }
 
+function transformCustomPages(raw: unknown[]): CustomPage[] {
+  const isDev = import.meta.env.DEV;
+  const pages: CustomPage[] = [];
+  for (const item of raw) {
+    const parsed = strapiCustomPageSchema.safeParse(item);
+    if (!parsed.success) {
+      if (isDev)
+        console.warn(
+          "[transformCustomPages] page personnalisée ignorée (validation Strapi échouée).",
+          parsed.error.issues,
+        );
+      continue;
+    }
+    try {
+      pages.push(
+        customPageSchema.parse({
+          id: parsed.data.id,
+          titre: parsed.data.titre,
+          icone: parsed.data.icone ?? "autre",
+          ordre: parsed.data.ordre ?? 0,
+          contenu: transformDynamicZone(parsed.data.contenu ?? []),
+        }),
+      );
+    } catch (err) {
+      if (isDev)
+        console.warn("[transformCustomPages] page personnalisée ignorée (transform échoué).", err);
+    }
+  }
+  // Tri par `ordre` croissant, puis par id pour départager (tri stable).
+  return pages.sort((a, b) => a.ordre - b.ordre || a.id - b.id);
+}
+
 function transformGuide(d: StrapiGuideData): Property {
   return propertySchema.parse({
     nom: d.nom,
@@ -510,6 +561,7 @@ function transformGuide(d: StrapiGuideData): Property {
     dechetsContenu: transformDynamicZone(d.dechetsContenu),
     regionContenu: transformDynamicZone(d.regionContenu),
     reglesContenu: transformDynamicZone(d.reglesContenu),
+    pagesPersonnalisees: transformCustomPages(d.pagesPersonnalisees),
   });
 }
 

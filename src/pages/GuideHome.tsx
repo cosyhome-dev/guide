@@ -1,9 +1,32 @@
-import { LogIn, LogOut, Car, Home, Trash2, MapPin } from "lucide-react";
+import {
+  LogIn,
+  LogOut,
+  Car,
+  Home,
+  Trash2,
+  MapPin,
+  Bath,
+  Waves,
+  Dumbbell,
+  Thermometer,
+  Gamepad2,
+  PlugZap,
+  Trophy,
+  Wifi,
+  Tv,
+  Utensils,
+  Flame,
+  Mountain,
+  Sparkles,
+  Star,
+  type LucideIcon,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import GuideLayout from "@/components/GuideLayout";
 import SafeImage from "@/components/SafeImage";
 import { useGuideContext, useLocale } from "@/hooks";
 import { fmt, RICHTEXT_CLASS } from "@/lib";
+import { customPageRouteKey, type CustomPageIcon } from "@/content/property";
 import heroImage from "@/assets/hero-guide.jpg";
 
 const sectionKeys = [
@@ -15,13 +38,31 @@ const sectionKeys = [
   "area",
 ] as const;
 
-const sectionIcons: Record<(typeof sectionKeys)[number], typeof LogIn> = {
+const sectionIcons: Record<(typeof sectionKeys)[number], LucideIcon> = {
   "check-in": LogIn,
   "check-out": LogOut,
   parking: Car,
   property: Home,
   "waste-recycling": Trash2,
   area: MapPin,
+};
+
+// Icône de nav des pages personnalisées : enum Strapi → composant lucide.
+const CUSTOM_PAGE_ICONS: Record<CustomPageIcon, LucideIcon> = {
+  jacuzzi: Bath,
+  piscine: Waves,
+  sport: Dumbbell,
+  sauna: Thermometer,
+  jeux: Gamepad2,
+  recharge: PlugZap,
+  tennis: Trophy,
+  wifi: Wifi,
+  television: Tv,
+  cuisine: Utensils,
+  cheminee: Flame,
+  montagne: Mountain,
+  etoile: Sparkles,
+  autre: Star,
 };
 
 export default function GuideHome() {
@@ -61,8 +102,16 @@ export default function GuideHome() {
           {/* Desktop / Tablet */}
           <div className="hidden md:block">
             <div className="flex items-stretch divide-x divide-border">
-              <QuickInfoCell variant="desktop" label={t.checkIn} lines={[property.infos.heureArrivee]} />
-              <QuickInfoCell variant="desktop" label={t.checkOut} lines={[property.infos.heureDepart]} />
+              <QuickInfoCell
+                variant="desktop"
+                label={t.checkIn}
+                lines={[property.infos.heureArrivee]}
+              />
+              <QuickInfoCell
+                variant="desktop"
+                label={t.checkOut}
+                lines={[property.infos.heureDepart]}
+              />
               <QuickInfoCell variant="desktop" label={t.accessCodes} lines={codeLines} />
               <QuickInfoCell
                 variant="desktop"
@@ -76,9 +125,17 @@ export default function GuideHome() {
           <div className="md:hidden">
             <div className="space-y-5">
               <div className="flex justify-center gap-8">
-                <QuickInfoCell variant="mobile" label={t.checkIn} lines={[property.infos.heureArrivee]} />
+                <QuickInfoCell
+                  variant="mobile"
+                  label={t.checkIn}
+                  lines={[property.infos.heureArrivee]}
+                />
                 <div className="w-px bg-border" />
-                <QuickInfoCell variant="mobile" label={t.checkOut} lines={[property.infos.heureDepart]} />
+                <QuickInfoCell
+                  variant="mobile"
+                  label={t.checkOut}
+                  lines={[property.infos.heureDepart]}
+                />
               </div>
               <div className="h-px bg-border" />
               <div className="flex justify-center gap-8">
@@ -127,6 +184,27 @@ export default function GuideHome() {
             );
           })}
 
+          {/* Pages personnalisées (retour cliente 2026-07-07) — mêmes tuiles,
+              après les sections fixes, avec leur icône choisie dans Strapi. */}
+          {(property.pagesPersonnalisees ?? []).map((page) => {
+            const Icon = CUSTOM_PAGE_ICONS[page.icone];
+            return (
+              <Link
+                key={page.id}
+                to={`/${locale}/${property.slug}/guide/${customPageRouteKey(page.id)}`}
+                className="bg-card border rounded-sm p-6 flex flex-col items-center gap-3 hover:border-accent/50 hover:shadow-sm transition-all group"
+              >
+                <Icon
+                  size={26}
+                  strokeWidth={1.2}
+                  className="text-muted-foreground group-hover:text-accent transition-colors"
+                />
+                <span className="text-[11px] tracking-wider uppercase text-center text-muted-foreground group-hover:text-foreground transition-colors">
+                  {page.titre}
+                </span>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </GuideLayout>

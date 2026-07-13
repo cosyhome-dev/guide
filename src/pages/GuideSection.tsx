@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import GuideLayout from "@/components/GuideLayout";
 import { DynamicZone } from "@/components/guide";
 import { useGuideContext, useLocale } from "@/hooks";
-import { SECTION_CONTENU_KEYS, type SectionKey } from "@/content/property";
+import { SECTION_CONTENU_KEYS, customPageRouteKey, type SectionKey } from "@/content/property";
 
 export default function GuideSection() {
   const { section } = useParams<{ slug: string; section: string }>();
@@ -12,10 +12,17 @@ export default function GuideSection() {
   const t = content.section;
   const s = content.sections;
 
-  const key = section as SectionKey;
-  const contenuKey = SECTION_CONTENU_KEYS[key];
+  // 1) Section fixe (check-in, rules…) → champ contenu dédié.
+  const contenuKey = SECTION_CONTENU_KEYS[section as SectionKey];
+  // 2) Sinon, page personnalisée (`p-<id>`, retour cliente 2026-07-07).
+  const customPage = contenuKey
+    ? undefined
+    : (property.pagesPersonnalisees ?? []).find((p) => customPageRouteKey(p.id) === section);
 
-  if (!contenuKey) {
+  const blocks = contenuKey ? property[contenuKey] : customPage?.contenu;
+  const pageTitle = contenuKey ? s[section as keyof typeof s] : customPage?.titre;
+
+  if (!blocks) {
     return (
       <GuideLayout>
         <div className="mx-auto max-w-3xl px-4 py-16 text-center">
@@ -30,9 +37,6 @@ export default function GuideSection() {
       </GuideLayout>
     );
   }
-
-  const blocks = property[contenuKey];
-  const pageTitle = s[key as keyof typeof s];
 
   return (
     <GuideLayout>

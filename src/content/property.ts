@@ -86,6 +86,48 @@ export type DropdownBlock = z.infer<typeof dropdownSchema>;
 export type AdresseAccesBlock = z.infer<typeof adresseAccesSchema>;
 
 // ---------------------------------------------------------------------------
+// Pages personnalisées (retour cliente 2026-07-07) : pages illimitées ajoutées
+// par logement (Jacuzzi, Piscine…), avec leur icône de nav et leurs blocs.
+// ---------------------------------------------------------------------------
+
+// Valeurs d'icône = enum côté Strapi (guide-page.icone). Mappées vers un
+// composant lucide dans GuideHome (ICON_MAP). `.catch` → repli défensif si une
+// nouvelle valeur d'enum arrive avant la mise à jour du mapping.
+export const customPageIconSchema = z
+  .enum([
+    "jacuzzi",
+    "piscine",
+    "sport",
+    "sauna",
+    "jeux",
+    "recharge",
+    "tennis",
+    "wifi",
+    "television",
+    "cuisine",
+    "cheminee",
+    "montagne",
+    "etoile",
+    "autre",
+  ])
+  .catch("autre");
+
+export type CustomPageIcon = z.infer<typeof customPageIconSchema>;
+
+export const customPageSchema = z.object({
+  id: z.number(),
+  titre: z.string(),
+  icone: customPageIconSchema,
+  ordre: z.number().default(0),
+  contenu: z.array(dynamicZoneBlockSchema),
+});
+
+export type CustomPage = z.infer<typeof customPageSchema>;
+
+/** Clé de route d'une page perso : `/guide/p-<id>`. */
+export const customPageRouteKey = (id: number) => `p-${id}`;
+
+// ---------------------------------------------------------------------------
 // Property schema
 // ---------------------------------------------------------------------------
 
@@ -121,6 +163,10 @@ export const propertySchema = z.object({
   dechetsContenu: z.array(dynamicZoneBlockSchema),
   regionContenu: z.array(dynamicZoneBlockSchema),
   reglesContenu: z.array(dynamicZoneBlockSchema),
+
+  // Optionnel dans le type (le mock n'en a pas) ; le transform réel remplit
+  // toujours un tableau (trié par `ordre`).
+  pagesPersonnalisees: z.array(customPageSchema).optional(),
 });
 
 export type Property = z.infer<typeof propertySchema>;
