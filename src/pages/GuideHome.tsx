@@ -77,6 +77,29 @@ export default function GuideHome() {
   if (property.infos.codeBoiteACles) codeLines.push(fmt(f.keyBox, property.infos.codeBoiteACles));
   for (const c of property.infos.codesSupplementaires) codeLines.push(`${c.nom} : ${c.valeur}`);
 
+  // Grille d'accueil = sections fixes + pages perso, dans UN ordre unifié
+  // (retour cliente : pouvoir intercaler une page perso entre 2 sections fixes).
+  // Sections fixes = ordre repère 10,20,…,60 ; une page perso avec `ordre` entre
+  // ces valeurs s'intercale (ex. 35 = entre Parking et Logement). `ordre = 0`
+  // (défaut) → la page perso passe à la fin.
+  const base = `/${locale}/${property.slug}/guide`;
+  const tiles = [
+    ...sectionKeys.map((key, i) => ({
+      key,
+      to: `${base}/${key}`,
+      Icon: sectionIcons[key],
+      label: s[key],
+      order: (i + 1) * 10,
+    })),
+    ...(property.pagesPersonnalisees ?? []).map((page) => ({
+      key: `p-${page.id}`,
+      to: `${base}/${customPageRouteKey(page)}`,
+      Icon: CUSTOM_PAGE_ICONS[page.icone],
+      label: page.titre,
+      order: page.ordre > 0 ? page.ordre : 1_000_000 + page.id,
+    })),
+  ].sort((a, b) => a.order - b.order);
+
   return (
     <GuideLayout overlayHeader hideEmergency>
       {/* Hero */}
@@ -162,49 +185,24 @@ export default function GuideHome() {
           />
         )}
 
-        {/* Section grid */}
+        {/* Grille d'accueil — sections fixes + pages perso, ordre unifié (voir `tiles`). */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-[20px] pb-[50px]">
-          {sectionKeys.map((key) => {
-            const Icon = sectionIcons[key];
-            return (
-              <Link
-                key={key}
-                to={`/${locale}/${property.slug}/guide/${key}`}
-                className="bg-card border rounded-sm p-6 flex flex-col items-center gap-3 hover:border-accent/50 hover:shadow-sm transition-all group"
-              >
-                <Icon
-                  size={26}
-                  strokeWidth={1.2}
-                  className="text-muted-foreground group-hover:text-accent transition-colors"
-                />
-                <span className="text-[11px] tracking-wider uppercase text-center text-muted-foreground group-hover:text-foreground transition-colors">
-                  {s[key]}
-                </span>
-              </Link>
-            );
-          })}
-
-          {/* Pages personnalisées (retour cliente 2026-07-07) — mêmes tuiles,
-              après les sections fixes, avec leur icône choisie dans Strapi. */}
-          {(property.pagesPersonnalisees ?? []).map((page) => {
-            const Icon = CUSTOM_PAGE_ICONS[page.icone];
-            return (
-              <Link
-                key={page.id}
-                to={`/${locale}/${property.slug}/guide/${customPageRouteKey(page.id)}`}
-                className="bg-card border rounded-sm p-6 flex flex-col items-center gap-3 hover:border-accent/50 hover:shadow-sm transition-all group"
-              >
-                <Icon
-                  size={26}
-                  strokeWidth={1.2}
-                  className="text-muted-foreground group-hover:text-accent transition-colors"
-                />
-                <span className="text-[11px] tracking-wider uppercase text-center text-muted-foreground group-hover:text-foreground transition-colors">
-                  {page.titre}
-                </span>
-              </Link>
-            );
-          })}
+          {tiles.map((tile) => (
+            <Link
+              key={tile.key}
+              to={tile.to}
+              className="bg-card border rounded-sm p-6 flex flex-col items-center gap-3 hover:border-accent/50 hover:shadow-sm transition-all group"
+            >
+              <tile.Icon
+                size={26}
+                strokeWidth={1.2}
+                className="text-muted-foreground group-hover:text-accent transition-colors"
+              />
+              <span className="text-[11px] tracking-wider uppercase text-center text-muted-foreground group-hover:text-foreground transition-colors">
+                {tile.label}
+              </span>
+            </Link>
+          ))}
         </div>
       </div>
     </GuideLayout>

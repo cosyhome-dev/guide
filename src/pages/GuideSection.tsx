@@ -3,7 +3,12 @@ import { ArrowLeft } from "lucide-react";
 import GuideLayout from "@/components/GuideLayout";
 import { DynamicZone } from "@/components/guide";
 import { useGuideContext, useLocale } from "@/hooks";
-import { SECTION_CONTENU_KEYS, customPageRouteKey, type SectionKey } from "@/content/property";
+import {
+  SECTION_CONTENU_KEYS,
+  customPageRouteKey,
+  customPageFallbackKey,
+  type SectionKey,
+} from "@/content/property";
 
 export default function GuideSection() {
   const { section } = useParams<{ slug: string; section: string }>();
@@ -14,10 +19,13 @@ export default function GuideSection() {
 
   // 1) Section fixe (check-in, rules…) → champ contenu dédié.
   const contenuKey = SECTION_CONTENU_KEYS[section as SectionKey];
-  // 2) Sinon, page personnalisée (`p-<id>`, retour cliente 2026-07-07).
+  // 2) Sinon, page personnalisée : match par slug lisible (dérivé du titre)
+  //    OU par l'ancienne clé `p-<id>` (compat des liens/bookmarks existants).
   const customPage = contenuKey
     ? undefined
-    : (property.pagesPersonnalisees ?? []).find((p) => customPageRouteKey(p.id) === section);
+    : (property.pagesPersonnalisees ?? []).find(
+        (p) => customPageRouteKey(p) === section || customPageFallbackKey(p.id) === section,
+      );
 
   const blocks = contenuKey ? property[contenuKey] : customPage?.contenu;
   const pageTitle = contenuKey ? s[section as keyof typeof s] : customPage?.titre;

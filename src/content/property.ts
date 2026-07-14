@@ -124,8 +124,27 @@ export const customPageSchema = z.object({
 
 export type CustomPage = z.infer<typeof customPageSchema>;
 
-/** Clé de route d'une page perso : `/guide/p-<id>`. */
-export const customPageRouteKey = (id: number) => `p-${id}`;
+/** Slug lisible depuis un titre : « Salle de sport » → « salle-de-sport ». */
+export function slugifyTitle(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "") // retire les accents décomposés (NFD)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+/** Repli/compat : ancienne clé de route `p-<id>`. */
+export const customPageFallbackKey = (id: number) => `p-${id}`;
+
+/**
+ * Clé de route d'une page perso, dérivée du titre pour une URL lisible
+ * (`/guide/jacuzzi`). Repli sur `p-<id>` si le titre ne donne pas de slug.
+ * L'unicité n'a besoin d'être vraie qu'au sein d'un guide (l'URL est préfixée
+ * par le slug du guide) — GuideSection accepte aussi l'ancienne clé `p-<id>`.
+ */
+export const customPageRouteKey = (page: { titre: string; id: number }): string =>
+  slugifyTitle(page.titre) || customPageFallbackKey(page.id);
 
 // ---------------------------------------------------------------------------
 // Property schema
