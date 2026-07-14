@@ -393,17 +393,20 @@ function transformDynamicZone(blocks: unknown[]): DynamicZoneBlock[] {
     // 1) Ref vers un contenu réutilisable → on déplie ses blocs concrets.
     const ref = strapiContenuReutilisableRefSchema.safeParse(raw);
     if (ref.success) {
-      if (!ref.data.contenu) {
-        if (isDev) {
-          console.warn(
-            `[transformDynamicZone] ref #${ref.data.id} pointe vers un contenu réutilisable supprimé/dépublié ou inaccessible (vérifier les permissions Strapi + le statut publié) — bloc ignoré.`,
-          );
-        }
-        continue;
+      // La relation `contenu` (vers le contenu réutilisable) peut être NULLE :
+      // contenu supprimé/dépublié, permission, OU — cas i18n fréquent — la
+      // relation n'a pas été recopiée à la traduction (retour cliente : sections
+      // vides/blanches en DE). On NE skippe PLUS le ref : on continue pour
+      // afficher au moins la surcharge texte/photos propre au logement.
+      const reusable = ref.data.contenu;
+      if (!reusable && isDev) {
+        console.warn(
+          `[transformDynamicZone] ref #${ref.data.id} : contenu réutilisable non résolu (relation nulle — supprimé/dépublié, permission, ou relation non recopiée à la traduction). Seule la surcharge éventuelle est affichée.`,
+        );
       }
       const startLen = out.length;
-      const nested = ref.data.contenu.contenu ?? [];
-      for (const b of nested) pushInline(b, `contenu réutilisable #${ref.data.contenu.id}`);
+      const nested = reusable?.contenu ?? [];
+      for (const b of nested) pushInline(b, `contenu réutilisable #${reusable?.id ?? "?"}`);
 
       // Surcharge par logement (retours cliente 2026-07-07) : texte + photos
       // perso propres à CE logement. Champ vide = ignoré (plus de toggle). On
