@@ -102,7 +102,7 @@ const FR_STATIC: StaticContent = {
   depart: { checkoutLabel: "Check-out", checklistTitle: "Checklist de départ" },
   notFound: { title: "404", message: "Page introuvable", link: "Retour à l'accueil" },
   alt: { brand: "CosyHome Conciergerie" },
-  format: { building: "Bâtiment : {value}", keyBox: "Boîte à clé : {value}", password: "MDP : {value}" },
+  format: { building: "Bâtiment : {value}", keyBox: "Boîte à clé : {value}", password: "{value}" },
   urgences: {
     urgencesLabel: "Urgences 144", urgencesTel: "+41144",
     policeLabel: "Police 117", policeTel: "+41117",
@@ -128,7 +128,7 @@ const EN_STATIC: StaticContent = {
   depart: { checkoutLabel: "Check-out", checklistTitle: "Departure checklist" },
   notFound: { title: "404", message: "Page not found", link: "Back to home" },
   alt: { brand: "CosyHome Conciergerie" },
-  format: { building: "Building: {value}", keyBox: "Key box: {value}", password: "Pwd: {value}" },
+  format: { building: "Building: {value}", keyBox: "Key box: {value}", password: "{value}" },
   urgences: {
     urgencesLabel: "Emergency 144", urgencesTel: "+41144",
     policeLabel: "Police 117", policeTel: "+41117",
@@ -154,7 +154,7 @@ const IT_STATIC: StaticContent = {
   depart: { checkoutLabel: "Check-out", checklistTitle: "Checklist di partenza" },
   notFound: { title: "404", message: "Pagina non trovata", link: "Torna alla home" },
   alt: { brand: "CosyHome Conciergerie" },
-  format: { building: "Edificio: {value}", keyBox: "Cassetta chiavi: {value}", password: "Pwd: {value}" },
+  format: { building: "Edificio: {value}", keyBox: "Cassetta chiavi: {value}", password: "{value}" },
   urgences: {
     urgencesLabel: "Emergenza 144", urgencesTel: "+41144",
     policeLabel: "Polizia 117", policeTel: "+41117",
@@ -180,7 +180,7 @@ const DE_STATIC: StaticContent = {
   depart: { checkoutLabel: "Check-out", checklistTitle: "Abreise-Checkliste" },
   notFound: { title: "404", message: "Seite nicht gefunden", link: "Zurück zur Startseite" },
   alt: { brand: "CosyHome Conciergerie" },
-  format: { building: "Gebäude: {value}", keyBox: "Schlüsselbox: {value}", password: "Pwd: {value}" },
+  format: { building: "Gebäude: {value}", keyBox: "Schlüsselbox: {value}", password: "{value}" },
   urgences: {
     urgencesLabel: "Notruf 144", urgencesTel: "+41144",
     policeLabel: "Polizei 117", policeTel: "+41117",
