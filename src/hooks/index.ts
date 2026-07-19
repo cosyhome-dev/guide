@@ -1,6 +1,6 @@
 export { useStaticContent } from "./useStaticContent";
 export { useValidateCode } from "./useValidateCode";
-export { setAccess } from "./useAccessCode";
+export { setAccess, hasSessionFor } from "./useAccessCode";
 export { useGuideContext } from "./guideContext";
 export { default as GuideProvider } from "./GuideProvider";
 export {

@@ -1,6 +1,13 @@
 import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { useStaticContent, useValidateCode, useLocale, setAccess, type Locale } from "@/hooks";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
+import {
+  useStaticContent,
+  useValidateCode,
+  useLocale,
+  setAccess,
+  hasSessionFor,
+  type Locale,
+} from "@/hooks";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import heroImage from "@/assets/hero-guide.jpg";
@@ -86,6 +93,16 @@ export default function Login() {
   const { data: content } = useStaticContent();
   const validateCode = useValidateCode();
 
+  // Déjà connecté sur ce logement (jeton encore valide) → on saute le
+  // formulaire et on file droit au guide. Sans ça, un voyageur qui rouvre
+  // l'URL d'accès /:locale/:slug/ — celle que le concierge partage — revoit le
+  // formulaire et doit re-saisir son code alors que sa session est toujours là
+  // (retour cliente « je dois me reconnecter à chaque fois »). `replace` pour
+  // ne pas laisser le login dans l'historique (pas de retour-arrière parasite).
+  if (hasSessionFor(slugFromUrl)) {
+    return <Navigate to={`/${locale}/${slugFromUrl}/guide/`} replace />;
+  }
+
   // Copy : Strapi en priorité, fallback i18n inline si pas encore chargé
   const fb = FALLBACK_COPY[locale] ?? FALLBACK_COPY.fr;
   const t = {
@@ -113,7 +130,7 @@ export default function Login() {
       { slug: slugFromUrl, code },
       {
         onSuccess: (result) => {
-          setAccess(result.slug, result.token);
+          setAccess(result.slug, result.token, result.expiresAt);
           navigate(`/${locale}/${result.slug}/guide/`);
         },
         onError: (err) =>

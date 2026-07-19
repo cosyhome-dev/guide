@@ -283,8 +283,10 @@ const strapiGuideResponseSchema = z.object({
   meta: z.object({}).passthrough(),
 });
 
-// Réponse de POST /guides/access : jeton signé HMAC (3 jours) à présenter
-// en Bearer sur GET /guides/access/:slug. `expiresAt` informatif (ms epoch).
+// Réponse de POST /guides/access : jeton signé HMAC (10 jours) à présenter
+// en Bearer sur GET /guides/access/:slug. `expiresAt` (ms epoch) fait FOI :
+// le guide le stocke comme expiry de sa session locale (voir setAccess) pour
+// que celle-ci expire exactement en même temps que le jeton signé.
 const accessResponseSchema = z.object({
   slug: z.string(),
   token: z.string(),
@@ -583,7 +585,7 @@ function transformGuide(d: StrapiGuideData): Property {
 export async function validateCode(
   slug: string,
   code: string,
-): Promise<{ slug: string; token: string }> {
+): Promise<{ slug: string; token: string; expiresAt?: number }> {
   if (USE_MOCK) {
     await delay(200);
     if (!code.trim()) throw new Error("CODE_REQUIRED");

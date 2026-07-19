@@ -2,7 +2,7 @@ import { Navigate, useParams } from "react-router-dom";
 import { useStaticContent } from "./useStaticContent";
 import { useGuide } from "./useGuide";
 import { useLocale } from "./useLocale";
-import { getSlug, getToken } from "./useAccessCode";
+import { hasSessionFor } from "./useAccessCode";
 import { GuideContext } from "./guideContext";
 import GuideSkeleton from "@/components/GuideSkeleton";
 import NotFound from "@/pages/NotFound";
@@ -10,11 +10,11 @@ import NotFound from "@/pages/NotFound";
 export default function GuideProvider({ children }: { children: React.ReactNode }) {
   const { slug } = useParams<{ slug: string }>();
   const { locale } = useLocale();
-  const storedSlug = getSlug();
-  const token = getToken();
 
-  // Session valide = slug d'URL présent, identique au slug stocké, + jeton signé.
-  const hasSession = Boolean(slug && storedSlug && slug === storedSlug && token);
+  // Session valide = slug d'URL présent, identique au slug stocké, + jeton
+  // signé non expiré. Même test (hasSessionFor) que Login, pour qu'ils ne se
+  // renvoient jamais la balle en boucle de redirection.
+  const hasSession = hasSessionFor(slug);
 
   // ⚠️ Hooks appelés INCONDITIONNELLEMENT (rules-of-hooks) : on ne fait PLUS
   // de return AVANT ces hooks. La requête guide n'est déclenchée que si la
