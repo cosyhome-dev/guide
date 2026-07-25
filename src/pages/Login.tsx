@@ -34,7 +34,7 @@ const FALLBACK_COPY: Record<Locale, {
   brand: string;
 }> = {
   fr: {
-    title: "Guide de séjour",
+    title: "Enjoy your stay !",
     description:
       "Entrez le code d'accès fourni dans votre confirmation de réservation pour accéder au guide de votre logement.",
     codeLabel: "Code d'accès",
@@ -46,7 +46,7 @@ const FALLBACK_COPY: Record<Locale, {
     brand: "CosyHome Conciergerie",
   },
   en: {
-    title: "Stay guide",
+    title: "Enjoy your stay !",
     description:
       "Enter the access code provided in your booking confirmation to access your property guide.",
     codeLabel: "Access code",
@@ -58,7 +58,7 @@ const FALLBACK_COPY: Record<Locale, {
     brand: "CosyHome Conciergerie",
   },
   it: {
-    title: "Guida di soggiorno",
+    title: "Enjoy your stay !",
     description:
       "Inserisca il codice d'accesso fornito nella conferma di prenotazione per accedere alla guida del suo alloggio.",
     codeLabel: "Codice d'accesso",
@@ -70,7 +70,7 @@ const FALLBACK_COPY: Record<Locale, {
     brand: "CosyHome Conciergerie",
   },
   de: {
-    title: "Aufenthaltsleitfaden",
+    title: "Enjoy your stay !",
     description:
       "Geben Sie den in Ihrer Buchungsbestätigung erhaltenen Zugangscode ein, um auf den Leitfaden Ihrer Unterkunft zuzugreifen.",
     codeLabel: "Zugangscode",

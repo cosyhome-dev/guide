@@ -211,16 +211,29 @@ const strapiGuideDataSchema = z.object({
   infos: z.object({
     id: z.number().optional(),
     heureArrivee: z.string(),
-    codeImmeuble: z.string().nullable().optional(),
-    codeBoiteACles: z.string().nullable().optional(),
-    codesSupplementaires: z
-      .array(z.object({ id: z.number().optional(), nom: z.string(), valeur: z.string() }))
-      .nullable()
-      .optional()
-      .transform((v) => v ?? []),
     heureDepart: z.string(),
     noteGenerale: z.string().nullable().optional(),
   }),
+
+  // Codes d'accès partagés (retour cliente T2) : composant NON localisé du
+  // guide → même valeur dans les 4 langues (le fetch par locale renvoie la
+  // valeur partagée). Sorti du composant `infos` (qui reste localisé pour les
+  // heures et la note) pour qu'une édition FR se répercute en EN/IT/DE sans
+  // repasser par « Translate ». Optionnel/nullable : un guide sans aucun code
+  // n'a pas de composant accesCodes rempli.
+  accesCodes: z
+    .object({
+      id: z.number().optional(),
+      codeImmeuble: z.string().nullable().optional(),
+      codeBoiteACles: z.string().nullable().optional(),
+      codesSupplementaires: z
+        .array(z.object({ id: z.number().optional(), nom: z.string(), valeur: z.string() }))
+        .nullable()
+        .optional()
+        .transform((v) => v ?? []),
+    })
+    .nullable()
+    .optional(),
 
   wifi: z.object({
     id: z.number().optional(),
@@ -546,14 +559,18 @@ function transformGuide(d: StrapiGuideData): Property {
     whatsapp: d.gestionnaire?.phone ?? "",
     infos: {
       heureArrivee: d.infos.heureArrivee,
-      codeImmeuble: d.infos.codeImmeuble ?? undefined,
-      codeBoiteACles: d.infos.codeBoiteACles ?? undefined,
-      codesSupplementaires: d.infos.codesSupplementaires.map((c) => ({
+      heureDepart: d.infos.heureDepart,
+      noteGenerale: d.infos.noteGenerale ?? undefined,
+      // Codes lus depuis le composant NON localisé `accesCodes` (retour cliente
+      // T2) mais réinjectés dans `infos` pour garder la forme `Property.infos`
+      // inchangée côté rendu (GuideHome.tsx). `accesCodes` peut être absent si
+      // aucun code n'est renseigné.
+      codeImmeuble: d.accesCodes?.codeImmeuble ?? undefined,
+      codeBoiteACles: d.accesCodes?.codeBoiteACles ?? undefined,
+      codesSupplementaires: (d.accesCodes?.codesSupplementaires ?? []).map((c) => ({
         nom: c.nom,
         valeur: c.valeur,
       })),
-      heureDepart: d.infos.heureDepart,
-      noteGenerale: d.infos.noteGenerale ?? undefined,
     },
     wifi: {
       nomReseau: d.wifi.nomReseau ?? "",
