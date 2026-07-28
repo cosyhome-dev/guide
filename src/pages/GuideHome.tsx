@@ -19,6 +19,11 @@ import {
   Mountain,
   Sparkles,
   Star,
+  ShowerHead,
+  Bed,
+  SquareParking,
+  Snowflake,
+  Flower2,
   type LucideIcon,
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -62,6 +67,11 @@ const CUSTOM_PAGE_ICONS: Record<CustomPageIcon, LucideIcon> = {
   cheminee: Flame,
   montagne: Mountain,
   etoile: Sparkles,
+  douche: ShowerHead,
+  lit: Bed,
+  parking: SquareParking,
+  ski: Snowflake,
+  spa: Flower2,
   autre: Star,
 };
 
