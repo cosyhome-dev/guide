@@ -16,25 +16,25 @@ import logoCopyright from "@/assets/logo-copyright-blanc.png";
 
 const COPY: Record<Locale, { title: string; message: string; brand: string }> = {
   fr: {
-    title: "Enjoy your stay !",
+    title: "Guide de séjour",
     message:
       "Votre guide de séjour est accessible à tout moment via le lien communiqué par votre concierge.",
     brand: "CosyHome Conciergerie",
   },
   en: {
-    title: "Enjoy your stay !",
+    title: "Stay guide",
     message:
       "Your stay guide is accessible at any time through the link provided by your concierge.",
     brand: "CosyHome Conciergerie",
   },
   it: {
-    title: "Enjoy your stay !",
+    title: "Guida di soggiorno",
     message:
       "La sua guida di soggiorno è accessibile in qualsiasi momento tramite il link comunicato dal concierge.",
     brand: "CosyHome Conciergerie",
   },
   de: {
-    title: "Enjoy your stay !",
+    title: "Aufenthaltsleitfaden",
     message:
       "Ihr Aufenthaltsleitfaden ist jederzeit über den von Ihrem Concierge mitgeteilten Link zugänglich.",
     brand: "CosyHome Conciergerie",
