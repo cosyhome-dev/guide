@@ -108,6 +108,11 @@ export const customPageIconSchema = z
     "cheminee",
     "montagne",
     "etoile",
+    "douche",
+    "lit",
+    "parking",
+    "ski",
+    "spa",
     "autre",
   ])
   .catch("autre");
