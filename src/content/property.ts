@@ -170,7 +170,9 @@ export const propertySchema = z.object({
     heureArrivee: z.string(),
     codeImmeuble: z.string().optional(),
     codeBoiteACles: z.string().optional(),
-    codesSupplementaires: z.array(z.object({ nom: z.string(), valeur: z.string() })).default([]),
+    codesSupplementaires: z
+      .array(z.object({ nom: z.string(), nomLibre: z.string().optional(), valeur: z.string() }))
+      .default([]),
     heureDepart: z.string(),
     noteGenerale: z.string().optional(),
   }),
