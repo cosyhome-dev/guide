@@ -85,7 +85,14 @@ export default function GuideHome() {
   const codeLines: string[] = [];
   if (property.infos.codeImmeuble) codeLines.push(fmt(f.building, property.infos.codeImmeuble));
   if (property.infos.codeBoiteACles) codeLines.push(fmt(f.keyBox, property.infos.codeBoiteACles));
-  for (const c of property.infos.codesSupplementaires) codeLines.push(`${c.nom} : ${c.valeur}`);
+  // `nom` = valeur d'enum Strapi (batiment, barriere-parking…) → libellé
+  // traduit via f.codeNames ; « autre » → nomLibre affiché tel quel. Fallback
+  // c.nom : donnée d'avant migration (texte libre), affichée telle quelle —
+  // dégrade proprement si le front est déployé avant la migration back.
+  for (const c of property.infos.codesSupplementaires) {
+    const label = f.codeNames[c.nom] ?? c.nomLibre ?? c.nom;
+    codeLines.push(`${label} : ${c.valeur}`);
+  }
 
   // Grille d'accueil = sections fixes + pages perso, dans UN ordre unifié
   // (retour cliente : pouvoir intercaler une page perso entre 2 sections fixes).

@@ -227,7 +227,14 @@ const strapiGuideDataSchema = z.object({
       codeImmeuble: z.string().nullable().optional(),
       codeBoiteACles: z.string().nullable().optional(),
       codesSupplementaires: z
-        .array(z.object({ id: z.number().optional(), nom: z.string(), valeur: z.string() }))
+        .array(
+          z.object({
+            id: z.number().optional(),
+            nom: z.string(),
+            nomLibre: z.string().nullable().optional(),
+            valeur: z.string(),
+          }),
+        )
         .nullable()
         .optional()
         .transform((v) => v ?? []),
@@ -569,6 +576,7 @@ function transformGuide(d: StrapiGuideData): Property {
       codeBoiteACles: d.accesCodes?.codeBoiteACles ?? undefined,
       codesSupplementaires: (d.accesCodes?.codesSupplementaires ?? []).map((c) => ({
         nom: c.nom,
+        nomLibre: c.nomLibre ?? undefined,
         valeur: c.valeur,
       })),
     },

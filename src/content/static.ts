@@ -64,6 +64,10 @@ export const staticContentSchema = z.object({
     building: z.string(),
     keyBox: z.string(),
     password: z.string(),
+    // Libellés traduits des codes supplémentaires (clé = valeur de l'enum
+    // Strapi `guide.code-acces.nom`). « autre » n'y figure pas : son libellé
+    // vient de `nomLibre`, affiché tel quel.
+    codeNames: z.record(z.string(), z.string()),
   }),
 
   urgences: z.object({
@@ -102,7 +106,12 @@ const FR_STATIC: StaticContent = {
   depart: { checkoutLabel: "Check-out", checklistTitle: "Checklist de départ" },
   notFound: { title: "404", message: "Page introuvable", link: "Retour à l'accueil" },
   alt: { brand: "CosyHome Conciergerie" },
-  format: { building: "Bâtiment : {value}", keyBox: "Boîte à clé : {value}", password: "{value}" },
+  format: {
+    building: "Bâtiment : {value}",
+    keyBox: "Boîte à clé : {value}",
+    password: "{value}",
+    codeNames: { batiment: "Bâtiment", "barriere-parking": "Barrière parking", garage: "Garage", portail: "Portail" },
+  },
   urgences: {
     urgencesLabel: "Urgences 144", urgencesTel: "+41144",
     policeLabel: "Police 117", policeTel: "+41117",
@@ -128,7 +137,12 @@ const EN_STATIC: StaticContent = {
   depart: { checkoutLabel: "Check-out", checklistTitle: "Departure checklist" },
   notFound: { title: "404", message: "Page not found", link: "Back to home" },
   alt: { brand: "CosyHome Conciergerie" },
-  format: { building: "Building: {value}", keyBox: "Key box: {value}", password: "{value}" },
+  format: {
+    building: "Building: {value}",
+    keyBox: "Key box: {value}",
+    password: "{value}",
+    codeNames: { batiment: "Building", "barriere-parking": "Parking barrier", garage: "Garage", portail: "Gate" },
+  },
   urgences: {
     urgencesLabel: "Emergency 144", urgencesTel: "+41144",
     policeLabel: "Police 117", policeTel: "+41117",
@@ -154,7 +168,12 @@ const IT_STATIC: StaticContent = {
   depart: { checkoutLabel: "Check-out", checklistTitle: "Checklist di partenza" },
   notFound: { title: "404", message: "Pagina non trovata", link: "Torna alla home" },
   alt: { brand: "CosyHome Conciergerie" },
-  format: { building: "Edificio: {value}", keyBox: "Cassetta chiavi: {value}", password: "{value}" },
+  format: {
+    building: "Edificio: {value}",
+    keyBox: "Cassetta chiavi: {value}",
+    password: "{value}",
+    codeNames: { batiment: "Edificio", "barriere-parking": "Barriera del parcheggio", garage: "Garage", portail: "Cancello" },
+  },
   urgences: {
     urgencesLabel: "Emergenza 144", urgencesTel: "+41144",
     policeLabel: "Polizia 117", policeTel: "+41117",
@@ -180,7 +199,12 @@ const DE_STATIC: StaticContent = {
   depart: { checkoutLabel: "Check-out", checklistTitle: "Abreise-Checkliste" },
   notFound: { title: "404", message: "Seite nicht gefunden", link: "Zurück zur Startseite" },
   alt: { brand: "CosyHome Conciergerie" },
-  format: { building: "Gebäude: {value}", keyBox: "Schlüsselbox: {value}", password: "{value}" },
+  format: {
+    building: "Gebäude: {value}",
+    keyBox: "Schlüsselbox: {value}",
+    password: "{value}",
+    codeNames: { batiment: "Gebäude", "barriere-parking": "Parkplatzschranke", garage: "Garage", portail: "Tor" },
+  },
   urgences: {
     urgencesLabel: "Notruf 144", urgencesTel: "+41144",
     policeLabel: "Polizei 117", policeTel: "+41117",
